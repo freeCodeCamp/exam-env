@@ -1,0 +1,52 @@
+{
+  "productName": "Exam Environment",
+  "version": "0.1.0",
+  "identifier": "org.freecodecamp.exam",
+  "build": {
+    "beforeDevCommand": "pnpm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Exam Environment",
+        "label": "main",
+        "fullscreen": true,
+        "contentProtected": false
+      }
+    ],
+    "macOSPrivateApi": true,
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": false,
+    "targets": "all",
+    "macOS": {
+      "entitlements": "Release.entitlements",
+      "exceptionDomain": "",
+      "frameworks": []
+    },
+    "resources": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": null
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERBMEZDMUIzMTc4N0E1NTMKUldSVHBZY1hzOEVQMnEydTAzSFNQOWxjelRMdHJ1SmZwVy9vNnJ0bmVtSU1LTFFFZzhsRlZ0UmEK",
+      "endpoints": [
+        "https://github.com/freeCodeCamp/exam-env/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

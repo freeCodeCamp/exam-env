@@ -1,0 +1,56 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --title-bar-height: 35px;
+
+  --dark-1: #0a0a23;
+  --dark-2: #1b1b32;
+  --dark-3: #2a2a40;
+  --dark-4: #3b3b4f;
+  --light-1: #ffffff;
+  --light-2: #f5f6f7;
+  --light-3: #dfdfe2;
+  --light-4: #d0d0d5;
+  --light-purple: #dbb8ff;
+  --light-yellow: #f1be32;
+  --light-blue: #99c9ff;
+  --light-green: #acd157;
+  --light-red: #ff6b6b;
+  --dark-purple: #5a01a7;
+  --dark-yellow: #4d3800;
+  --dark-blue: #002ead;
+  --dark-green: #00471b;
+}
+
+.bottom-bubble-nav {
+  border-radius: 100%;
+  border: 2.5px solid rgba(153, 201, 255, 255);
+  cursor: pointer;
+  color: black;
+  font-size: 16px;
+  font-weight: 600;
+  width: 40px;
+  height: 40px;
+  margin: 0.5em;
+  text-align: center;
+  user-select: none;
+  line-height: 2;
+}
+
+.bubble-active {
+  border: 3px solid rgb(48, 48, 204);
+  background-color: rgb(48, 48, 204);
+  color: white;
+}
+
+.bubble-answered {
+  background-color: rgba(153, 201, 255, 255);
+  color: white;
+}
+
+audio {
+  width: 100%;
+}

@@ -1,0 +1,1713 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "about": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "acceptedPrivacyTerms": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        },
+        "completedChallenges": {
+          "type": "array",
+          "originalType": "CompletedChallenge",
+          "items": {
+            "$ref": "#/definitions/CompletedChallenge"
+          }
+        },
+        "completedExams": {
+          "type": "array",
+          "originalType": "CompletedExam",
+          "items": {
+            "$ref": "#/definitions/CompletedExam"
+          }
+        },
+        "currentChallengeId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "donationEmails": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          }
+        },
+        "email": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "emailAuthLinkTTL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "emailVerified": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        },
+        "emailVerifyTTL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "externalId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "githubProfile": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "isApisMicroservicesCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isBackEndCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isBanned": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isCheater": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isDataAnalysisPyCertV7": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isDataVisCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isDonating": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        },
+        "isFoundationalCSharpCertV8": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isFrontEndCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isFrontEndLibsCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isFullStackCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isHonest": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isInfosecCertV7": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isInfosecQaCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isJsAlgoDataStructCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isJsAlgoDataStructCertV8": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isMachineLearningPyCertV7": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isQaCertV7": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isRelationalDatabaseCertV8": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isRespWebDesignCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isSciCompPyCertV7": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "is2018DataVisCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "is2018FullStackCert": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isCollegeAlgebraPyCertV8": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "isUpcomingPythonCertV8": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "keyboardShortcuts": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "linkedin": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "needsModeration": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "newEmail": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "partiallyCompletedChallenges": {
+          "type": "array",
+          "originalType": "PartiallyCompletedChallenge",
+          "items": {
+            "$ref": "#/definitions/PartiallyCompletedChallenge"
+          }
+        },
+        "password": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "picture": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "portfolio": {
+          "type": "array",
+          "originalType": "Portfolio",
+          "items": {
+            "$ref": "#/definitions/Portfolio"
+          }
+        },
+        "profileUI": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ProfileUI"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "originalType": "ProfileUI"
+        },
+        "progressTimestamps": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "rand": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "originalType": "Float",
+          "description": "A random number between 0 and 1.\n\nValuable for selectively performing random logic."
+        },
+        "savedChallenges": {
+          "type": "array",
+          "originalType": "SavedChallenge",
+          "items": {
+            "$ref": "#/definitions/SavedChallenge"
+          }
+        },
+        "sendQuincyEmail": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        },
+        "theme": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "twitter": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "unsubscribeId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "updateCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "originalType": "Int",
+          "default": 0,
+          "description": "Used to track the number of times the user's record was written to.\n\nThis has the main benefit of allowing concurrent ops to check for race conditions."
+        },
+        "username": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "usernameDisplay": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "verificationToken": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "website": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "yearsTopContributor": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isClassroomAccount": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        }
+      },
+      "required": [
+        "about",
+        "acceptedPrivacyTerms",
+        "donationEmails",
+        "email",
+        "emailVerified",
+        "externalId",
+        "isDonating",
+        "picture",
+        "sendQuincyEmail",
+        "unsubscribeId",
+        "username",
+        "yearsTopContributor"
+      ]
+    },
+    "EnvExam": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Globally unique exam id"
+        },
+        "questionSets": {
+          "type": "array",
+          "originalType": "EnvQuestionSet",
+          "items": {
+            "$ref": "#/definitions/EnvQuestionSet"
+          },
+          "description": "All questions for a given exam"
+        },
+        "config": {
+          "$ref": "#/definitions/EnvConfig"
+        },
+        "prerequisites": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          },
+          "description": "ObjectIds for required challenges/blocks to take the exam"
+        }
+      },
+      "required": [
+        "prerequisites",
+        "config",
+        "questionSets"
+      ]
+    },
+    "EnvExamAttempt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "questionSets": {
+          "type": "array",
+          "originalType": "EnvQuestionSetAttempt",
+          "items": {
+            "$ref": "#/definitions/EnvQuestionSetAttempt"
+          }
+        },
+        "startTimeInMS": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Time exam was started as milliseconds since epoch"
+        },
+        "submissionTimeInMS": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "originalType": "Int",
+          "description": "Time exam was submitted as milliseconds since epoch\n\nAs attempt might not be submitted (disconnection or quit), field is optional"
+        },
+        "needsRetake": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        }
+      },
+      "required": [
+        "userId",
+        "examId",
+        "generatedExamId",
+        "startTimeInMS",
+        "needsRetake",
+        "questionSets"
+      ]
+    },
+    "EnvGeneratedExam": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "questionSets": {
+          "type": "array",
+          "originalType": "EnvGeneratedQuestionSet",
+          "items": {
+            "$ref": "#/definitions/EnvGeneratedQuestionSet"
+          }
+        },
+        "deprecated": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "description": "If `deprecated`, the generation should not longer be considered for users"
+        }
+      },
+      "required": [
+        "examId",
+        "deprecated"
+      ]
+    },
+    "AccessToken": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "created": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "ttl": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "id",
+        "created",
+        "ttl",
+        "userId"
+      ]
+    },
+    "AuthToken": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "created": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "ttl": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "id",
+        "created",
+        "ttl",
+        "userId"
+      ]
+    },
+    "Donation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "amount": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "customerId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "duration": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "email": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "endDate": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DonationEndDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "originalType": "DonationEndDate"
+        },
+        "provider": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "startDate": {
+          "$ref": "#/definitions/DonationStartDate"
+        },
+        "subscriptionId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "amount",
+        "customerId",
+        "email",
+        "provider",
+        "subscriptionId",
+        "userId"
+      ]
+    },
+    "UserRateLimit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "counter": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "expirationDate": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "counter",
+        "expirationDate"
+      ]
+    },
+    "UserToken": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "created": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "ttl": {
+          "type": "number",
+          "originalType": "Float"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "id",
+        "created",
+        "ttl",
+        "userId"
+      ]
+    },
+    "ExamEnvironmentAuthorizationToken": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "createdDate": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "createdDate",
+        "userId"
+      ]
+    },
+    "sessions": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "expires": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "session": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "id",
+        "expires",
+        "session"
+      ]
+    },
+    "MsUsername": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "ttl": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "msUsername": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "userId",
+        "ttl",
+        "msUsername"
+      ]
+    },
+    "Exam": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "numberOfQuestionsInExam": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "passingPercent": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "prerequisites": {
+          "type": "array",
+          "originalType": "Prerequisite",
+          "items": {
+            "$ref": "#/definitions/Prerequisite"
+          }
+        },
+        "title": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "questions": {
+          "type": "array",
+          "originalType": "Question",
+          "items": {
+            "$ref": "#/definitions/Question"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "numberOfQuestionsInExam",
+        "passingPercent",
+        "title"
+      ]
+    },
+    "Survey": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "title": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "responses": {
+          "type": "array",
+          "originalType": "SurveyResponse",
+          "items": {
+            "$ref": "#/definitions/SurveyResponse"
+          }
+        }
+      },
+      "required": [
+        "userId",
+        "title"
+      ]
+    },
+    "File": {
+      "type": "object",
+      "properties": {
+        "contents": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "ext": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "key": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "contents",
+        "ext",
+        "key",
+        "name"
+      ]
+    },
+    "CompletedChallenge": {
+      "type": "object",
+      "properties": {
+        "challengeType": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "originalType": "Int"
+        },
+        "completedDate": {
+          "type": "number",
+          "originalType": "Float"
+        },
+        "files": {
+          "type": "array",
+          "originalType": "File",
+          "items": {
+            "$ref": "#/definitions/File"
+          }
+        },
+        "githubLink": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "isManuallyApproved": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "solution": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "examResults": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ExamResults"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "originalType": "ExamResults"
+        }
+      },
+      "required": [
+        "completedDate",
+        "id"
+      ]
+    },
+    "PartiallyCompletedChallenge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "completedDate": {
+          "type": "number",
+          "originalType": "Float"
+        }
+      },
+      "required": [
+        "id",
+        "completedDate"
+      ]
+    },
+    "Portfolio": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "image": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "title": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "url": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "description",
+        "id",
+        "image",
+        "title",
+        "url"
+      ]
+    },
+    "ProfileUI": {
+      "type": "object",
+      "properties": {
+        "isLocked": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showAbout": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showCerts": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showDonation": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showHeatMap": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showLocation": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showName": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showPoints": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showPortfolio": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "showTimeLine": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        }
+      },
+      "required": []
+    },
+    "SavedChallengeFile": {
+      "type": "object",
+      "properties": {
+        "contents": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "ext": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "history": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          }
+        },
+        "key": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "contents",
+        "ext",
+        "history",
+        "key",
+        "name"
+      ]
+    },
+    "SavedChallenge": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "originalType": "SavedChallengeFile",
+          "items": {
+            "$ref": "#/definitions/SavedChallengeFile"
+          }
+        },
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "lastSavedDate": {
+          "type": "number",
+          "originalType": "Float"
+        }
+      },
+      "required": [
+        "id",
+        "lastSavedDate"
+      ]
+    },
+    "EnvQuestionSet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Unique question type id"
+        },
+        "type": {
+          "type": "string",
+          "originalType": "EnvQuestionType",
+          "enum": [
+            "MultipleChoice",
+            "Dialogue"
+          ]
+        },
+        "context": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String",
+          "description": "Content related to all questions in set"
+        },
+        "questions": {
+          "type": "array",
+          "originalType": "EnvMultipleChoiceQuestion",
+          "items": {
+            "$ref": "#/definitions/EnvMultipleChoiceQuestion"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "context",
+        "questions"
+      ]
+    },
+    "EnvMultipleChoiceQuestion": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Unique question id"
+        },
+        "text": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Main question paragraph"
+        },
+        "tags": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          },
+          "description": "Zero or more tags given to categorize a question"
+        },
+        "audio": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/EnvAudio"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "originalType": "EnvAudio"
+        },
+        "answers": {
+          "type": "array",
+          "originalType": "EnvAnswer",
+          "items": {
+            "$ref": "#/definitions/EnvAnswer"
+          },
+          "description": "Available possible answers for an exam"
+        },
+        "deprecated": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "description": "TODO Possible \"deprecated_time\" to remove after all exams could possibly have been taken"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "tags",
+        "deprecated",
+        "audio",
+        "answers"
+      ]
+    },
+    "EnvAudio": {
+      "type": "object",
+      "properties": {
+        "captions": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String",
+          "description": "Optional text for audio"
+        },
+        "url": {
+          "type": "string",
+          "originalType": "String",
+          "description": "URL to audio file\n\nExpected in the format: `<url>#t=<start_time_in_seconds>,<end_time_in_seconds>`\nWhere `start_time_in_seconds` and `end_time_in_seconds` are optional floats."
+        }
+      },
+      "required": [
+        "url",
+        "captions",
+        "startTimeInMS",
+        "endTimeInMS"
+      ]
+    },
+    "EnvAnswer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Unique answer id"
+        },
+        "isCorrect": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "description": "Whether the answer is correct"
+        },
+        "text": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Answer paragraph"
+        }
+      },
+      "required": [
+        "id",
+        "isCorrect",
+        "text"
+      ]
+    },
+    "EnvConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Human-readable exam name"
+        },
+        "note": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Notes given about exam"
+        },
+        "tags": {
+          "type": "array",
+          "originalType": "EnvTagConfig",
+          "items": {
+            "$ref": "#/definitions/EnvTagConfig"
+          },
+          "description": "Category configuration for question selection"
+        },
+        "totalTimeInMS": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Total time allocated for exam in milliseconds"
+        },
+        "questionSets": {
+          "type": "array",
+          "originalType": "EnvQuestionSetConfig",
+          "items": {
+            "$ref": "#/definitions/EnvQuestionSetConfig"
+          },
+          "description": "Configuration for sets of questions"
+        }
+      },
+      "required": [
+        "name",
+        "note",
+        "totalTimeInMS",
+        "tags",
+        "questionSets"
+      ]
+    },
+    "EnvQuestionSetConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "originalType": "EnvQuestionType",
+          "enum": [
+            "MultipleChoice",
+            "Dialogue"
+          ]
+        },
+        "numberOfSet": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Number of this grouping of questions per exam"
+        },
+        "numberOfQuestions": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Number of multiple choice questions per grouping matching this set config"
+        },
+        "numberOfCorrectAnswers": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Number of correct answers given per multiple choice question"
+        },
+        "numberOfIncorrectAnswers": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Number of incorrect answers given per multiple choice question"
+        }
+      },
+      "required": [
+        "type",
+        "numberOfSet",
+        "numberOfQuestions",
+        "numberOfCorrectAnswers",
+        "numberOfIncorrectAnswers"
+      ]
+    },
+    "EnvTagConfig": {
+      "type": "object",
+      "properties": {
+        "group": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          },
+          "description": "Group of multiple choice question tags"
+        },
+        "numberOfQuestions": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Number of multiple choice questions per exam that should meet the group criteria"
+        }
+      },
+      "required": [
+        "group",
+        "numberOfQuestions"
+      ]
+    },
+    "EnvQuestionSetAttempt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "questions": {
+          "type": "array",
+          "originalType": "EnvMultipleChoiceQuestionAttempt",
+          "items": {
+            "$ref": "#/definitions/EnvMultipleChoiceQuestionAttempt"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "EnvMultipleChoiceQuestionAttempt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Foreign key to question"
+        },
+        "answers": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of foreign keys to answers"
+        },
+        "submissionTimeInMS": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Time answers to question were submitted as milliseconds since epoch\n\nIf the question is later revisited, this field is updated"
+        }
+      },
+      "required": [
+        "id",
+        "answers"
+      ]
+    },
+    "EnvGeneratedQuestionSet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "questions": {
+          "type": "array",
+          "originalType": "EnvGeneratedMultipleChoiceQuestion",
+          "items": {
+            "$ref": "#/definitions/EnvGeneratedMultipleChoiceQuestion"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "EnvGeneratedMultipleChoiceQuestion": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String",
+          "description": "Foreign key to question id"
+        },
+        "answers": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          },
+          "description": "Each item is a foreign key to an answer"
+        }
+      },
+      "required": [
+        "id",
+        "answers"
+      ]
+    },
+    "CompletedExam": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "challengeType": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "completedDate": {
+          "type": "number",
+          "originalType": "Float"
+        },
+        "examResults": {
+          "$ref": "#/definitions/ExamResults"
+        }
+      },
+      "required": [
+        "id",
+        "challengeType",
+        "completedDate"
+      ]
+    },
+    "ExamResults": {
+      "type": "object",
+      "properties": {
+        "numberOfCorrectAnswers": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "numberOfQuestionsInExam": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "percentCorrect": {
+          "type": "number",
+          "originalType": "Float"
+        },
+        "passingPercent": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "passed": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        },
+        "examTimeInSeconds": {
+          "type": "integer",
+          "originalType": "Int"
+        }
+      },
+      "required": [
+        "numberOfCorrectAnswers",
+        "numberOfQuestionsInExam",
+        "percentCorrect",
+        "passingPercent",
+        "passed",
+        "examTimeInSeconds"
+      ]
+    },
+    "Question": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "question": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "wrongAnswers": {
+          "type": "array",
+          "originalType": "Answer",
+          "items": {
+            "$ref": "#/definitions/Answer"
+          }
+        },
+        "correctAnswers": {
+          "type": "array",
+          "originalType": "Answer",
+          "items": {
+            "$ref": "#/definitions/Answer"
+          }
+        },
+        "deprecated": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        }
+      },
+      "required": [
+        "id",
+        "question"
+      ]
+    },
+    "Answer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "answer": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "deprecated": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        }
+      },
+      "required": [
+        "id",
+        "answer"
+      ]
+    },
+    "Prerequisite": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "title": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    },
+    "DonationEndDate": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "when": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "date",
+        "when"
+      ]
+    },
+    "DonationStartDate": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "when": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "date",
+        "when"
+      ]
+    },
+    "SurveyResponse": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "response": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "question",
+        "response"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "user": {
+      "$ref": "#/definitions/user"
+    },
+    "envExam": {
+      "$ref": "#/definitions/EnvExam"
+    },
+    "envExamAttempt": {
+      "$ref": "#/definitions/EnvExamAttempt"
+    },
+    "envGeneratedExam": {
+      "$ref": "#/definitions/EnvGeneratedExam"
+    },
+    "accessToken": {
+      "$ref": "#/definitions/AccessToken"
+    },
+    "authToken": {
+      "$ref": "#/definitions/AuthToken"
+    },
+    "donation": {
+      "$ref": "#/definitions/Donation"
+    },
+    "userRateLimit": {
+      "$ref": "#/definitions/UserRateLimit"
+    },
+    "userToken": {
+      "$ref": "#/definitions/UserToken"
+    },
+    "examEnvironmentAuthorizationToken": {
+      "$ref": "#/definitions/ExamEnvironmentAuthorizationToken"
+    },
+    "sessions": {
+      "$ref": "#/definitions/sessions"
+    },
+    "msUsername": {
+      "$ref": "#/definitions/MsUsername"
+    },
+    "exam": {
+      "$ref": "#/definitions/Exam"
+    },
+    "survey": {
+      "$ref": "#/definitions/Survey"
+    }
+  }
+}

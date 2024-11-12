@@ -1,0 +1,31 @@
+{
+  "id": "63ceed18f71dda7d8cf21e8e",
+  "userId": "63ceed18f71dda7d8cf21e8e",
+  "examId": "63ceed18f71dda7d8cf21e8e",
+  "generatedExamId": "63ceed18f71dda7d8cf21e8e",
+  "questionSets": [
+    {
+      "id": "63ceed18f71dda7d8cf21e8e",
+      "questions": [
+        {
+          "id": "63ceed18f71dda7d8cf21e8e",
+          "answers": ["63ceed18f71dda7d8cf21e8e"],
+          "submissionTimeInMS": 1234567890
+        }
+      ]
+    },
+    {
+      "id": "63ceed18f71dda7d8cf21e8e",
+      "questions": [
+        {
+          "id": "63ceed18f71dda7d8cf21e8e",
+          "answers": ["63ceed18f71dda7d8cf21e8e"],
+          "submissionTimeInMS": 1234567890
+        }
+      ]
+    }
+  ],
+  "startTimeInMS": 1234567890,
+  "submissionTimeInMS": 1234567891,
+  "needsRetake": false
+}

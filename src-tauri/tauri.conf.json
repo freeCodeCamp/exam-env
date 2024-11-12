@@ -1,0 +1,59 @@
+{
+  "productName": "Exam Environment",
+  "version": "0.1.0",
+  "identifier": "org.freecodecamp.exam",
+  "build": {
+    "beforeDevCommand": "pnpm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Exam Environment",
+        "label": "main",
+        "fullscreen": false,
+        "contentProtected": true
+      }
+    ],
+    "macOSPrivateApi": true,
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "category": "public.app-category.education",
+    "macOS": {
+      "entitlements": "Release.entitlements",
+      "exceptionDomain": "",
+      "frameworks": [],
+      "signingIdentity": "Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)",
+      "files": {
+        "embedded.provisionprofile": "embedded.provisionprofile"
+      }
+    },
+    "resources": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "signCommand": "relic sign --file %1 --key azure --config relic.conf"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERBMEZDMUIzMTc4N0E1NTMKUldSVHBZY1hzOEVQMnEydTAzSFNQOWxjelRMdHJ1SmZwVy9vNnJ0bmVtSU1LTFFFZzhsRlZ0UmEK",
+      "endpoints": [
+        "https://github.com/freeCodeCamp/exam-env/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}
