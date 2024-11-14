@@ -31,8 +31,14 @@ export function QuestionSetForm({
     if (audioRef.current) {
       // This is to prevent a stupid UI bug (all Shaun's fault)
       audioRef.current.load();
-      audioRef.current.play();
-      audioRef.current.pause();
+      audioRef.current
+        .play()
+        .then(() => {
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+        })
+        .catch(console.error);
     }
   };
 
