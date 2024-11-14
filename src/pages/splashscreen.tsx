@@ -41,6 +41,7 @@ function SplashParents({ children }: { children: ReactNode }) {
 
 export function Splashscreen() {
   const [progress, setProgress] = useState(0);
+  const [isStartDownload, setIsStartDownload] = useState(false);
   const navigate = useNavigate();
 
   const updateQuery = useQuery({
@@ -50,8 +51,8 @@ export function Splashscreen() {
 
   const update = updateQuery.data;
   const downloadAndInstallQuery = useQuery({
-    queryKey: ["downloadAndInstall", [update]],
-    enabled: update?.available,
+    queryKey: ["downloadAndInstall", [update, isStartDownload]],
+    enabled: update?.available && isStartDownload,
     queryFn: async () => {
       let downloaded = 0;
       let contentLength: number | undefined = 0;
@@ -102,7 +103,7 @@ export function Splashscreen() {
         </ListItem>
         <Progress isIndeterminate />
         <ListItem opacity={0.5}>Downloading update</ListItem>
-        <ListItem>Checking device compatibility</ListItem>
+        <ListItem>Check device compatibility</ListItem>
       </SplashParents>
     );
   }
@@ -116,11 +117,29 @@ export function Splashscreen() {
         </ListItem>
         <Text>{updateQuery.error.message}</Text>
         <ListItem>Downloading update</ListItem>
-        <ListItem>Checking device compatibility</ListItem>
+        <ListItem>Check device compatibility</ListItem>
       </SplashParents>
     );
   }
 
+  if (update?.available && !isStartDownload) {
+    return (
+      <SplashParents>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
+          App update found
+        </ListItem>
+        <ListItem fontWeight={900}>
+          <ListIcon as={SpinnerIcon} color="blue.500" />
+          Download update (version {update.version})?
+        </ListItem>
+        <Button block={true} onClick={() => setIsStartDownload(true)}>
+          Download Now
+        </Button>
+        <ListItem>Check device compatibility</ListItem>
+      </SplashParents>
+    );
+  }
   if (update?.available && downloadAndInstallQuery.isPending) {
     return (
       <SplashParents>
@@ -134,7 +153,7 @@ export function Splashscreen() {
           finished.
         </ListItem>
         <Progress hasStripe value={progress} />
-        <ListItem>Checking device compatibility</ListItem>
+        <ListItem>Check device compatibility</ListItem>
       </SplashParents>
     );
   }
@@ -151,7 +170,7 @@ export function Splashscreen() {
           Downloading update
         </ListItem>
         <Text>{downloadAndInstallQuery.error.message}</Text>
-        <ListItem>Checking device compatibility</ListItem>
+        <ListItem>Check device compatibility</ListItem>
       </SplashParents>
     );
   }
@@ -184,6 +203,14 @@ export function Splashscreen() {
           Error checking device compatibility
         </ListItem>
         <Text>{compatibilityCheckQuery.error.message}</Text>
+        <Button
+          block={true}
+          onClick={() => {
+            compatibilityCheckQuery.refetch();
+          }}
+        >
+          Retry
+        </Button>
       </SplashParents>
     );
   }
@@ -310,15 +337,23 @@ async function updateDeviceList() {
       // @ts-expect-error "camera" does exist on PermissionName. The type is wrong.
       name: "camera",
     });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Unassociate track with stream to free resource
+      stream.getTracks().forEach((track) => track.stop());
+    } catch (e) {
+      return new Error(`Unable to access camera. ${e}`);
+    }
+
     if (cameraPermission.state !== "granted") {
-      return "Camera permission denied. Please allow camera access.";
+      return new Error("Camera permission denied. Please allow camera access.");
     }
     const atLeastOneCamera = devices.some((d) => d.kind === "videoinput");
     if (!atLeastOneCamera) {
-      return "No Camera found!";
+      return new Error("No Camera found!");
     }
     return null;
   } catch (e) {
-    return "Error checking device compatibility. Try again.";
+    return new Error("Error checking device compatibility. Try again.");
   }
 }

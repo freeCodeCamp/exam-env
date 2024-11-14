@@ -50,7 +50,7 @@
       {
         "id": "66b522f014a1cd98b5d3dc05",
         "type": "Dialogue",
-        "text": "During their travels, Alex marveled at the vibrant culture and rich history of Madrid, the capital of Spain. They recounted their adventures across Asia, the largest continent by area, with its breathtaking landscapes and diverse cultures. History fascinated them, especially stories of George Washington, the first president of the United States, whose leadership helped shape the nation. Their curiosity extended to science, where they discussed the importance of water, known chemically as H2O, vital for all living beings. Their conversation flowed into literature, where they shared a mutual admiration for the timeless works of William Shakespeare, particularly the tragic love story of 'Romeo and Juliet'.",
+        "context": "During their travels, Alex marveled at the vibrant culture and rich history of Madrid, the capital of Spain. They recounted their adventures across Asia, the largest continent by area, with its breathtaking landscapes and diverse cultures. History fascinated them, especially stories of George Washington, the first president of the United States, whose leadership helped shape the nation. Their curiosity extended to science, where they discussed the importance of water, known chemically as H2O, vital for all living beings. Their conversation flowed into literature, where they shared a mutual admiration for the timeless works of William Shakespeare, particularly the tragic love story of 'Romeo and Juliet'.",
         "questions": [
           {
             "id": "66b522f714a1cd98b5d3dc06",
