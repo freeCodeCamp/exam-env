@@ -55,36 +55,6 @@ export function Exam() {
     (examAttempt.startTimeInMS + exam.config.totalTimeInMS - Date.now()) / 1000
   );
 
-  useEffect(() => {
-    const handleExamAttempt = async () => {
-      try {
-        const response = await postExamAttempt(examAttempt);
-
-        if (!response || response.status !== 200) {
-          setIsOffline(true);
-          return;
-        }
-
-        setIsOffline(false);
-
-        if (currentQuestionNumber < questions.length) {
-          const constructedFullQuestion = fullQuestionFromExamAttempt(
-            exam,
-            examAttempt
-          );
-          console.log(constructedFullQuestion);
-          setFullQuestion(constructedFullQuestion);
-        } else {
-          setHasFinishedExam(true);
-        }
-      } catch (error) {
-        setIsOffline(true);
-      }
-    };
-
-    handleExamAttempt();
-  }, [examAttempt]);
-
   function fullQuestionFromExamAttempt(
     exam: UserExam,
     examAttempt: UserExamAttempt
@@ -155,7 +125,6 @@ export function Exam() {
 
   useEffect(() => {
     const cqn = questions.findIndex((q) => q.id === fullQuestion.id) + 1;
-    console.log(cqn);
     setCurrentQuestionNumber(cqn);
   }, [fullQuestion]);
 
@@ -292,6 +261,25 @@ export function Exam() {
       ...examAttempt,
       questionSets,
     };
+
+    try {
+      const response = await postExamAttempt(examAttempt);
+
+      if (!response || response.status !== 200) {
+        setIsOffline(true);
+        return;
+      }
+
+      setIsOffline(false);
+
+      if (currentQuestionNumber < questions.length) {
+        nextQuestion();
+      } else {
+        setHasFinishedExam(true);
+      }
+    } catch (error) {
+      setIsOffline(true);
+    }
 
     setExamAttempt(updatedExamAttempt);
   }
