@@ -20,7 +20,9 @@ export function Login() {
   const navigate = useNavigate();
   const { login, examEnvironmentAuthenticationToken } =
     useContext(AuthContext)!;
-  const [accountToken, setAccountToken] = useState("");
+  const [accountToken, setAccountToken] = useState(
+    examEnvironmentAuthenticationToken || ""
+  );
   const [error, setError] = useState<unknown>(null);
   const [setAuthToken, isPending, setAuthTokenError] = useInvoke<undefined>(
     "set_authorization_token"
