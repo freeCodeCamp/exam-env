@@ -29,8 +29,8 @@ export function Landing() {
 
   const fetchAvailableExams = async () => {
     try {
-      const exams = await getExams();
-      setExams(exams);
+      const data = await getExams();
+      setExams(data.exams);
       setExamError(null);
     } catch (e) {
       console.log(e);
