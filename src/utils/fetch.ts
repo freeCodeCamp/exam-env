@@ -136,15 +136,11 @@ export async function getExams() {
   return data;
 }
 
-type Ua = keyof paths;
-type Ma<U extends Ua> = keyof paths[U];
-type X<U extends Ua, M extends Ma<U>> = paths[U][M];
-
 function openapiFetchResponse<
-  Url extends Ua,
-  Method extends Ma<Url>,
-  T extends X<Url, Method>
->(data: T["responses"]): FetchResponse<T, FetchOptions<T>, "application/json"> {
+  Url extends keyof paths,
+  Method extends keyof paths[Url],
+  T extends paths[Url][Method]["responses"]["200"]["content"]["application/json"]
+>(data: T): FetchResponse<T, FetchOptions<T>, "application/json"> {
   return {
     data,
     response: new Response(null, { status: 200 }),
