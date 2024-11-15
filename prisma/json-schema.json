@@ -722,17 +722,18 @@
       "properties": {
         "id": {
           "type": "string",
-          "originalType": "String"
+          "originalType": "String",
+          "description": "An ObjectId is used to provide access to the created timestamp"
         },
-        "createdDate": {
+        "expireAt": {
           "type": "string",
           "originalType": "DateTime",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "Used to set an `expireAt` index to delete documents"
         }
       },
       "required": [
-        "id",
-        "createdDate",
+        "expireAt",
         "userId"
       ]
     },
