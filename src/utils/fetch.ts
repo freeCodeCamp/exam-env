@@ -8,6 +8,7 @@ import type { paths } from "../../prisma/api-schema";
 
 const client = createClient<paths>({
   baseUrl: import.meta.env.VITE_FREECODECAMP_API,
+  fetch,
 });
 
 export async function verifyToken(token: string) {
