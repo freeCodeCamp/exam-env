@@ -33,13 +33,19 @@ if (import.meta.env.VITE_MOCK_DATA === "true" && import.meta.env.PROD) {
 const queryClient = new QueryClient();
 
 const examLoader: LoaderFunction = async ({ params }) => {
-  const examData = await getGeneratedExam(params.examId!);
-  if (examData.code) {
+  const res = await getGeneratedExam(params.examId!);
+
+  if (res.response.status === 500) {
+    return redirect("/error?errorInfo='Server error fetching generated exam'");
+  }
+  if (res.error?.code) {
     // TODO: Prevent camera from starting up
     return redirect(
-      `/landing?flashKind=warning&flashMessage=${examData.message}`
+      `/landing?flashKind=warning&flashMessage=${res.error.message}`
     );
   }
+
+  const examData = res.data;
 
   return examData;
 };
