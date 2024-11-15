@@ -122,7 +122,7 @@ export async function getExams() {
   }
 
   const endpoint = new URL(
-    "/exam-environment/exam",
+    "/exam-environment/exams",
     import.meta.env.VITE_FREECODECAMP_API
   );
 
@@ -135,7 +135,7 @@ export async function getExams() {
   });
 
   if (res.status !== 200) {
-    throw new Error(await res.json());
+    throw new Error(await res.text());
   }
 
   const data = await res.json();

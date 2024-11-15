@@ -1,6 +1,6 @@
 import { Box, Center, Flex, IconButton, Text } from "@chakra-ui/react";
 import { Button, Modal } from "@freecodecamp/ui";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -23,6 +23,7 @@ import { takeScreenshot } from "../utils/screenshot";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { postExamAttempt } from "../utils/fetch";
 import OfflineModal from "../components/offline-modal";
+import { IncompatibleDeviceModal } from "../components/incompatible-device-modal";
 
 export function Exam() {
   const examData = useLoaderData() as {
@@ -41,39 +42,18 @@ export function Exam() {
   const [fullQuestion, setFullQuestion] = useState<FullQuestion>(
     fullQuestionFromExamAttempt(exam, examAttempt)
   );
+  const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
 
   const [isOffline, setIsOffline] = useState(false);
+  const [incompatibleDevice, setIncompatibleDevice] = useState<string | null>(
+    null
+  );
 
   const [maxTimeReached, setMaxTimeReached] = useState(false);
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
   const secondsLeft = Math.floor(
     (examAttempt.startTimeInMS + exam.config.totalTimeInMS - Date.now()) / 1000
   );
-
-  useEffect(() => {
-    const handleExamAttempt = async () => {
-      try {
-        const response = await postExamAttempt(examAttempt);
-
-        if (!response || response.status !== 200) {
-          setIsOffline(true);
-          return;
-        }
-
-        setIsOffline(false);
-
-        if (currentQuestionNumber < questions.length) {
-          nextQuestion();
-        } else {
-          setHasFinishedExam(true);
-        }
-      } catch (error) {
-        setIsOffline(true);
-      }
-    };
-
-    handleExamAttempt();
-  }, [examAttempt]);
 
   function fullQuestionFromExamAttempt(
     exam: UserExam,
@@ -83,19 +63,25 @@ export function Exam() {
 
     if (!questionSets.length) {
       // TODO: Bad
+      const questionSet = exam.questionSets.at(0)!;
+      const question = questionSet.questions.at(0)!;
+
       return {
-        questionSet: exam.questionSets.at(0)!,
-        ...exam.questionSets.at(0)!.questions!.at(0)!,
+        questionSet,
+        ...question,
       };
     }
+    const latestQuestionSet = questionSets.at(-1)!;
 
-    const latestQuestionTypeIndex = questionSets.length;
-    const latestQuestionIndex = questionSets.at(-1)?.questions?.length ?? 1;
-
-    const questionSet = exam.questionSets.at(latestQuestionTypeIndex - 1)!;
+    const questionSet = exam.questionSets.find(
+      (qs) => qs.id === latestQuestionSet.id
+    )!;
+    const latestQuestion = questionSet.questions.find(
+      (q) => q.id === latestQuestionSet.questions.at(-1)!.id
+    )!;
     const fullQuestion = {
       questionSet,
-      ...questionSet.questions.at(latestQuestionIndex - 1)!,
+      ...latestQuestion,
     };
 
     return fullQuestion;
@@ -132,16 +118,19 @@ export function Exam() {
     }
   }
 
+  const questions = useMemo(
+    () => exam.questionSets.flatMap((qt) => qt.questions),
+    [exam]
+  );
+
+  useEffect(() => {
+    const cqn = questions.findIndex((q) => q.id === fullQuestion.id) + 1;
+    setCurrentQuestionNumber(cqn);
+  }, [fullQuestion]);
+
   if (!exam || !fullQuestion || !examAttempt) {
     return null;
   }
-
-  const questions = exam.questionSets.flatMap((qt) => {
-    return qt.questions;
-  });
-
-  const currentQuestionNumber =
-    questions.findIndex((q) => q.id === fullQuestion?.id) + 1;
 
   function nextQuestion() {
     if (!exam || !fullQuestion) {
@@ -273,11 +262,39 @@ export function Exam() {
       questionSets,
     };
 
+    try {
+      const response = await postExamAttempt(examAttempt);
+
+      if (!response || response.status !== 200) {
+        setIsOffline(true);
+        return;
+      }
+
+      setIsOffline(false);
+
+      if (currentQuestionNumber < questions.length) {
+        nextQuestion();
+      } else {
+        setHasFinishedExam(true);
+      }
+    } catch (error) {
+      setIsOffline(true);
+    }
+
     setExamAttempt(updatedExamAttempt);
   }
 
   function handleExamEnd() {
     navigate("/landing");
+  }
+
+  function onUserMediaSetupError(err: unknown) {
+    console.log(err);
+    if (typeof err === "string") {
+      setIncompatibleDevice(err);
+    } else if (err instanceof Error) {
+      setIncompatibleDevice(err.message);
+    }
   }
 
   return (
@@ -289,7 +306,12 @@ export function Exam() {
         position={"fixed"}
         width={"100%"}
       >
-        <Camera height={100} width={200} autoPlay />
+        <Camera
+          height={100}
+          width={200}
+          autoPlay
+          onUserMediaSetupError={onUserMediaSetupError}
+        />
       </Box>
       <Box width={"full"} m="1em" mt="4em">
         <Center height={"100%"}>
@@ -299,6 +321,9 @@ export function Exam() {
             fullQuestion={fullQuestion}
             selectedAnswers={newSelectedAnswers}
           />
+          {incompatibleDevice && (
+            <IncompatibleDeviceModal incompatibleDevice={incompatibleDevice} />
+          )}
           <Box
             display={"flex"}
             flexDirection={"column"}

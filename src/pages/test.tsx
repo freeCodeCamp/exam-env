@@ -43,6 +43,10 @@ export function Test() {
     runFocusRef.current = false;
   }
 
+  function onUserMediaSetupError(err: unknown) {
+    console.log("TODO: ", err);
+  }
+
   return (
     <Flex direction="column">
       <Header />
@@ -56,7 +60,9 @@ export function Test() {
               onChange={(e) => setAuthorizationToken(e.target.value)}
               width="75%"
             />
-            <Text width="75%" >Current Authorization Token: {authorizationToken ?? ""}</Text>
+            <Text width="75%">
+              Current Authorization Token: {authorizationToken ?? ""}
+            </Text>
             <Button size="large" onClick={() => handleAuthorizationToken()}>
               Set Authorization Token
             </Button>
@@ -70,7 +76,7 @@ export function Test() {
             <Button size="large" onClick={handleExamEnd}>
               End Exam
             </Button>
-            <Camera autoPlay />
+            <Camera autoPlay onUserMediaSetupError={onUserMediaSetupError} />
           </Flex>
         </Center>
       </Box>

@@ -13,7 +13,7 @@
       {
         "title": "Exam Environment",
         "label": "main",
-        "fullscreen": true,
+        "fullscreen": false,
         "contentProtected": false
       }
     ],
@@ -44,9 +44,7 @@
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERBMEZDMUIzMTc4N0E1NTMKUldSVHBZY1hzOEVQMnEydTAzSFNQOWxjelRMdHJ1SmZwVy9vNnJ0bmVtSU1LTFFFZzhsRlZ0UmEK",
-      "endpoints": [
-        "https://github.com/freeCodeCamp/exam-env/releases/latest/download/latest.json"
-      ]
+      "endpoints": ["http://localhost:1420/mocks/latest.json"]
     }
   }
 }

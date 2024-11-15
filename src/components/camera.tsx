@@ -5,6 +5,7 @@ type CameraProps = Omit<VideoHTMLAttributes<HTMLVideoElement>, "onPause"> & {
     video?: boolean;
     audio?: boolean;
   };
+  onUserMediaSetupError: (err: unknown) => void;
 };
 
 /**
@@ -15,7 +16,11 @@ type CameraProps = Omit<VideoHTMLAttributes<HTMLVideoElement>, "onPause"> & {
  * Use `on<event_name>` hooks to tap into events around video. \
  * **NOTE:** Do NOT overwrite `onPause` function.
  */
-export function Camera({ constraints, ...rest }: CameraProps) {
+export function Camera({
+  constraints,
+  onUserMediaSetupError,
+  ...rest
+}: CameraProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   async function startCamera() {
@@ -34,13 +39,15 @@ export function Camera({ constraints, ...rest }: CameraProps) {
             track.stop();
           });
         };
-        // Look into adding event listener for video.
         // Event "suspend" is emitted if permissions are revoked for camera
+        video.onsuspend = (e) => {
+          console.log(e);
+          onUserMediaSetupError("Camera is unavailable.");
+        };
       }
     } catch (err) {
-      // TODO: Do something with error
       console.error("Error accessing camera: ", err);
-      alert("TODO: Camera not accessibile.");
+      onUserMediaSetupError(err);
     }
   }
 
