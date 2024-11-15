@@ -48,8 +48,7 @@ export async function getGeneratedExam(examId: string) {
 
     const res = openapiFetchResponse<
       "/exam-environment/exam/generated-exam",
-      "post",
-      typeof generatedExam
+      "post"
     >(generatedExam);
     return res;
   }
@@ -137,16 +136,15 @@ export async function getExams() {
   return data;
 }
 
+type Ua = keyof paths;
+type Ma<U extends Ua> = keyof paths[U];
+type X<U extends Ua, M extends Ma<U>> = paths[U][M];
+
 function openapiFetchResponse<
-  Url extends keyof paths,
-  Method extends keyof paths[Url] &
-    ("get" | "post" | "put" | "delete" | "patch"),
-  T extends paths[Url][Method] extends {
-    responses: { "200": { content: { "application/json": any } } };
-  }
-    ? paths[Url][Method]["responses"]["200"]["content"]["application/json"]
-    : never
->(data: T): FetchResponse<T, FetchOptions<T>, "application/json"> {
+  Url extends Ua,
+  Method extends Ma<Url>,
+  T extends X<Url, Method>
+>(data: T["responses"]): FetchResponse<T, FetchOptions<T>, "application/json"> {
   return {
     data,
     response: new Response(null, { status: 200 }),
