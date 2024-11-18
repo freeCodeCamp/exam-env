@@ -2,7 +2,11 @@ import { invoke } from "@tauri-apps/api/core";
 import { fetch } from "@tauri-apps/plugin-http";
 import { UserExamAttempt } from "./types";
 
-import createClient, { FetchOptions, FetchResponse } from "openapi-fetch";
+import createClient, {
+  Client,
+  FetchOptions,
+  FetchResponse,
+} from "openapi-fetch";
 import type { paths } from "../../prisma/api-schema";
 
 const client = createClient<paths>({
@@ -136,11 +140,17 @@ export async function getExams() {
   return data;
 }
 
+type Resp<
+  P extends keyof paths,
+  Method extends keyof paths[P]
+> = paths[P] extends { [key in Method]: unknown } ? paths[P][Method] : never;
+
 function openapiFetchResponse<
   Url extends keyof paths,
   Method extends keyof paths[Url],
-  T extends paths[Url][Method]["responses"]["200"]["content"]["application/json"]
->(data: T): FetchResponse<T, FetchOptions<T>, "application/json"> {
+  T extends Resp<Url, Method>
+>(data: T) {
+  // >(data: T): FetchResponse<T, FetchOptions<T>, "application/json"> {
   return {
     data,
     response: new Response(null, { status: 200 }),
