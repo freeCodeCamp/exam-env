@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch } from "@tauri-apps/plugin-http";
 import { UserExamAttempt } from "./types";
-import { redirect } from "react-router-dom";
 
 import createClient from "openapi-fetch";
 import type { paths } from "../../prisma/api-schema";
@@ -42,38 +41,30 @@ export async function verifyToken(token: string) {
 
 export async function getGeneratedExam(examId: string) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
-    const generatedExam = await (
+    const generatedExam = (await (
       await fetch("/mocks/generated-exam.json")
-    ).json();
+    ).json()) as paths["/exam-environment/exam/generated-exam"]["post"]["responses"]["200"]["content"]["application/json"];
     generatedExam.examAttempt.startTimeInMS = Date.now();
-    return generatedExam;
+
+    return {
+      data: generatedExam,
+      response: new Response(null, { status: 200 }),
+      error: undefined,
+    };
   }
 
-  const endpoint = new URL(
-    "/exam-environment/exam/generated-exam",
-    import.meta.env.VITE_FREECODECAMP_API
-  );
-
   const token = await invoke<string>("get_authorization_token");
-  const res = await fetch(endpoint, {
-    method: "POST",
-    body: JSON.stringify({
-      examId,
-    }),
-    headers: {
-      "Exam-Environment-Authorization-Token": token,
-      "Content-Type": "application/json",
+
+  const res = await client.POST("/exam-environment/exam/generated-exam", {
+    body: { examId },
+    params: {
+      header: {
+        "exam-environment-authorization-token": token,
+      },
     },
   });
 
-  if (res.status === 500) {
-    return redirect("/error?errorInfo='Server error fetching generated exam'");
-  }
-
-  const data = await res.json();
-  console.debug(data);
-
-  return data;
+  return res;
 }
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
