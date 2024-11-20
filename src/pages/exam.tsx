@@ -262,23 +262,19 @@ export function Exam() {
       questionSets,
     };
 
-    try {
-      const response = await postExamAttempt(examAttempt);
+    const { response, error } = await postExamAttempt(examAttempt);
 
-      if (!response || response.status !== 200) {
-        setIsOffline(true);
-        return;
-      }
-
-      setIsOffline(false);
-
-      if (currentQuestionNumber < questions.length) {
-        nextQuestion();
-      } else {
-        setHasFinishedExam(true);
-      }
-    } catch (error) {
+    if (response.status !== 200 || error) {
       setIsOffline(true);
+      return;
+    }
+
+    setIsOffline(false);
+
+    if (currentQuestionNumber < questions.length) {
+      nextQuestion();
+    } else {
+      setHasFinishedExam(true);
     }
 
     setExamAttempt(updatedExamAttempt);
