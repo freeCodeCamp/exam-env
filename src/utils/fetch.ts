@@ -2,11 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { fetch } from "@tauri-apps/plugin-http";
 import { UserExamAttempt } from "./types";
 
-import createClient, {
-  Client,
-  FetchOptions,
-  FetchResponse,
-} from "openapi-fetch";
+import createClient from "openapi-fetch";
 import type { paths } from "../../prisma/api-schema";
 
 const client = createClient<paths>({
@@ -50,11 +46,11 @@ export async function getGeneratedExam(examId: string) {
     ).json()) as paths["/exam-environment/exam/generated-exam"]["post"]["responses"]["200"]["content"]["application/json"];
     generatedExam.examAttempt.startTimeInMS = Date.now();
 
-    const res = openapiFetchResponse<
-      "/exam-environment/exam/generated-exam",
-      "post"
-    >(generatedExam);
-    return res;
+    return {
+      data: generatedExam,
+      response: new Response(null, { status: 200 }),
+      error: undefined,
+    };
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -138,21 +134,4 @@ export async function getExams() {
   console.debug(data);
 
   return data;
-}
-
-type Resp<
-  P extends keyof paths,
-  Method extends keyof paths[P]
-> = paths[P] extends { [key in Method]: unknown } ? paths[P][Method] : never;
-
-function openapiFetchResponse<
-  Url extends keyof paths,
-  Method extends keyof paths[Url],
-  T extends Resp<Url, Method>
->(data: T) {
-  // >(data: T): FetchResponse<T, FetchOptions<T>, "application/json"> {
-  return {
-    data,
-    response: new Response(null, { status: 200 }),
-  };
 }
