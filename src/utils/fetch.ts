@@ -70,11 +70,7 @@ export async function getGeneratedExam(examId: string) {
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     const response = new Response(null, { status: 200 });
-    return { response, data: undefined, error: undefined } as {
-      response: Response;
-      data: never;
-      error?: undefined;
-    };
+    return { response, data: undefined as never, error: undefined };
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -94,20 +90,24 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
 export async function getExams() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     const res = await fetch("/exam-config.json");
-    const [exam] =
+    const {
+      exams: [exam],
+    } =
       (await res.json()) as paths["/exam-environment/exams"]["get"]["responses"]["200"]["content"]["application/json"];
     return {
-      data: [
-        {
-          id: exam.id,
-          canTake: true,
-          config: {
-            name: exam.config.name,
-            note: exam.config.note,
-            totalTimeInMS: exam.config.totalTimeInMS,
+      data: {
+        exams: [
+          {
+            id: exam.id,
+            canTake: true,
+            config: {
+              name: exam.config.name,
+              note: exam.config.note,
+              totalTimeInMS: exam.config.totalTimeInMS,
+            },
           },
-        },
-      ],
+        ],
+      },
       response: new Response(null, { status: 200 }),
       error: undefined,
     };
