@@ -29,7 +29,11 @@ export function Landing() {
 
   const fetchAvailableExams = async () => {
     try {
-      const data = await getExams();
+      const { data, error } = await getExams();
+      if (error) {
+        return setExamError(error.message);
+      }
+
       setExams(data.exams);
       setExamError(null);
     } catch (e) {
