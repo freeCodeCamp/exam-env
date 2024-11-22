@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::Manager;
+use utils::valid_sentry_dsn;
 
 mod commands;
 mod config;
@@ -12,15 +13,19 @@ mod utils;
 
 fn main() {
     let sentry_dsn = dotenvy_macro::dotenv!("SENTRY_DSN");
-    // NOTE: Events are only emitted, once the guard goes out of scope (on app close).
-    // TODO: Might look into forcing some/all events to emit: https://docs.rs/sentry/latest/sentry/trait.Transport.html
-    let _guard = sentry::init((
-        sentry_dsn,
-        sentry::ClientOptions {
-            release: sentry::release_name!(),
-            ..Default::default()
-        },
-    ));
+
+    let _guard;
+    if valid_sentry_dsn(sentry_dsn) {
+        // NOTE: Events are only emitted, once the guard goes out of scope (on app close).
+        // TODO: Might look into forcing some/all events to emit: https://docs.rs/sentry/latest/sentry/trait.Transport.html
+        _guard = sentry::init((
+            sentry_dsn,
+            sentry::ClientOptions {
+                release: sentry::release_name!(),
+                ..Default::default()
+            },
+        ));
+    }
 
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())

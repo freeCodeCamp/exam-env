@@ -1,0 +1,370 @@
+{
+  "exams": [
+    {
+      "id": "63ceed18f71dda7d8cf21e8e",
+      "config": {
+        "name": "First Exam",
+        "note": "This exam includes listening comprehension",
+        "totalTimeInMS": 30000,
+        "tags": [
+          {
+            "group": ["Rhetorical"],
+            "numberOfQuestions": 1
+          }
+        ],
+        "questionSets": [
+          {
+            "type": "MultipleChoice",
+            "numberOfSet": 1,
+            "numberOfQuestions": 1,
+            "numberOfCorrectAnswers": 1,
+            "numberOfIncorrectAnswers": 3
+          }
+        ]
+      },
+      "questionSets": [
+        {
+          "id": "66b1ce3e9273b7b5f81513ea",
+          "type": "MultipleChoice",
+          "context": null,
+          "questions": [
+            {
+              "id": "66b1ce3e9273b7b5f81513e0",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Rhetorical"],
+              "text": "What is the capital of France?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Paris",
+                  "isCorrect": true
+                },
+                {
+                  "id": "2",
+                  "text": "London",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "Berlin",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "Madrid",
+                  "isCorrect": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "66b1ce3e9273b7b5f81513e0",
+          "type": "Dialogue",
+          "context": "During their travels, Alex marveled at the vibrant culture and rich history of Madrid, the capital of Spain. They recounted their adventures across Asia, the largest continent by area, with its breathtaking landscapes and diverse cultures. History fascinated them, especially stories of George Washington, the first president of the United States, whose leadership helped shape the nation. Their curiosity extended to science, where they discussed the importance of water, known chemically as H2O, vital for all living beings. Their conversation flowed into literature, where they shared a mutual admiration for the timeless works of William Shakespeare, particularly the tragic love story of 'Romeo and Juliet'.",
+          "questions": [
+            {
+              "id": "66b1ce3e9273b7b5f81513e0",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Rhetorical"],
+              "text": "What is the capital of Spain?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Paris",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "London",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "Berlin",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "Madrid",
+                  "isCorrect": true
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e1",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Geography"],
+              "text": "What is the largest continent by area?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Africa",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "Asia",
+                  "isCorrect": true
+                },
+                {
+                  "id": "3",
+                  "text": "Europe",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "South America",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e2",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["History"],
+              "text": "Who was the first president of the United States?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Thomas Jefferson",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "Abraham Lincoln",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "George Washington",
+                  "isCorrect": true
+                },
+                {
+                  "id": "4",
+                  "text": "John Adams",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e3",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Science"],
+              "text": "What is the chemical symbol for water?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "O2",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "CO2",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "H2O",
+                  "isCorrect": true
+                },
+                {
+                  "id": "4",
+                  "text": "H2O2",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e4",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Literature"],
+              "text": "Who wrote 'Romeo and Juliet'?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Charles Dickens",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "William Shakespeare",
+                  "isCorrect": true
+                },
+                {
+                  "id": "3",
+                  "text": "Mark Twain",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "Jane Austen",
+                  "isCorrect": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "66b1ce3e9273c7b5f81513e0",
+          "type": "Dialogue",
+          "context": "Funny Dialogue about bananas",
+          "questions": [
+            {
+              "id": "66b1ce3e9274b7b5f81513e0",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Rhetorical"],
+              "text": "What is the capital of Spain?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Paris",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "London",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "Berlin",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "Madrid",
+                  "isCorrect": true
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e1",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Geography"],
+              "text": "What is the largest continent by area?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Africa",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "Asia",
+                  "isCorrect": true
+                },
+                {
+                  "id": "3",
+                  "text": "Europe",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "South America",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e2",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["History"],
+              "text": "Who was the first president of the United States?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Thomas Jefferson",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "Abraham Lincoln",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "George Washington",
+                  "isCorrect": true
+                },
+                {
+                  "id": "4",
+                  "text": "John Adams",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e3",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Science"],
+              "text": "What is the chemical symbol for water?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "O2",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "CO2",
+                  "isCorrect": false
+                },
+                {
+                  "id": "3",
+                  "text": "H2O",
+                  "isCorrect": true
+                },
+                {
+                  "id": "4",
+                  "text": "H2O2",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "id": "66b1ce3e9273b7b5f81513e4",
+              "deprecated": false,
+              "audio": null,
+              "tags": ["Literature"],
+              "text": "Who wrote 'Romeo and Juliet'?",
+              "answers": [
+                {
+                  "id": "1",
+                  "text": "Charles Dickens",
+                  "isCorrect": false
+                },
+                {
+                  "id": "2",
+                  "text": "William Shakespeare",
+                  "isCorrect": true
+                },
+                {
+                  "id": "3",
+                  "text": "Mark Twain",
+                  "isCorrect": false
+                },
+                {
+                  "id": "4",
+                  "text": "Jane Austen",
+                  "isCorrect": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "prerequisites": []
+    }
+  ]
+}

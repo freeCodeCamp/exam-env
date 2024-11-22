@@ -89,7 +89,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
 
 export async function getExams() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
-    const res = await fetch("/exam-config.json");
+    const res = await fetch("/mocks/exams.json");
     const {
       exams: [exam],
     } =
