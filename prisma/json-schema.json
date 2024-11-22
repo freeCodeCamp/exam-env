@@ -244,13 +244,6 @@
           ],
           "originalType": "Boolean"
         },
-        "isUpcomingPythonCertV8": {
-          "type": [
-            "boolean",
-            "null"
-          ],
-          "originalType": "Boolean"
-        },
         "keyboardShortcuts": {
           "type": [
             "boolean",

@@ -2920,18 +2920,25 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: {
-                                exams: {
-                                    id: string;
-                                    config: {
-                                        name: string;
-                                        note: string;
-                                        totalTimeInMS: number;
-                                    };
-                                    canTake: boolean;
-                                }[];
-                            };
-                        } | {
+                            exams: {
+                                id: string;
+                                config: {
+                                    name: string;
+                                    note: string;
+                                    totalTimeInMS: number;
+                                };
+                                canTake: boolean;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
                             code: string;
                             message: string;
                         };
@@ -3793,13 +3800,13 @@ export interface paths {
                                 };
                             }[];
                         } | {
-                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "front-end-development-v9" | "upcoming-python-v8" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
+                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
                             certTitle: string;
                             username: string;
                             date: number;
                             completionTime: number;
                         } | {
-                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "front-end-development-v9" | "upcoming-python-v8" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
+                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
                             certTitle: string;
                             username: string;
                             name: string;

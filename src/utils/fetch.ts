@@ -69,69 +69,59 @@ export async function getGeneratedExam(examId: string) {
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
-    return new Response();
+    const response = new Response(null, { status: 200 });
+    return { response, data: undefined as never, error: undefined };
   }
 
-  const endpoint = new URL(
-    "/exam-environment/exam/attempt",
-    import.meta.env.VITE_FREECODECAMP_API
-  );
-
   const token = await invoke<string>("get_authorization_token");
-  const res = await fetch(endpoint, {
-    method: "POST",
-    body: JSON.stringify({
-      attempt: examAttempt,
-    }),
-    headers: {
-      "Exam-Environment-Authorization-Token": token,
-      "Content-Type": "application/json",
+
+  const res = await client.POST("/exam-environment/exam/attempt", {
+    body: { attempt: examAttempt },
+    params: {
+      header: {
+        "exam-environment-authorization-token": token,
+      },
     },
   });
 
-  if (res.status !== 200) {
-    throw new Error(await res.json());
-  } else {
-    return res;
-  }
+  return res;
 }
 
 export async function getExams() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
-    const res = await fetch("/exam-config.json");
-    const [exam] = await res.json();
-    return [
-      {
-        id: exam.id,
-        canTake: true,
-        config: {
-          name: exam.config.name,
-          note: exam.config.note,
-          totalTimeInMS: exam.config.totalTimeInMS,
-        },
+    const res = await fetch("/mocks/exams.json");
+    const {
+      exams: [exam],
+    } =
+      (await res.json()) as paths["/exam-environment/exams"]["get"]["responses"]["200"]["content"]["application/json"];
+    return {
+      data: {
+        exams: [
+          {
+            id: exam.id,
+            canTake: true,
+            config: {
+              name: exam.config.name,
+              note: exam.config.note,
+              totalTimeInMS: exam.config.totalTimeInMS,
+            },
+          },
+        ],
       },
-    ];
+      response: new Response(null, { status: 200 }),
+      error: undefined,
+    };
   }
 
-  const endpoint = new URL(
-    "/exam-environment/exams",
-    import.meta.env.VITE_FREECODECAMP_API
-  );
-
   const token = await invoke<string>("get_authorization_token");
-  const res = await fetch(endpoint, {
-    method: "GET",
-    headers: {
-      "Exam-Environment-Authorization-Token": token,
+
+  const res = await client.GET("/exam-environment/exams", {
+    params: {
+      header: {
+        "exam-environment-authorization-token": token,
+      },
     },
   });
 
-  if (res.status !== 200) {
-    throw new Error(await res.text());
-  }
-
-  const data = await res.json();
-  console.debug(data);
-
-  return data;
+  return res;
 }

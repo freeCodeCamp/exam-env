@@ -8,14 +8,20 @@ pub struct AppConfig {
 
 typify::import_types!(schema = "../prisma/json-schema.json");
 
+#[derive(Deserialize)]
+struct Exams {
+    #[serde(rename = "exams")]
+    _exams: Vec<EnvExam>,
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{EnvExam, EnvExamAttempt, EnvGeneratedExam};
+    use super::{EnvExamAttempt, EnvGeneratedExam, Exams};
 
     #[test]
     fn exam_serializes() {
-        let file = get_file("exam-config.json");
-        let _: Vec<EnvExam> = serde_json::from_str(&file).unwrap();
+        let file = get_file("mocks/exams.json");
+        let _: Exams = serde_json::from_str(&file).unwrap();
     }
 
     #[test]
