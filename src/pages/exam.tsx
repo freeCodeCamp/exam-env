@@ -1,41 +1,42 @@
+import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { Box, Center, Flex, IconButton, Text } from "@chakra-ui/react";
-import { Button, Modal } from "@freecodecamp/ui";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { CloseRequestedEvent } from "@tauri-apps/api/window";
+import { confirm } from "@tauri-apps/plugin-dialog";
+import { Button, Modal } from "@freecodecamp/ui";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@chakra-ui/icons";
-import { confirm } from "@tauri-apps/plugin-dialog";
-import { CloseRequestedEvent } from "@tauri-apps/api/window";
+
+import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
+import { IncompatibleDeviceModal } from "../components/incompatible-device-modal";
+import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
+import { QuestionSetForm } from "../components/question-set-form";
+import { ProtectedRoute } from "../components/protected-route";
+import { useAppFocus } from "../components/use-app-focus";
+import OfflineModal from "../components/offline-modal";
+import { takeScreenshot } from "../utils/screenshot";
+import { Camera } from "../components/camera";
+import { LandingRoute } from "./landing";
+import { ErrorRoute } from "./error";
+import { rootRoute } from "./root";
 import {
   Answers,
   FullQuestion,
   UserExam,
   UserExamAttempt,
 } from "../utils/types";
-import { Camera } from "../components/camera";
-import { useAppFocus } from "../components/use-app-focus";
-import { QuestionSetForm } from "../components/question-set-form";
-import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
-import { takeScreenshot } from "../utils/screenshot";
-import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
-import OfflineModal from "../components/offline-modal";
-import { IncompatibleDeviceModal } from "../components/incompatible-device-modal";
-import { useQuery } from "@tanstack/react-query";
-import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
-import { ProtectedRoute } from "../components/protected-route";
-import { ErrorRoute } from "./error";
-import { rootRoute } from "./root";
-import { LandingRoute } from "./landing";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
   const examQuery = useQuery({
     queryKey: ["exam", examId],
     queryFn: async () => {
-      const res = await getGeneratedExam(examId!);
+      const res = await getGeneratedExam(examId);
 
       if (res.error) {
         throw new Error(JSON.stringify(res.error));
@@ -43,6 +44,7 @@ export function Exam() {
 
       return res.data;
     },
+    retry: 3,
   });
 
   const navigate = useNavigate();

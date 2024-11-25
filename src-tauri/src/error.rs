@@ -11,6 +11,7 @@ pub enum Error {
     ScreenshotError(String),
     SerializationError(String),
     RequestError(String),
+    ClientError(String),
 }
 
 impl Error {
@@ -21,6 +22,7 @@ impl Error {
             Error::ScreenshotError(s) => s.push_str(context),
             Error::SerializationError(s) => s.push_str(context),
             Error::RequestError(s) => s.push_str(context),
+            Error::ClientError(s) => s.push_str(context),
         };
     }
 }
@@ -33,6 +35,7 @@ impl std::fmt::Display for Error {
             Error::ScreenshotError(s) => format!("ScreenshotError: {s}"),
             Error::SerializationError(s) => format!("SerializationError: {s}"),
             Error::RequestError(s) => format!("RequestError: {s}"),
+            Error::ClientError(s) => format!("ClientError: {s}"),
         };
 
         write!(f, "{}", stringed)
@@ -49,13 +52,13 @@ pub struct UnrecoverableError {
 
 pub trait PassToSentry<T> {
     /// A transparent wrapper around a `Result` that passes a `crate::Error` to Sentry.
-    fn capture(self) -> Result<T, Error>;
+    fn capture(self) -> T;
 
     /// Emits the error as an `UnrecoverableError` to the client to display.
-    fn emit(self, app: &AppHandle) -> Result<T, Error>;
+    fn emit(self, app: &AppHandle) -> T;
 }
 
-impl<T> PassToSentry<T> for Result<T, Error> {
+impl<T> PassToSentry<Result<T, Error>> for Result<T, Error> {
     fn capture(self) -> Result<T, Error> {
         match self {
             Err(mut e) => {
@@ -90,5 +93,29 @@ impl<T> PassToSentry<T> for Result<T, Error> {
             }
             Ok(t) => Ok(t),
         }
+    }
+}
+
+impl PassToSentry<()> for Error {
+    fn capture(self) -> () {
+        let _sentry_uuid = capture_error(&self);
+    }
+
+    fn emit(self, app: &AppHandle) -> () {
+        let source = if let Some(s) = self.source() {
+            s.to_string()
+        } else {
+            "unknown".to_string()
+        };
+
+        let sentry_uuid = capture_error(&self);
+
+        let message = format!("UUID: {}\n{}", sentry_uuid, self.to_string());
+
+        app.emit(
+            "unrecoverable-error",
+            UnrecoverableError { source, message },
+        )
+        .unwrap();
     }
 }

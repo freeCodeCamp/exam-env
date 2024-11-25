@@ -42,3 +42,8 @@ type EnvExamAttempt = Prisma.EnvExamAttempt;
 export type EnvQuestionSetAttempt = Prisma.EnvQuestionSetAttempt;
 export type EnvMultipleChoiceQuestionAttempt =
   Prisma.EnvMultipleChoiceQuestionAttempt;
+
+export type UnrecoverableError = {
+  source: String;
+  message: String;
+};

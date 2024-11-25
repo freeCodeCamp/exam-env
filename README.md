@@ -54,7 +54,7 @@ Non-blocking errors display an inline message about the failure to the Camper. I
 
 ##### Unrecoverable Errors
 
-**Example: API returns 500 for question submission**
+**Example: API returns 500 for generated exam request**
 
 After retrying request 3 times, the error page is shown. An event is emitted to Sentry.
 
