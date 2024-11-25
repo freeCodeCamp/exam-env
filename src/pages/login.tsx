@@ -13,8 +13,10 @@ import { Button, Spacer } from "@freecodecamp/ui";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { useInvoke } from "../components/use-invoke";
 import { AuthContext } from "../contexts/auth";
-import { useNavigate } from "react-router-dom";
 import { Header } from "../components/header";
+import { createRoute, useNavigate } from "@tanstack/react-router";
+import { rootRoute } from "./root";
+import { LandingRoute } from "./landing";
 
 export function Login() {
   const navigate = useNavigate();
@@ -34,7 +36,7 @@ export function Login() {
 
   useEffect(() => {
     if (examEnvironmentAuthenticationToken) {
-      navigate("/landing");
+      navigate({ to: LandingRoute.to });
     }
   }, []);
 
@@ -48,7 +50,7 @@ export function Login() {
     });
     try {
       await login(accountToken);
-      navigate("/landing");
+      navigate({ to: LandingRoute.to });
     } catch (e) {
       setError(String(e));
     }
@@ -117,3 +119,9 @@ export function Login() {
     </>
   );
 }
+
+export const LoginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/login",
+  component: Login,
+});

@@ -1,14 +1,17 @@
 import { Box, Center, Flex, Text, Heading, Checkbox } from "@chakra-ui/react";
 import { Button } from "@freecodecamp/ui";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "../components/header";
+import { ProtectedRoute } from "../components/protected-route";
+import { createRoute, useNavigate } from "@tanstack/react-router";
+import { rootRoute } from "./root";
+import { ExamRoute } from "./exam";
 
 export function ExamLanding() {
   const [hasAgreed, setHasAgreed] = useState(false);
   const navigate = useNavigate();
 
-  const { examId } = useParams();
+  const { examId } = ExamLandingRoute.useParams();
 
   const checkDevice = async () => {
     // This is a workaround to make sure Tauri knows that the user has
@@ -78,7 +81,7 @@ export function ExamLanding() {
                       if (reason) {
                         alert(reason);
                       } else {
-                        navigate(`/exam/${examId}`);
+                        navigate({ to: ExamRoute.to, params: { examId } });
                       }
                     });
                   }}
@@ -93,3 +96,13 @@ export function ExamLanding() {
     </>
   );
 }
+
+export const ExamLandingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/exam-landing/:examId",
+  component: () => (
+    <ProtectedRoute>
+      <ExamLanding />
+    </ProtectedRoute>
+  ),
+});

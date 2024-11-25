@@ -6,7 +6,6 @@ import {
 } from "@tauri-apps/plugin-updater";
 import { restartApp } from "../utils/commands";
 import { ReactNode, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Center,
@@ -20,6 +19,9 @@ import {
 import { CheckIcon, CloseIcon, SpinnerIcon } from "@chakra-ui/icons";
 import { Header } from "../components/header";
 import { Button, Spacer } from "@freecodecamp/ui";
+import { createRoute, useNavigate } from "@tanstack/react-router";
+import { rootRoute } from "./root";
+import { LandingRoute } from "./landing";
 
 async function delayForTesting(t: number) {
   await new Promise((res, _) => setTimeout(res, t));
@@ -229,7 +231,7 @@ export function Splashscreen() {
 
       <Button
         block={true}
-        onClick={() => navigate("/landing")}
+        onClick={() => navigate({ to: LandingRoute.to })}
         disabled={!!compatibilityCheckQuery.error || update?.available}
       >
         Continue to Landing Page
@@ -357,3 +359,9 @@ async function updateDeviceList() {
     return new Error("Error checking device compatibility. Try again.");
   }
 }
+
+export const SplashscreenRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: Splashscreen,
+});

@@ -1,14 +1,13 @@
 import { Box, Center, Code, Flex, Heading, Text } from "@chakra-ui/react";
-import { useLocation } from "react-router-dom";
+import { createRoute } from "@tanstack/react-router";
+import { rootRoute } from "./root";
 
 type ErrorProps = {
   info?: string;
 };
 
 export function Error({ info }: ErrorProps) {
-  const loc = useLocation();
-  const queryParams = new URLSearchParams(loc.search);
-  const errorInfo = queryParams.get("errorInfo");
+  const { errorInfo } = ErrorRoute.useSearch();
 
   return (
     <Box width={"full"}>
@@ -30,3 +29,9 @@ export function Error({ info }: ErrorProps) {
     </Box>
   );
 }
+
+export const ErrorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/error",
+  component: Error,
+});

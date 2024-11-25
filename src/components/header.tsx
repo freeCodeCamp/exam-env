@@ -14,8 +14,11 @@ import {
 } from "@chakra-ui/react";
 import { ArrowForwardIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { useContext, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/auth";
+import { useNavigate } from "@tanstack/react-router";
+import { LandingRoute } from "../pages/landing";
+import { TestRoute } from "../pages/test";
+import { SplashscreenRoute } from "../pages/splashscreen";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -75,29 +78,33 @@ export function Header() {
           <DrawerHeader>Navigate</DrawerHeader>
           <DrawerBody>
             <Button
-              onClick={() => navigate("/landing")}
+              onClick={() => navigate({ to: LandingRoute.to })}
               variant="ghost"
               w={"100%"}
               rightIcon={<ArrowForwardIcon />}
             >
               Home
             </Button>
-            <Button
-              onClick={() => navigate("/test")}
-              variant="ghost"
-              w={"100%"}
-              rightIcon={<ArrowForwardIcon />}
-            >
-              Test (Dev Only)
-            </Button>
-            <Button
-              onClick={() => navigate("/")}
-              variant="ghost"
-              w={"100%"}
-              rightIcon={<ArrowForwardIcon />}
-            >
-              Splashscreen (Dev Only)
-            </Button>
+            {import.meta.env.DEV && (
+              <Button
+                onClick={() => navigate({ to: TestRoute.to })}
+                variant="ghost"
+                w={"100%"}
+                rightIcon={<ArrowForwardIcon />}
+              >
+                Test (Dev Only)
+              </Button>
+            )}
+            {import.meta.env.DEV && (
+              <Button
+                onClick={() => navigate({ to: SplashscreenRoute.to })}
+                variant="ghost"
+                w={"100%"}
+                rightIcon={<ArrowForwardIcon />}
+              >
+                Splashscreen (Dev Only)
+              </Button>
+            )}
             {examEnvironmentAuthenticationToken && (
               <Button
                 onClick={() => logout()}

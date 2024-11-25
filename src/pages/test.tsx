@@ -1,11 +1,13 @@
 import { Box, Center, Flex, Heading, Text, Textarea } from "@chakra-ui/react";
 import { Button } from "@freecodecamp/ui";
+import { invoke } from "@tauri-apps/api/core";
+import { createRoute } from "@tanstack/react-router";
 import { Camera } from "../components/camera";
 import { useAppFocus } from "../components/use-app-focus";
 import { useEffect, useRef, useState } from "react";
 import { takeScreenshot } from "../utils/screenshot";
-import { invoke } from "@tauri-apps/api/core";
 import { Header } from "../components/header";
+import { rootRoute } from "./root";
 
 export function Test() {
   const runFocusRef = useRef(false);
@@ -83,3 +85,10 @@ export function Test() {
     </Flex>
   );
 }
+
+export const TestRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/test",
+  // TODO: Lazy load
+  component: import.meta.env.DEV ? Test : () => null,
+});

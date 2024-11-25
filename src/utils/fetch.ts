@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch } from "@tauri-apps/plugin-http";
-import { UserExamAttempt } from "./types";
+import { UserExam, UserExamAttempt } from "./types";
 
 import createClient from "openapi-fetch";
 import type { paths } from "../../prisma/api-schema";
@@ -43,9 +43,13 @@ export async function getGeneratedExam(examId: string) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     const generatedExam = (await (
       await fetch("/mocks/generated-exam.json")
-    ).json()) as paths["/exam-environment/exam/generated-exam"]["post"]["responses"]["200"]["content"]["application/json"];
+    ).json()) as { exam: UserExam; examAttempt: UserExamAttempt };
     generatedExam.examAttempt.startTimeInMS = Date.now();
 
+    // return {
+    //   response: new Response(null, { status: 500 }),
+    //   error: "Test error",
+    // };
     return {
       data: generatedExam,
       response: new Response(null, { status: 200 }),
@@ -64,7 +68,11 @@ export async function getGeneratedExam(examId: string) {
     },
   });
 
-  return res;
+  return res as {
+    data?: { exam: UserExam; examAttempt: UserExamAttempt };
+    response: Response;
+    error: typeof res.error;
+  };
 }
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
