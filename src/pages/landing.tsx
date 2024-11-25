@@ -2,9 +2,12 @@ import { Center, Flex, Text, Heading } from "@chakra-ui/react";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { Header } from "../components/header";
 import { Fragment, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
+import { createRoute, useNavigate } from "@tanstack/react-router";
+import { ProtectedRoute } from "../components/protected-route";
+import { rootRoute } from "./root";
+import { ExamLandingRoute } from "./exam-landing";
 
 interface ExamInfo {
   id: string;
@@ -17,10 +20,7 @@ interface ExamInfo {
 }
 
 export function Landing() {
-  const loc = useLocation();
-  const queryParams = new URLSearchParams(loc.search);
-  const flashKind = queryParams.get("flashKind");
-  const flashMessage = queryParams.get("flashMessage");
+  const { flashKind, flashMessage } = LandingRoute.useSearch();
 
   const [exams, setExams] = useState<ExamInfo[] | null>(null);
   const [examError, setExamError] = useState<string | null>(null);
@@ -85,7 +85,10 @@ export function Landing() {
                   <Button
                     disabled={!exam.canTake}
                     onClick={() => {
-                      navigate(`/exam-landing/${exam.id}`);
+                      navigate({
+                        to: ExamLandingRoute.to,
+                        params: { examId: exam.id },
+                      });
                     }}
                   >
                     {exam.config.name}
@@ -99,3 +102,13 @@ export function Landing() {
     </>
   );
 }
+
+export const LandingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/landing",
+  component: () => (
+    <ProtectedRoute>
+      <Landing />
+    </ProtectedRoute>
+  ),
+});

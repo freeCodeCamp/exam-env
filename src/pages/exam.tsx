@@ -20,28 +20,38 @@ import { useAppFocus } from "../components/use-app-focus";
 import { QuestionSetForm } from "../components/question-set-form";
 import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
 import { takeScreenshot } from "../utils/screenshot";
-import { useLoaderData, useNavigate } from "react-router-dom";
-import { postExamAttempt } from "../utils/fetch";
+import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
 import OfflineModal from "../components/offline-modal";
 import { IncompatibleDeviceModal } from "../components/incompatible-device-modal";
+import { useQuery } from "@tanstack/react-query";
+import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { ProtectedRoute } from "../components/protected-route";
+import { ErrorRoute } from "./error";
+import { rootRoute } from "./root";
+import { LandingRoute } from "./landing";
 
 export function Exam() {
-  const examData = useLoaderData() as {
-    exam: UserExam;
-    examAttempt: UserExamAttempt;
-  };
+  const { examId } = ExamRoute.useParams();
+  const examQuery = useQuery({
+    queryKey: ["exam", examId],
+    queryFn: async () => {
+      const res = await getGeneratedExam(examId!);
+
+      if (res.error) {
+        throw new Error(JSON.stringify(res.error));
+      }
+
+      return res.data;
+    },
+  });
+
   const navigate = useNavigate();
-  const { exam } = examData;
-  const [examAttempt, setExamAttempt] = useState<UserExamAttempt>(
-    examData.examAttempt
-  );
+  const [examAttempt, setExamAttempt] = useState<UserExamAttempt | null>(null);
   const [newSelectedAnswers, setNewSelectedAnswers] = useState<
     Answers[number]["id"][]
   >([]);
 
-  const [fullQuestion, setFullQuestion] = useState<FullQuestion>(
-    fullQuestionFromExamAttempt(exam, examAttempt)
-  );
+  const [fullQuestion, setFullQuestion] = useState<FullQuestion | null>(null);
   const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
 
   const [isOffline, setIsOffline] = useState(false);
@@ -51,9 +61,18 @@ export function Exam() {
 
   const [maxTimeReached, setMaxTimeReached] = useState(false);
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
-  const secondsLeft = Math.floor(
-    (examAttempt.startTimeInMS + exam.config.totalTimeInMS - Date.now()) / 1000
-  );
+
+  useEffect(() => {
+    if (!examQuery.data) {
+      return;
+    }
+    const exam = examQuery.data.exam;
+    const examAttempt = examQuery.data.examAttempt;
+
+    const fullQuestion = fullQuestionFromExamAttempt(exam, examAttempt);
+    setFullQuestion(fullQuestion);
+    setExamAttempt(examAttempt);
+  }, [examQuery.data]);
 
   function fullQuestionFromExamAttempt(
     exam: UserExam,
@@ -119,27 +138,24 @@ export function Exam() {
   }
 
   const questions = useMemo(
-    () => exam.questionSets.flatMap((qt) => qt.questions),
-    [exam]
+    () =>
+      examQuery.data?.exam?.questionSets?.flatMap((qt) => qt.questions) || [],
+    [examQuery.data?.exam]
   );
 
   useEffect(() => {
-    const cqn = questions.findIndex((q) => q.id === fullQuestion.id) + 1;
+    const cqn = questions.findIndex((q) => q.id === fullQuestion?.id) + 1;
     setCurrentQuestionNumber(cqn);
   }, [fullQuestion]);
 
-  if (!exam || !fullQuestion || !examAttempt) {
-    return null;
-  }
-
   function nextQuestion() {
-    if (!exam || !fullQuestion) {
+    if (!fullQuestion) {
       return;
     }
 
     const nextQ = questions[currentQuestionNumber];
 
-    const questionSet = exam.questionSets.find((qt) =>
+    const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
       qt.questions.some((q) => q.id === nextQ.id)
     );
     if (!questionSet) {
@@ -154,13 +170,13 @@ export function Exam() {
   }
 
   function specificQuestion(question_num: number) {
-    if (!exam || !fullQuestion) {
+    if (!fullQuestion) {
       return;
     }
 
     const specificQ = questions[question_num - 1];
 
-    const questionSet = exam.questionSets.find((qt) =>
+    const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
       qt.questions.some((q) => q.id === specificQ.id)
     );
 
@@ -176,12 +192,12 @@ export function Exam() {
   }
 
   function previousQuestion() {
-    if (!exam || !fullQuestion) {
+    if (!fullQuestion) {
       return;
     }
 
     const prevQ = questions[currentQuestionNumber - 2];
-    const questionSet = exam.questionSets.find((qt) =>
+    const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
       qt.questions.some((q) => q.id === prevQ.id)
     );
     if (!questionSet) {
@@ -281,7 +297,7 @@ export function Exam() {
   }
 
   function handleExamEnd() {
-    navigate("/landing");
+    navigate({ to: LandingRoute.to });
   }
 
   function onUserMediaSetupError(err: unknown) {
@@ -292,6 +308,30 @@ export function Exam() {
       setIncompatibleDevice(err.message);
     }
   }
+
+  if (examQuery.isPending) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (examQuery.isError) {
+    return (
+      <Navigate
+        to={ErrorRoute.to}
+        search={{ errorInfo: examQuery.error.message }}
+      />
+    );
+  }
+
+  if (!examAttempt || !fullQuestion) {
+    return <Text>Loading...</Text>;
+  }
+
+  const secondsLeft = Math.floor(
+    (examAttempt.startTimeInMS +
+      (examQuery.data?.exam?.config?.totalTimeInMS ?? 0) -
+      Date.now()) /
+      1000
+  );
 
   return (
     <>
@@ -548,3 +588,13 @@ function secondsToMMSS(seconds: number): string {
   const secondsString = remainingSeconds.toString().padStart(2, "0");
   return `${minutesString}:${secondsString}`;
 }
+
+export const ExamRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/exam/:examId",
+  component: () => (
+    <ProtectedRoute>
+      <Exam />
+    </ProtectedRoute>
+  ),
+});
