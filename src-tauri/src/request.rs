@@ -21,12 +21,12 @@ pub async fn post_screenshot(image: String) -> Result<(), Error> {
             .body(image)
             .send()
             .await
-            .map_err(|e| Error::RequestError(format!("Request failed to send images: {}", e)))
+            .map_err(|e| Error::Request(format!("Request failed to send images: {}", e)))
             .capture()?;
 
         println!("Response: {:?}", res);
     } else {
-        return Err(Error::CredentialError(
+        return Err(Error::Credential(
             "Exam Environment Authorization Token is not set".to_string(),
         ));
     }

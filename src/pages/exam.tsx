@@ -1,4 +1,4 @@
-import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Box, Center, Flex, IconButton, Text } from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
@@ -22,7 +22,6 @@ import OfflineModal from "../components/offline-modal";
 import { takeScreenshot } from "../utils/screenshot";
 import { Camera } from "../components/camera";
 import { LandingRoute } from "./landing";
-import { ErrorRoute } from "./error";
 import { rootRoute } from "./root";
 import {
   Answers,
@@ -30,6 +29,7 @@ import {
   UserExam,
   UserExamAttempt,
 } from "../utils/types";
+import { invoke } from "@tauri-apps/api/core";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -316,11 +316,8 @@ export function Exam() {
   }
 
   if (examQuery.isError) {
-    return (
-      <Navigate
-        to={ErrorRoute.to}
-        search={{ errorInfo: examQuery.error.message }}
-      />
+    invoke("emit_to_sentry", { errorStr: examQuery.error.message }).catch(
+      console.error
     );
   }
 

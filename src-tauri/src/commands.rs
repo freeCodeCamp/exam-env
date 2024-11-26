@@ -15,7 +15,7 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
     window
         .set_content_protected(false)
         .map_err(|e| {
-            Error::ScreenshotError(format!(
+            Error::Screenshot(format!(
                 "Unable to set window to unprotected mode before screenshot: {}",
                 e
             ))
@@ -23,20 +23,20 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
         .capture()?;
 
     let screens = Screen::all()
-        .map_err(|e| Error::ScreenshotError(format!("Unable to return all screens: {}", e)))
+        .map_err(|e| Error::Screenshot(format!("Unable to return all screens: {}", e)))
         .capture()?;
 
     if let Some(main_screen) = screens.iter().find(|s| s.display_info.is_primary) {
         let main_screen_img = main_screen
             .capture()
-            .map_err(|e| Error::ScreenshotError(format!("Unable to capture screen: {}", e)))
+            .map_err(|e| Error::Screenshot(format!("Unable to capture screen: {}", e)))
             .capture()?;
 
         // Inability to set window to content_protected == true should not prevent continuation
         let _window_protected = window
             .set_content_protected(true)
             .map_err(|e| {
-                Error::ScreenshotError(format!(
+                Error::Screenshot(format!(
                     "Unable to set window back to protected mode after screenshot: {}",
                     e
                 ))
@@ -51,7 +51,7 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
         let image = BASE64_STANDARD.encode(utils::image_to_bytes(main_screen_img));
         post_screenshot(image).await?;
     } else {
-        return Err(Error::ScreenshotError(
+        return Err(Error::Screenshot(
             "No main screen found to take screenshot".to_string(),
         ));
     }
@@ -101,8 +101,8 @@ pub fn pass_to_sentry(error_str: String, sentry_state: State<SentryState>) {
 
 #[tauri::command]
 pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: AppHandle) {
-    let error = Error::ClientError(error_str);
-    let _ = error.emit(&app);
+    let error = Error::Client(error_str);
+    let _ = error.capture().emit(&app);
 
     if let Some(client) = &sentry_state.client {
         client.flush(None);
