@@ -19,7 +19,7 @@ pub async fn post_screenshot(image: Vec<u8>) -> Result<(), Error> {
         let img_part = reqwest::multipart::Part::bytes(image)
             .file_name("screenshot.jpg")
             .mime_str("image/jpeg")
-            .map_err(|e| Error::RequestError(format!("Unable to create image part: {}", e)))?;
+            .map_err(|e| Error::Request(format!("Unable to create image part: {}", e)))?;
 
         let form = reqwest::multipart::Form::new().part("file", img_part);
 
