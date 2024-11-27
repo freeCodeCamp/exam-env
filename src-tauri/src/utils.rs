@@ -10,8 +10,5 @@ pub fn image_to_bytes(img: ImageBuffer<Rgba<u8>, Vec<u8>>) -> Vec<u8> {
 }
 
 pub fn valid_sentry_dsn(url: &str) -> bool {
-    match url.parse::<Dsn>() {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    url.parse::<Dsn>().is_ok()
 }

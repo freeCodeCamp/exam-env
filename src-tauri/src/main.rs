@@ -11,20 +11,24 @@ mod request;
 mod secret;
 mod utils;
 
+pub struct SentryState {
+    pub client: Option<sentry::ClientInitGuard>,
+}
+
 fn main() {
     let sentry_dsn = dotenvy_macro::dotenv!("SENTRY_DSN");
 
-    let _guard;
+    let mut guard = None;
     if valid_sentry_dsn(sentry_dsn) {
         // NOTE: Events are only emitted, once the guard goes out of scope (on app close).
         // TODO: Might look into forcing some/all events to emit: https://docs.rs/sentry/latest/sentry/trait.Transport.html
-        _guard = sentry::init((
+        guard = Some(sentry::init((
             sentry_dsn,
             sentry::ClientOptions {
                 release: sentry::release_name!(),
                 ..Default::default()
             },
-        ));
+        )));
     }
 
     tauri::Builder::default()
@@ -39,6 +43,9 @@ fn main() {
                 webview_window.set_content_protected(false).unwrap();
             }
 
+            let client = guard;
+            app.manage(SentryState { client });
+
             Ok(())
         })
         .plugin(tauri_plugin_shell::init())
@@ -47,7 +54,9 @@ fn main() {
             commands::set_authorization_token,
             commands::remove_authorization_token,
             commands::take_screenshot,
-            commands::restart_app
+            commands::restart_app,
+            commands::pass_to_sentry,
+            commands::emit_to_sentry
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

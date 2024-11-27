@@ -4,23 +4,27 @@ use sentry::capture_error;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
 
+use crate::secret::get_authorization_token;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Error {
-    CredentialError(String),
-    FSError(String),
-    ScreenshotError(String),
-    SerializationError(String),
-    RequestError(String),
+    Credential(String),
+    FS(String),
+    Screenshot(String),
+    Serialization(String),
+    Request(String),
+    Client(String),
 }
 
 impl Error {
     fn add_context(&mut self, context: &str) {
         match self {
-            Error::CredentialError(s) => s.push_str(context),
-            Error::FSError(s) => s.push_str(context),
-            Error::ScreenshotError(s) => s.push_str(context),
-            Error::SerializationError(s) => s.push_str(context),
-            Error::RequestError(s) => s.push_str(context),
+            Error::Credential(s) => s.push_str(context),
+            Error::FS(s) => s.push_str(context),
+            Error::Screenshot(s) => s.push_str(context),
+            Error::Serialization(s) => s.push_str(context),
+            Error::Request(s) => s.push_str(context),
+            Error::Client(s) => s.push_str(context),
         };
     }
 }
@@ -28,11 +32,12 @@ impl Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let stringed = match self {
-            Error::CredentialError(s) => format!("CredentialError: {s}"),
-            Error::FSError(s) => format!("FSError: {s}"),
-            Error::ScreenshotError(s) => format!("ScreenshotError: {s}"),
-            Error::SerializationError(s) => format!("SerializationError: {s}"),
-            Error::RequestError(s) => format!("RequestError: {s}"),
+            Error::Credential(s) => format!("Credential: {s}"),
+            Error::FS(s) => format!("FS: {s}"),
+            Error::Screenshot(s) => format!("Screenshot: {s}"),
+            Error::Serialization(s) => format!("Serialization: {s}"),
+            Error::Request(s) => format!("Request: {s}"),
+            Error::Client(s) => format!("Client: {s}"),
         };
 
         write!(f, "{}", stringed)
@@ -49,16 +54,20 @@ pub struct UnrecoverableError {
 
 pub trait PassToSentry<T> {
     /// A transparent wrapper around a `Result` that passes a `crate::Error` to Sentry.
-    fn capture(self) -> Result<T, Error>;
+    fn capture(self) -> T;
 
     /// Emits the error as an `UnrecoverableError` to the client to display.
-    fn emit(self, app: &AppHandle) -> Result<T, Error>;
+    ///
+    /// NOTE: Calling this method does not capture the error in Sentry.
+    fn emit(self, app: &AppHandle) -> T;
 }
 
-impl<T> PassToSentry<T> for Result<T, Error> {
+impl<T> PassToSentry<Result<T, Error>> for Result<T, Error> {
     fn capture(self) -> Result<T, Error> {
         match self {
             Err(mut e) => {
+                configure_scope();
+
                 let sentry_uuid = capture_error(&e);
                 e.add_context(&format!(" + UUID: {sentry_uuid}"));
 
@@ -90,5 +99,48 @@ impl<T> PassToSentry<T> for Result<T, Error> {
             }
             Ok(t) => Ok(t),
         }
+    }
+}
+
+impl PassToSentry<Error> for Error {
+    fn capture(mut self) -> Self {
+        configure_scope();
+
+        let sentry_uuid = capture_error(&self);
+
+        self.add_context(&format!(" + UUID: {sentry_uuid}"));
+
+        self
+    }
+
+    fn emit(self, app: &AppHandle) -> Self {
+        let source = if let Some(s) = self.source() {
+            s.to_string()
+        } else {
+            "unknown".to_string()
+        };
+
+        app.emit(
+            "unrecoverable-error",
+            UnrecoverableError {
+                source,
+                message: self.to_string(),
+            },
+        )
+        .unwrap();
+
+        self
+    }
+}
+
+fn configure_scope() {
+    if let Some(authorization_token) = get_authorization_token() {
+        sentry::configure_scope(|scope| {
+            let user = sentry::User {
+                id: Some(authorization_token),
+                ..Default::default()
+            };
+            scope.set_user(Some(user));
+        });
     }
 }

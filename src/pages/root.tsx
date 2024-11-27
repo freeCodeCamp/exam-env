@@ -1,5 +1,8 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
-import React from "react";
+import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { listen } from "@tauri-apps/api/event";
+import React, { useEffect } from "react";
+import { UnrecoverableError } from "../utils/types";
+import { ErrorRoute } from "./error";
 
 const TanStackRouterDevtools =
   import.meta.env.NODE_ENV === "production"
@@ -15,6 +18,27 @@ const TanStackRouterDevtools =
 
 export const rootRoute = createRootRoute({
   component: () => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      const unlisten = listen<UnrecoverableError>(
+        "unrecoverable-error",
+        (error) => {
+          navigate({
+            to: ErrorRoute.to,
+            search: { errorInfo: error.payload.message },
+          });
+        }
+      );
+
+      console.debug(unlisten);
+
+      return () => {
+        console.debug("unlisten");
+        unlisten.then((u) => u());
+      };
+    }, []);
+
     return (
       <>
         <TanStackRouterDevtools />

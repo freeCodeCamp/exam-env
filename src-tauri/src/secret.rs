@@ -2,7 +2,7 @@ use keyring::Entry;
 
 use crate::error::{Error, PassToSentry};
 
-pub const EXAM_ENVIRONMENT_AUTHORIZATION_TOKEN_HANDLE: &'static str =
+pub const EXAM_ENVIRONMENT_AUTHORIZATION_TOKEN_HANDLE: &str =
     "exam_environment_authorization_token";
 
 pub fn get_authorization_token() -> Option<String> {
@@ -15,7 +15,7 @@ pub fn set_authorization_token(new_token: &str) -> Result<(), Error> {
 
     entry
         .set_password(new_token)
-        .map_err(|e| Error::CredentialError(e.to_string()))
+        .map_err(|e| Error::Credential(e.to_string()))
         .capture()?;
 
     Ok(())
@@ -25,7 +25,7 @@ pub fn remove_authorization_token() -> Result<(), Error> {
     let entry = get_entry();
     entry
         .delete_credential()
-        .map_err(|e| Error::CredentialError(e.to_string()))
+        .map_err(|e| Error::Credential(e.to_string()))
         .capture()?;
 
     Ok(())

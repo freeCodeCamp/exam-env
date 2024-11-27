@@ -1,11 +1,12 @@
 use base64::{prelude::BASE64_STANDARD, Engine};
 use screenshots::Screen;
-use tauri::{AppHandle, Window};
+use sentry::capture_event;
+use tauri::{AppHandle, State, Window};
 
 use crate::{
     error::{Error, PassToSentry},
     request::post_screenshot,
-    secret, utils,
+    secret, utils, SentryState,
 };
 
 #[tauri::command]
@@ -14,7 +15,7 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
     window
         .set_content_protected(false)
         .map_err(|e| {
-            Error::ScreenshotError(format!(
+            Error::Screenshot(format!(
                 "Unable to set window to unprotected mode before screenshot: {}",
                 e
             ))
@@ -22,20 +23,20 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
         .capture()?;
 
     let screens = Screen::all()
-        .map_err(|e| Error::ScreenshotError(format!("Unable to return all screens: {}", e)))
+        .map_err(|e| Error::Screenshot(format!("Unable to return all screens: {}", e)))
         .capture()?;
 
     if let Some(main_screen) = screens.iter().find(|s| s.display_info.is_primary) {
         let main_screen_img = main_screen
             .capture()
-            .map_err(|e| Error::ScreenshotError(format!("Unable to capture screen: {}", e)))
+            .map_err(|e| Error::Screenshot(format!("Unable to capture screen: {}", e)))
             .capture()?;
 
         // Inability to set window to content_protected == true should not prevent continuation
         let _window_protected = window
             .set_content_protected(true)
             .map_err(|e| {
-                Error::ScreenshotError(format!(
+                Error::Screenshot(format!(
                     "Unable to set window back to protected mode after screenshot: {}",
                     e
                 ))
@@ -50,7 +51,7 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
         let image = BASE64_STANDARD.encode(utils::image_to_bytes(main_screen_img));
         post_screenshot(image).await?;
     } else {
-        return Err(Error::ScreenshotError(
+        return Err(Error::Screenshot(
             "No main screen found to take screenshot".to_string(),
         ));
     }
@@ -77,4 +78,33 @@ pub fn remove_authorization_token() -> Result<(), Error> {
 #[tauri::command]
 pub fn restart_app(app: AppHandle) {
     app.restart()
+}
+
+#[tauri::command]
+pub fn pass_to_sentry(error_str: String, sentry_state: State<SentryState>) {
+    let event_id = sentry::types::random_uuid();
+    let level = sentry::protocol::Level::Error;
+    let message = Some(error_str);
+    let event = sentry::protocol::Event {
+        event_id,
+        level,
+        message,
+        ..Default::default()
+    };
+
+    let _ = capture_event(event);
+
+    if let Some(client) = &sentry_state.client {
+        client.flush(None);
+    }
+}
+
+#[tauri::command]
+pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: AppHandle) {
+    let error = Error::Client(error_str);
+    let _ = error.capture().emit(&app);
+
+    if let Some(client) = &sentry_state.client {
+        client.flush(None);
+    }
 }

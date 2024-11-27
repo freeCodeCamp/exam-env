@@ -1,10 +1,10 @@
 {
   "name": "exam-env",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "prisma-generate": "node prisma/index.js && npx prisma generate && node prisma/post-generate.js",
+    "prisma-generate": "npx prisma generate",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
