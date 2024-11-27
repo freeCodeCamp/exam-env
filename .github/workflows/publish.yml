@@ -98,13 +98,14 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: copy sample.env .env
 
-      - name: setup relic (windows)
-        if: matrix.platform == 'windows-latest'
+      - name: install Go stable
+        uses: actions/setup-go@v4
+        with:
+          go-version: "stable"
+
+      - name: install relic
         run: |
-          curl -L -o relic https://github.com/sassoftware/relic/releases/download/v8.1.1/relic-linux-amd64
-          chmod +x relic
-          echo "$(pwd)" >> $GITHUB_PATH
-        shell: bash
+          go install github.com/sassoftware/relic/v8@latest
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -114,6 +115,7 @@ jobs:
           AZURE_VAULT_ID: ${{ secrets.AZURE_VAULT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
