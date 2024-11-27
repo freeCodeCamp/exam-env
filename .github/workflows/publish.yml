@@ -102,7 +102,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           curl -L -o relic.exe https://github.com/sassoftware/relic/releases/download/v8.1.1/relic-windows-amd64.exe
-          echo "::add-path::$(pwd)"
+          echo "::add-path::${{ github.workspace }}"
         shell: cmd
 
       - uses: tauri-apps/tauri-action@v0
@@ -112,14 +112,14 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           AZURE_VAULT_ID: ${{ secrets.AZURE_VAULT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: $${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
           VITE_MOCK_DATA: ${{ env.VITE_MOCK_DATA }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
-          args: ${{ matrix.args }}
+          args: ${{ matrix.args }} --verbose
           includeDebug: true
           # TODO: Include release at v1.0.0
           includeRelease: false
