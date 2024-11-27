@@ -88,6 +88,15 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install && pnpm run prisma-generate
 
+      # The rust build requires the `.env` file to exist, even if none of the variables are used
+      - name: prep env (non-windows)
+        if: matrix.platform != 'windows-latest'
+        run: cp sample.env .env
+
+      - name: prep env (windows)
+        if: matrix.platform == 'windows-latest'
+        run: copy sample.env .env
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
