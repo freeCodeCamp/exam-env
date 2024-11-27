@@ -47,10 +47,10 @@ jobs:
       matrix:
         include:
           # TODO: Error failed to bundle project: Failed to copy directory "embedded.provisionprofile" to "embedded.provisionprofile": `"embedded.provisionprofile" does not exist`
-          # - platform: "macos-latest"
-          # args: "--target aarch64-apple-darwin"
-          # - platform: "macos-latest"
-          # args: "--target x86_64-apple-darwin"
+          - platform: "macos-latest"
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin"
           - platform: "ubuntu-22.04"
             args: ""
           - platform: "windows-latest"
@@ -58,8 +58,8 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     env:
-      VITE_MOCK_DATA: false
-      VITE_FREECODECAMP_API: https://test-api.freecodecamp.dev
+      VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
+      VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
@@ -98,12 +98,14 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: copy sample.env .env
 
-      - name: install Go stable
+      - name: install Go stable (windows)
+        if: matrix.platform == 'windows-latest'
         uses: actions/setup-go@v4
         with:
           go-version: "stable"
 
-      - name: install relic
+      - name: install relic (windows)
+        if: matrix.platform == 'windows-latest'
         run: |
           go install github.com/sassoftware/relic/v8@latest
 
@@ -116,6 +118,13 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_DISTRIBUTION_CERT: ${{ secrets.APPLE_DISTRIBUTION_CERT }}
+          MAC_INSTALLER_DISTRIBUTION_CERT: ${{ secrets.MAC_INSTALLER_DISTRIBUTION_CERT }}
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
