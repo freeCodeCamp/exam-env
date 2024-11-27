@@ -101,9 +101,10 @@ jobs:
       - name: setup relic (windows)
         if: matrix.platform == 'windows-latest'
         run: |
-          curl -L -o relic.exe https://github.com/sassoftware/relic/releases/download/v8.1.1/relic-windows-amd64.exe
-          echo "::add-path::${{ github.workspace }}"
-        shell: cmd
+          curl -L -o relic https://github.com/sassoftware/relic/releases/download/v8.1.1/relic-linux-amd64
+          chmod +x relic
+          echo "$(pwd)" >> $GITHUB_PATH
+        shell: bash
 
       - uses: tauri-apps/tauri-action@v0
         env:
