@@ -109,6 +109,36 @@ jobs:
         run: |
           go install github.com/sassoftware/relic/v8@latest
 
+      - name: install codemagic cli tools (macos)
+        if: matrix.platform == 'macos-latest'
+        run: pip3 install codemagic-cli-tools --break-system-packages
+
+      - name: install apple certificates and provisioning profiles
+        if: matrix.platform == 'macos-latest'
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_DISTRIBUTION_CERT: ${{ secrets.APPLE_DISTRIBUTION_CERT }}
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+        run: |
+          # create variables
+          CERT_BASE_PATH=/Users/runner/Library/MobileDevice/Certificates
+          mkdir -p $CERT_BASE_PATH
+          DISTRIBUTION_CERT_PATH=$CERT_BASE_PATH/distribution_certificate.p12
+          PP_PATH=./src-tauri/embedded.provisionprofile
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$APPLE_DISTRIBUTION_CERT" | base64 --decode -o $DISTRIBUTION_CERT_PATH
+          echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
+
+          # create temporary keychain
+          keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
+
+          # import certificate to keychain
+          keychain add-certificates
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security find-identity -v
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,13 +148,6 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          APPLE_DISTRIBUTION_CERT: ${{ secrets.APPLE_DISTRIBUTION_CERT }}
-          MAC_INSTALLER_DISTRIBUTION_CERT: ${{ secrets.MAC_INSTALLER_DISTRIBUTION_CERT }}
-          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
