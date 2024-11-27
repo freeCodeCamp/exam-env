@@ -98,13 +98,12 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: copy sample.env .env
 
-      - name: setup-binary (windows)
+      - name: setup relic (windows)
         if: matrix.platform == 'windows-latest'
-        uses: supplypike/setup-bin@v4.0.1
-        with:
-          uri: "https://github.com/sassoftware/relic/releases/download/v8.1.1/relic-windows-amd64.exe"
-          name: "relic"
-          version: "8.1.1"
+        run: |
+          curl -L -o relic.exe https://github.com/sassoftware/relic/releases/download/v8.1.1/relic-windows-amd64.exe
+          echo "::add-path::$(pwd)"
+        shell: cmd
 
       - uses: tauri-apps/tauri-action@v0
         env:

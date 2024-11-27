@@ -50,7 +50,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERBMEZDMUIzMTc4N0E1NTMKUldSVHBZY1hzOEVQMnEydTAzSFNQOWxjelRMdHJ1SmZwVy9vNnJ0bmVtSU1LTFFFZzhsRlZ0UmEK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQwMkZBRkI4MUY5QzZBQzQKUldURWFwd2Z1Szh2UU81ZmVJenNsTXpSQURMbUFqaDF1Rm1WOG9XUEJxYUxxa1RLalRtVm5DVVkK",
       "endpoints": [
         "https://github.com/freeCodeCamp/exam-env/releases/latest/download/latest.json"
       ]
