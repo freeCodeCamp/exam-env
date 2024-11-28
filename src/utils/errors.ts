@@ -27,3 +27,20 @@ export function assertError(value: unknown): asserts value is FCCError {
     throw new Error("Invalid error object " + JSON.stringify(value));
   }
 }
+
+export interface ErrorResponse<T> {
+  error: T;
+  response: { status: number };
+}
+
+export type QueryFn<T extends (...args: any) => any> = Awaited<ReturnType<T>>;
+
+export type QueryFnError<F extends (...args: any) => any> = NonNullable<
+  Awaited<ReturnType<F>>["error"]
+> & {
+  _status: Awaited<ReturnType<F>>["response"]["status"];
+};
+
+export function err<T extends ErrorResponse<any>>(res: T) {
+  return { ...res.error, _status: res.response.status };
+}

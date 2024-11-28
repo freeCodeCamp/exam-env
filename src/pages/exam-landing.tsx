@@ -99,7 +99,7 @@ export function ExamLanding() {
 
 export const ExamLandingRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/exam-landing/:examId",
+  path: "/exam-landing/$examId",
   component: () => (
     <ProtectedRoute>
       <ExamLanding />

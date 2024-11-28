@@ -1,8 +1,6 @@
 import { Box, Center, Code, Flex, Heading, Text } from "@chakra-ui/react";
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "./root";
-import { useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
 
 type ErrorProps = {
   info?: string;
@@ -10,12 +8,6 @@ type ErrorProps = {
 
 export function Error({ info }: ErrorProps) {
   const { errorInfo } = ErrorRoute.useSearch();
-
-  useEffect(() => {
-    invoke("pass_to_sentry", { errorStr: info || errorInfo }).catch(
-      console.error
-    );
-  }, []);
 
   return (
     <Box width={"full"}>

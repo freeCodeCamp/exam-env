@@ -1,22 +1,24 @@
 {
   "exams": [
     {
-      "id": "63ceed18f71dda7d8cf21e8e",
+      "id": "674819431ed2e8ac8d170f5e",
       "config": {
-        "name": "First Exam",
-        "note": "This exam includes listening comprehension",
-        "totalTimeInMS": 30000,
-        "tags": [
-          {
-            "group": ["Rhetorical"],
-            "numberOfQuestions": 1
-          }
-        ],
+        "name": "Practice Exam",
+        "note": "This exam is for learning the Exam Environment.",
+        "totalTimeInMS": 120000,
+        "tags": [],
         "questionSets": [
           {
             "type": "MultipleChoice",
-            "numberOfSet": 1,
+            "numberOfSet": 2,
             "numberOfQuestions": 1,
+            "numberOfCorrectAnswers": 1,
+            "numberOfIncorrectAnswers": 3
+          },
+          {
+            "type": "Dialogue",
+            "numberOfSet": 1,
+            "numberOfQuestions": 3,
             "numberOfCorrectAnswers": 1,
             "numberOfIncorrectAnswers": 3
           }
@@ -24,35 +26,35 @@
       },
       "questionSets": [
         {
-          "id": "66b1ce3e9273b7b5f81513ea",
+          "id": "67481800ad3aacfd878c22b4",
           "type": "MultipleChoice",
           "context": null,
           "questions": [
             {
-              "id": "66b1ce3e9273b7b5f81513e0",
+              "id": "67481809a43e536190e3eb6f",
               "deprecated": false,
               "audio": null,
-              "tags": ["Rhetorical"],
-              "text": "What is the capital of France?",
+              "tags": [],
+              "text": "This is an example of a multiple-choice question without audio. Which answer has the most text?",
               "answers": [
                 {
-                  "id": "1",
-                  "text": "Paris",
+                  "id": "674818271ff8b2a575a57251",
+                  "text": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
                   "isCorrect": true
                 },
                 {
-                  "id": "2",
-                  "text": "London",
+                  "id": "6748180f23e95e2e9791b08c",
+                  "text": "Lorem ipsum",
                   "isCorrect": false
                 },
                 {
-                  "id": "3",
-                  "text": "Berlin",
+                  "id": "67481818ce784b666ac445ca",
+                  "text": "Dolor sit amet",
                   "isCorrect": false
                 },
                 {
-                  "id": "4",
-                  "text": "Madrid",
+                  "id": "6748182183eaec029ea3fe37",
+                  "text": "Consectetur adipiscing elit",
                   "isCorrect": false
                 }
               ]
@@ -60,151 +62,38 @@
           ]
         },
         {
-          "id": "66b1ce3e9273b7b5f81513e0",
-          "type": "Dialogue",
-          "context": "During their travels, Alex marveled at the vibrant culture and rich history of Madrid, the capital of Spain. They recounted their adventures across Asia, the largest continent by area, with its breathtaking landscapes and diverse cultures. History fascinated them, especially stories of George Washington, the first president of the United States, whose leadership helped shape the nation. Their curiosity extended to science, where they discussed the importance of water, known chemically as H2O, vital for all living beings. Their conversation flowed into literature, where they shared a mutual admiration for the timeless works of William Shakespeare, particularly the tragic love story of 'Romeo and Juliet'.",
+          "id": "6748182f0f9d6e80fa2eb04d",
+          "type": "MultipleChoice",
+          "context": null,
           "questions": [
             {
-              "id": "66b1ce3e9273b7b5f81513e0",
+              "id": "674818354cd5f347eb35df91",
               "deprecated": false,
-              "audio": null,
-              "tags": ["Rhetorical"],
-              "text": "What is the capital of Spain?",
+              "audio": {
+                "captions": null,
+                "url": "curriculum/english/animation-assets/sounds/1.1-1.mp3"
+              },
+              "tags": [],
+              "text": "This is an example of a multiple-choice question with audio. Listen to the audio to answer this question: When was freeCodeCamp started?",
               "answers": [
                 {
-                  "id": "1",
-                  "text": "Paris",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "London",
-                  "isCorrect": false
-                },
-                {
-                  "id": "3",
-                  "text": "Berlin",
-                  "isCorrect": false
-                },
-                {
-                  "id": "4",
-                  "text": "Madrid",
-                  "isCorrect": true
-                }
-              ]
-            },
-            {
-              "id": "66b1ce3e9273b7b5f81513e1",
-              "deprecated": false,
-              "audio": null,
-              "tags": ["Geography"],
-              "text": "What is the largest continent by area?",
-              "answers": [
-                {
-                  "id": "1",
-                  "text": "Africa",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "Asia",
+                  "id": "6748183cbc00e4a0a3c2ebf8",
+                  "text": "2014",
                   "isCorrect": true
                 },
                 {
-                  "id": "3",
-                  "text": "Europe",
+                  "id": "674818446784013ac9152ec1",
+                  "text": "2010",
                   "isCorrect": false
                 },
                 {
-                  "id": "4",
-                  "text": "South America",
-                  "isCorrect": false
-                }
-              ]
-            },
-            {
-              "id": "66b1ce3e9273b7b5f81513e2",
-              "deprecated": false,
-              "audio": null,
-              "tags": ["History"],
-              "text": "Who was the first president of the United States?",
-              "answers": [
-                {
-                  "id": "1",
-                  "text": "Thomas Jefferson",
+                  "id": "67481849a2178d78a1c33fc0",
+                  "text": "2016",
                   "isCorrect": false
                 },
                 {
-                  "id": "2",
-                  "text": "Abraham Lincoln",
-                  "isCorrect": false
-                },
-                {
-                  "id": "3",
-                  "text": "George Washington",
-                  "isCorrect": true
-                },
-                {
-                  "id": "4",
-                  "text": "John Adams",
-                  "isCorrect": false
-                }
-              ]
-            },
-            {
-              "id": "66b1ce3e9273b7b5f81513e3",
-              "deprecated": false,
-              "audio": null,
-              "tags": ["Science"],
-              "text": "What is the chemical symbol for water?",
-              "answers": [
-                {
-                  "id": "1",
-                  "text": "O2",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "CO2",
-                  "isCorrect": false
-                },
-                {
-                  "id": "3",
-                  "text": "H2O",
-                  "isCorrect": true
-                },
-                {
-                  "id": "4",
-                  "text": "H2O2",
-                  "isCorrect": false
-                }
-              ]
-            },
-            {
-              "id": "66b1ce3e9273b7b5f81513e4",
-              "deprecated": false,
-              "audio": null,
-              "tags": ["Literature"],
-              "text": "Who wrote 'Romeo and Juliet'?",
-              "answers": [
-                {
-                  "id": "1",
-                  "text": "Charles Dickens",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "William Shakespeare",
-                  "isCorrect": true
-                },
-                {
-                  "id": "3",
-                  "text": "Mark Twain",
-                  "isCorrect": false
-                },
-                {
-                  "id": "4",
-                  "text": "Jane Austen",
+                  "id": "6748184f8ec2864e9138a127",
+                  "text": "2019",
                   "isCorrect": false
                 }
               ]
@@ -212,151 +101,93 @@
           ]
         },
         {
-          "id": "66b1ce3e9273c7b5f81513e0",
+          "id": "6748185695ebfe93a2334ffd",
           "type": "Dialogue",
-          "context": "Funny Dialogue about bananas",
+          "context": "This is part of a dialogue question. This paragraph of text is the content of the dialogue, and is common for multiple, associated multiple-choice questions.",
           "questions": [
             {
-              "id": "66b1ce3e9274b7b5f81513e0",
+              "id": "6748185feb760604d3e1012d",
               "deprecated": false,
               "audio": null,
-              "tags": ["Rhetorical"],
-              "text": "What is the capital of Spain?",
+              "tags": [],
+              "text": "This is one of the multiple-choice questions associated with the dialogue. What is the third word of the dialogue text?",
               "answers": [
                 {
-                  "id": "1",
-                  "text": "Paris",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "London",
-                  "isCorrect": false
-                },
-                {
-                  "id": "3",
-                  "text": "Berlin",
-                  "isCorrect": false
-                },
-                {
-                  "id": "4",
-                  "text": "Madrid",
-                  "isCorrect": true
-                }
-              ]
-            },
-            {
-              "id": "66b1ce3e9273b7b5f81513e1",
-              "deprecated": false,
-              "audio": null,
-              "tags": ["Geography"],
-              "text": "What is the largest continent by area?",
-              "answers": [
-                {
-                  "id": "1",
-                  "text": "Africa",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "Asia",
+                  "id": "67481867cfb879a9f90a1298",
+                  "text": "part",
                   "isCorrect": true
                 },
                 {
-                  "id": "3",
-                  "text": "Europe",
+                  "id": "6748186ddefb67f67eb63fba",
+                  "text": "This",
                   "isCorrect": false
                 },
                 {
-                  "id": "4",
-                  "text": "South America",
+                  "id": "67481872fac930e1d2098930",
+                  "text": "is",
+                  "isCorrect": false
+                },
+                {
+                  "id": "674818798976b9a94f4192d9",
+                  "text": "dialogue",
                   "isCorrect": false
                 }
               ]
             },
             {
-              "id": "66b1ce3e9273b7b5f81513e2",
+              "id": "6748187e309291000b26e9f4",
               "deprecated": false,
               "audio": null,
-              "tags": ["History"],
-              "text": "Who was the first president of the United States?",
+              "tags": [],
+              "text": "This is one of the multiple-choice questions associated with the dialogue. What is the seventh word of the dialogue text?",
               "answers": [
                 {
-                  "id": "1",
-                  "text": "Thomas Jefferson",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "Abraham Lincoln",
-                  "isCorrect": false
-                },
-                {
-                  "id": "3",
-                  "text": "George Washington",
+                  "id": "6748188307c1c86daf765a7d",
+                  "text": "question",
                   "isCorrect": true
                 },
                 {
-                  "id": "4",
-                  "text": "John Adams",
+                  "id": "6748188947b4f538b00adde2",
+                  "text": "paragraph",
+                  "isCorrect": true
+                },
+                {
+                  "id": "6748188f09398c3c40fccc63",
+                  "text": "of",
+                  "isCorrect": false
+                },
+                {
+                  "id": "67481895719aed66749ab787",
+                  "text": "text",
                   "isCorrect": false
                 }
               ]
             },
             {
-              "id": "66b1ce3e9273b7b5f81513e3",
+              "id": "6748189c305ad55e44a7fda3",
               "deprecated": false,
               "audio": null,
-              "tags": ["Science"],
-              "text": "What is the chemical symbol for water?",
+              "tags": [],
+              "text": "This is one of the multiple-choice questions associated with the dialogue. What is the last word of the dialogue text?",
               "answers": [
                 {
-                  "id": "1",
-                  "text": "O2",
-                  "isCorrect": false
-                },
-                {
-                  "id": "2",
-                  "text": "CO2",
-                  "isCorrect": false
-                },
-                {
-                  "id": "3",
-                  "text": "H2O",
+                  "id": "674818a330c7795df45929b6",
+                  "text": "questions",
                   "isCorrect": true
                 },
                 {
-                  "id": "4",
-                  "text": "H2O2",
-                  "isCorrect": false
-                }
-              ]
-            },
-            {
-              "id": "66b1ce3e9273b7b5f81513e4",
-              "deprecated": false,
-              "audio": null,
-              "tags": ["Literature"],
-              "text": "Who wrote 'Romeo and Juliet'?",
-              "answers": [
-                {
-                  "id": "1",
-                  "text": "Charles Dickens",
+                  "id": "674818a83f795ef97e3ba99e",
+                  "text": "associated",
                   "isCorrect": false
                 },
                 {
-                  "id": "2",
-                  "text": "William Shakespeare",
+                  "id": "674818ae35234d22bfe8235e",
+                  "text": "multiple",
                   "isCorrect": true
                 },
                 {
-                  "id": "3",
-                  "text": "Mark Twain",
-                  "isCorrect": false
-                },
-                {
-                  "id": "4",
-                  "text": "Jane Austen",
+                  "id": "674818b4e78a117d120a0682",
+                  "text": "common",
                   "isCorrect": false
                 }
               ]

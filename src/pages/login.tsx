@@ -38,7 +38,7 @@ export function Login() {
     if (examEnvironmentAuthenticationToken) {
       navigate({ to: LandingRoute.to });
     }
-  }, []);
+  }, [examEnvironmentAuthenticationToken]);
 
   function handleTokenChange(e: ChangeEvent<HTMLInputElement>) {
     setAccountToken(e.target.value);
