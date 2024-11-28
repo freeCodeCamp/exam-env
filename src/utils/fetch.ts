@@ -70,7 +70,7 @@ export async function getGeneratedExam(examId: string) {
 
   return res as {
     data?: { exam: UserExam; examAttempt: UserExamAttempt };
-    response: Response;
+    response: typeof res.response;
     error: typeof res.error;
   };
 }

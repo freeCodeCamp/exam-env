@@ -1,4 +1,4 @@
-import { createRoute, useNavigate } from "@tanstack/react-router";
+import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { Box, Center, Flex, IconButton, Text } from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
@@ -30,22 +30,28 @@ import {
   UserExamAttempt,
 } from "../utils/types";
 import { invoke } from "@tauri-apps/api/core";
+import { err, QueryFn, QueryFnError } from "../utils/errors";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
-  const examQuery = useQuery({
+  const examQuery = useQuery<
+    QueryFn<typeof examQueryFn>,
+    QueryFnError<typeof getGeneratedExam>
+  >({
     queryKey: ["exam", examId],
-    queryFn: async () => {
-      const res = await getGeneratedExam(examId);
-
-      if (res.error) {
-        throw new Error(JSON.stringify(res.error));
-      }
-
-      return res.data;
-    },
-    retry: 3,
+    queryFn: examQueryFn,
+    retry: false,
   });
+
+  async function examQueryFn() {
+    const res = await getGeneratedExam(examId);
+
+    if (res.error) {
+      throw err(res);
+    }
+
+    return res.data;
+  }
 
   const navigate = useNavigate();
   const [examAttempt, setExamAttempt] = useState<UserExamAttempt | null>(null);
@@ -312,16 +318,30 @@ export function Exam() {
   }
 
   if (examQuery.isPending) {
+    // TODO: Improve this loading
     return <Text>Loading...</Text>;
   }
 
   if (examQuery.isError) {
-    invoke("emit_to_sentry", { errorStr: examQuery.error.message }).catch(
-      console.error
-    );
+    if (examQuery.error._status === 500) {
+      invoke("emit_to_sentry", { errorStr: examQuery.error.message }).catch(
+        console.error
+      );
+    } else {
+      return (
+        <Navigate
+          to={LandingRoute.to}
+          search={{
+            flashKind: "warning",
+            flashMessage: examQuery.error.message,
+          }}
+        />
+      );
+    }
   }
 
   if (!examAttempt || !fullQuestion) {
+    // TODO: Improve
     return <Text>Loading...</Text>;
   }
 
@@ -590,7 +610,7 @@ function secondsToMMSS(seconds: number): string {
 
 export const ExamRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/exam/:examId",
+  path: "/exam/$examId",
   component: () => (
     <ProtectedRoute>
       <Exam />
