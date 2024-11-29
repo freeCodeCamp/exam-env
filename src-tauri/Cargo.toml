@@ -20,7 +20,7 @@ bson = "2.13.0"
 typify = "0.2.0"
 chrono = { version = "0.4.38", features = ["serde"] }
 tauri-plugin-dialog = "2.0.3"
-sentry = "0.34.0"
+sentry = "0.35.0"
 dotenvy_macro = "0.15.7"
 keyring = { version = "3.6.1", features = [
   "windows-native",
