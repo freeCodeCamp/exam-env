@@ -1,4 +1,3 @@
-use base64::{prelude::BASE64_STANDARD, Engine};
 use screenshots::Screen;
 use sentry::capture_event;
 use tauri::{AppHandle, State, Window};
@@ -48,7 +47,7 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
             main_screen.display_info.id,
             main_screen_img.len()
         );
-        let image = BASE64_STANDARD.encode(utils::image_to_bytes(main_screen_img));
+        let image = utils::image_to_bytes(main_screen_img);
         post_screenshot(image).await?;
     } else {
         return Err(Error::Screenshot(
