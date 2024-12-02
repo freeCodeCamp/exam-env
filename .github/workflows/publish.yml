@@ -155,9 +155,9 @@ jobs:
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }} --verbose
-          includeDebug: true
+          includeDebug: false
           # TODO: Include release at v1.0.0
-          includeRelease: false
+          includeRelease: true
           includeUpdaterJson: true
 
   publish-release:
