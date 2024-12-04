@@ -1,0 +1,10 @@
+{
+  "identifier": "org.freecodecamp.exam",
+  "bundle": {
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      }
+    }
+  }
+}
