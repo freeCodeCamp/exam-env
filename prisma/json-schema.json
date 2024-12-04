@@ -1241,10 +1241,7 @@
         }
       },
       "required": [
-        "url",
-        "captions",
-        "startTimeInMS",
-        "endTimeInMS"
+        "url"
       ]
     },
     "EnvAnswer": {
