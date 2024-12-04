@@ -4713,9 +4713,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-dialog"
-version = "2.0.3"
+version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4307310e1d2c09ab110235834722e7c2b85099b683e1eb7342ab351b0be5ada3"
+checksum = "0962c2b9210e43cd849790d33bdf3d28c0e50d9884493fb340835244a708b5ba"
 dependencies = [
  "log",
  "raw-window-handle",
@@ -4725,15 +4725,15 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "tauri-plugin-fs",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
  "url",
 ]
 
 [[package]]
 name = "tauri-plugin-fs"
-version = "2.0.3"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96ba7d46e86db8c830d143ef90ab5a453328365b0cc834c24edea4267b16aba0"
+checksum = "0cdaf6701ee5efc83161cf41004aa5aec4d255c9fb2d2b11fe518fe506acc588"
 dependencies = [
  "anyhow",
  "dunce",
@@ -4745,16 +4745,18 @@ dependencies = [
  "serde_repr",
  "tauri",
  "tauri-plugin",
- "thiserror 1.0.69",
+ "tauri-utils",
+ "thiserror 2.0.3",
+ "toml 0.8.19",
  "url",
  "uuid",
 ]
 
 [[package]]
 name = "tauri-plugin-http"
-version = "2.0.3"
+version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c752aee1b00ec3c4d4f440095995d9bd2c640b478f2067d1fba388900b82eb96"
+checksum = "fd6f26c4e715b50f06e3fde65cda1d805dae23f04869a01380c4cf8708dbb296"
 dependencies = [
  "data-url",
  "http",
@@ -4766,7 +4768,7 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "tauri-plugin-fs",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
  "tokio",
  "url",
  "urlpattern",
@@ -4795,9 +4797,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-updater"
-version = "2.0.2"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1dd3d2fe0f02bf52eebb5a9d23b987fffac6684646ab6fd683d706dafb18da87"
+checksum = "50ba9adaede60b0df5e0764692c6ac176eb133aade95d326bddeb968ad793320"
 dependencies = [
  "base64 0.22.1",
  "dirs",
@@ -4815,7 +4817,7 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "tempfile",
- "thiserror 1.0.69",
+ "thiserror 2.0.3",
  "time",
  "tokio",
  "url",

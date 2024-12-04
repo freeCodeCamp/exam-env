@@ -19,7 +19,7 @@ screenshots = "0.8.10"
 bson = "2.13.0"
 typify = "0.2.0"
 chrono = { version = "0.4.38", features = ["serde"] }
-tauri-plugin-dialog = "2.0.3"
+tauri-plugin-dialog = "2.0.4"
 sentry = "0.35.0"
 dotenvy_macro = "0.15.7"
 keyring = { version = "3.6.1", features = [
@@ -27,8 +27,8 @@ keyring = { version = "3.6.1", features = [
   "apple-native",
   "linux-native",
 ] }
-tauri-plugin-http = { version = "2.0.3", features = ["multipart"] }
+tauri-plugin-http = { version = "2.0.4", features = ["multipart"] }
 base64 = "0.22.1"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-updater = "2"
+tauri-plugin-updater = "2.1.0"
