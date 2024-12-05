@@ -88,7 +88,7 @@ export function Landing() {
                     onClick={() => {
                       navigate({
                         to: ExamLandingRoute.to,
-                        params: { examId: exam.id },
+                        params: { examId: exam.id, note: exam.config.note },
                       });
                     }}
                   >

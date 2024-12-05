@@ -12,7 +12,7 @@ export function ExamLanding() {
   const [hasAgreed, setHasAgreed] = useState(false);
   const navigate = useNavigate();
 
-  const { examId } = ExamLandingRoute.useParams();
+  const { examId, note } = ExamLandingRoute.useParams();
 
   const checkDevice = async () => {
     // This is a workaround to make sure Tauri knows that the user has
@@ -54,6 +54,14 @@ export function ExamLanding() {
               mt={"1em"}
               p={"1em"}
             >
+              {!!note && (
+                <>
+                  <Heading size={"md"} alignSelf={"center"}>
+                    Exam Note
+                  </Heading>
+                  <Text align={"center"}>{note}</Text>
+                </>
+              )}
               <Heading size={"md"} alignSelf={"center"}>
                 Instructions
               </Heading>
