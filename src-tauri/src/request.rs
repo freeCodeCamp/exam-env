@@ -23,15 +23,14 @@ pub async fn post_screenshot(image: Vec<u8>) -> Result<(), Error> {
 
         let form = reqwest::multipart::Form::new().part("file", img_part);
 
-        let res = post
+        // TODO: Consider passing Response 4XX/5XX to client
+        let _res = post
             .header("Exam-Environment-Authorization-Token", authorization_token)
             .multipart(form)
             .send()
             .await
             .map_err(|e| Error::Request(format!("Request failed to send images: {}", e)))
             .capture()?;
-
-        println!("Response: {:?}", res);
     } else {
         return Err(Error::Credential(
             "Exam Environment Authorization Token is not set".to_string(),

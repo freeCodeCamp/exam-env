@@ -1,5 +1,4 @@
 use screenshots::Screen;
-use sentry::capture_event;
 use tauri::{AppHandle, State, Window};
 
 use crate::{
@@ -42,11 +41,6 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
             })
             .capture();
 
-        println!(
-            "Image from monitor {:?}, of size {:?} bytes captured.",
-            main_screen.display_info.id,
-            main_screen_img.len()
-        );
         let image = utils::image_to_bytes(main_screen_img);
         post_screenshot(image).await?;
     } else {
@@ -79,25 +73,7 @@ pub fn restart_app(app: AppHandle) {
     app.restart()
 }
 
-#[tauri::command]
-pub fn pass_to_sentry(error_str: String, sentry_state: State<SentryState>) {
-    let event_id = sentry::types::random_uuid();
-    let level = sentry::protocol::Level::Error;
-    let message = Some(error_str);
-    let event = sentry::protocol::Event {
-        event_id,
-        level,
-        message,
-        ..Default::default()
-    };
-
-    let _ = capture_event(event);
-
-    if let Some(client) = &sentry_state.client {
-        client.flush(None);
-    }
-}
-
+/// Passes the error string to Sentry as a `Client` error, and flushes the Sentry client.
 #[tauri::command]
 pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: AppHandle) {
     let error = Error::Client(error_str);
