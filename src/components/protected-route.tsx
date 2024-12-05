@@ -1,6 +1,7 @@
 import { Navigate } from "@tanstack/react-router";
-import { AuthContext } from "../contexts/auth";
 import { ReactNode, useContext } from "react";
+
+import { AuthContext } from "../contexts/auth";
 import { LoginRoute } from "../pages/login";
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {

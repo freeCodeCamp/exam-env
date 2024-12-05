@@ -41,7 +41,7 @@ export function Camera({
         };
         // Event "suspend" is emitted if permissions are revoked for camera
         video.onsuspend = (e) => {
-          console.log(e);
+          console.debug(e);
           onUserMediaSetupError("Camera is unavailable.");
         };
       }

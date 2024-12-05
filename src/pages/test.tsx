@@ -1,11 +1,12 @@
 import { Box, Center, Flex, Heading, Text, Textarea } from "@chakra-ui/react";
-import { Button } from "@freecodecamp/ui";
-import { invoke } from "@tauri-apps/api/core";
 import { createRoute } from "@tanstack/react-router";
-import { Camera } from "../components/camera";
-import { useAppFocus } from "../components/use-app-focus";
 import { useEffect, useRef, useState } from "react";
-import { takeScreenshot } from "../utils/screenshot";
+import { invoke } from "@tauri-apps/api/core";
+import { Button } from "@freecodecamp/ui";
+
+import { useAppFocus } from "../components/use-app-focus";
+import { takeScreenshot } from "../utils/commands";
+import { Camera } from "../components/camera";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 

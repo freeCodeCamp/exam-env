@@ -1,5 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
 import { createContext, useEffect, useMemo, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+
 import { verifyToken } from "../utils/fetch";
 
 export const AuthContext = createContext<{

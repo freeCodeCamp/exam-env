@@ -1,9 +1,10 @@
 import { Box, Center, Flex, Text, Heading, Checkbox } from "@chakra-ui/react";
+import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@freecodecamp/ui";
 import { useState } from "react";
-import { Header } from "../components/header";
+
 import { ProtectedRoute } from "../components/protected-route";
-import { createRoute, useNavigate } from "@tanstack/react-router";
+import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { ExamRoute } from "./exam";
 

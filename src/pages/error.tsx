@@ -1,5 +1,6 @@
 import { Box, Center, Code, Flex, Heading, Text } from "@chakra-ui/react";
 import { createRoute } from "@tanstack/react-router";
+
 import { rootRoute } from "./root";
 
 type ErrorProps = {

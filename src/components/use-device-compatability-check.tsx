@@ -19,7 +19,7 @@ export function useDeviceCompatabilityCheck(cb: (reason: string) => void) {
   }, []);
 
   function deviceChangeListener(e: Event) {
-    console.log(e);
+    console.debug(e);
     updateDeviceList();
   }
 

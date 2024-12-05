@@ -9,12 +9,13 @@ import {
   Heading,
   Input,
 } from "@chakra-ui/react";
-import { Button, Spacer } from "@freecodecamp/ui";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { createRoute, useNavigate } from "@tanstack/react-router";
+import { Button, Spacer } from "@freecodecamp/ui";
+
 import { useInvoke } from "../components/use-invoke";
 import { AuthContext } from "../contexts/auth";
 import { Header } from "../components/header";
-import { createRoute, useNavigate } from "@tanstack/react-router";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 

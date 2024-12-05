@@ -1,9 +1,10 @@
-import { Box, Text, Spacer } from "@chakra-ui/react";
 import { Button, QuizQuestion } from "@freecodecamp/ui";
-import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
+import { Box, Text, Spacer } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
-import { audioCDN } from "../utils/cdn";
 import Markdown from "markdown-to-jsx";
+
+import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
+import { audioCDN } from "../utils/cdn";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;

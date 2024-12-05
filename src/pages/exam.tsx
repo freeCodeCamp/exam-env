@@ -19,7 +19,6 @@ import { QuestionSetForm } from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
 import { useAppFocus } from "../components/use-app-focus";
 import OfflineModal from "../components/offline-modal";
-import { takeScreenshot } from "../utils/screenshot";
 import { Camera } from "../components/camera";
 import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
@@ -31,6 +30,7 @@ import {
 } from "../utils/types";
 import { invoke } from "@tauri-apps/api/core";
 import { err, QueryFn, QueryFnError } from "../utils/errors";
+import { takeScreenshot } from "../utils/commands";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -126,7 +126,7 @@ export function Exam() {
   });
 
   async function onFocusChanged(focused: boolean) {
-    console.log(`App ${focused ? "is" : "is not"} focused`);
+    console.debug(`App ${focused ? "is" : "is not"} focused`);
     const { error } = await takeScreenshot();
     if (error) {
       console.error("TODO: Unable to take screenshot");

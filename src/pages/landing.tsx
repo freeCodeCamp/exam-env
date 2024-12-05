@@ -1,13 +1,14 @@
+import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Center, Flex, Text, Heading } from "@chakra-ui/react";
-import { Button, Spacer } from "@freecodecamp/ui";
-import { Header } from "../components/header";
 import { Fragment, useEffect, useState } from "react";
+import { Button, Spacer } from "@freecodecamp/ui";
+
+import { ProtectedRoute } from "../components/protected-route";
+import { ExamLandingRoute } from "./exam-landing";
+import { Header } from "../components/header";
 import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
-import { createRoute, useNavigate } from "@tanstack/react-router";
-import { ProtectedRoute } from "../components/protected-route";
 import { rootRoute } from "./root";
-import { ExamLandingRoute } from "./exam-landing";
 
 interface ExamInfo {
   id: string;

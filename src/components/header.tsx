@@ -13,12 +13,13 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { ArrowForwardIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { useContext, useRef } from "react";
-import { AuthContext } from "../contexts/auth";
 import { useNavigate } from "@tanstack/react-router";
-import { LandingRoute } from "../pages/landing";
-import { TestRoute } from "../pages/test";
+import { useContext, useRef } from "react";
+
 import { SplashscreenRoute } from "../pages/splashscreen";
+import { LandingRoute } from "../pages/landing";
+import { AuthContext } from "../contexts/auth";
+import { TestRoute } from "../pages/test";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
