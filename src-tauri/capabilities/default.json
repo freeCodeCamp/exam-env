@@ -16,6 +16,7 @@
     "shell:allow-open",
     "dialog:default",
     "updater:default",
+    "core:window:allow-destroy",
     {
       "identifier": "http:default",
       "allow": [
