@@ -22,7 +22,8 @@
             "numberOfCorrectAnswers": 1,
             "numberOfIncorrectAnswers": 3
           }
-        ]
+        ],
+        "retakeTimeInMS": 0
       },
       "questionSets": [
         {
