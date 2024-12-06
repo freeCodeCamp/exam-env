@@ -2926,6 +2926,7 @@ export interface paths {
                                     name: string;
                                     note: string;
                                     totalTimeInMS: number;
+                                    retakeTimeInMS: number;
                                 };
                                 canTake: boolean;
                             }[];

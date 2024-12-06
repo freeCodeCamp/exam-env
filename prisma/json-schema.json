@@ -494,14 +494,6 @@
           "originalType": "Int",
           "description": "Time exam was started as milliseconds since epoch"
         },
-        "submissionTimeInMS": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "originalType": "Int",
-          "description": "Time exam was submitted as milliseconds since epoch\n\nAs attempt might not be submitted (disconnection or quit), field is optional"
-        },
         "needsRetake": {
           "type": "boolean",
           "originalType": "Boolean"
@@ -1302,12 +1294,18 @@
             "$ref": "#/definitions/EnvQuestionSetConfig"
           },
           "description": "Configuration for sets of questions"
+        },
+        "retakeTimeInMS": {
+          "type": "integer",
+          "originalType": "Int",
+          "description": "Duration after exam completion before a retake is allowed in milliseconds"
         }
       },
       "required": [
         "name",
         "note",
         "totalTimeInMS",
+        "retakeTimeInMS",
         "tags",
         "questionSets"
       ]
