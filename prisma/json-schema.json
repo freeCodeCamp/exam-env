@@ -30,6 +30,13 @@
             "$ref": "#/definitions/CompletedExam"
           }
         },
+        "quizAttempts": {
+          "type": "array",
+          "originalType": "QuizAttempt",
+          "items": {
+            "$ref": "#/definitions/QuizAttempt"
+          }
+        },
         "currentChallengeId": {
           "type": [
             "string",
@@ -1119,6 +1126,28 @@
       "required": [
         "id",
         "lastSavedDate"
+      ]
+    },
+    "QuizAttempt": {
+      "type": "object",
+      "properties": {
+        "challengeId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "quizId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "timestamp": {
+          "type": "number",
+          "originalType": "Float"
+        }
+      },
+      "required": [
+        "challengeId",
+        "quizId",
+        "timestamp"
       ]
     },
     "EnvQuestionSet": {

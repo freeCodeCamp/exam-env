@@ -739,6 +739,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/submit-quiz-attempt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: objectid */
+                        challengeId: string;
+                        quizId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "That does not appear to be a valid quiz attempt submission.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.generic-error";
+                            /** @enum {string} */
+                            type: "danger";
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/donate/update-stripe-card": {
         parameters: {
             query?: never;
@@ -2677,6 +2748,12 @@ export interface paths {
                                             passed: boolean;
                                             examTimeInSeconds: number;
                                         };
+                                    }[];
+                                    quizAttempts: {
+                                        /** Format: objectid */
+                                        challengeId: string;
+                                        quizId: string;
+                                        timestamp: number;
                                     }[];
                                     completedChallengeCount: number;
                                     currentChallengeId: string;
