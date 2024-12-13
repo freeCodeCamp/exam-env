@@ -137,9 +137,15 @@ A manual run of the `publish` action can build and cut the release of the app. T
 ### Local
 
 ```bash
-cargo tauri build --config src-tauri/tauri.conf.dev.json
+cargo tauri build --config src-tauri/tauri.dev.conf.json
 # OR, build a debug build
 cargo tauri build --debug
 ```
 
 The `tauri.conf.dev.json` config does not sign the bundle, and does not create updater artifacts. Also, it disables the `contentProtected` feature so the app can be screenshotted.
+
+### Windows
+
+```bash
+.\scripts\WindowsEnv.ps1 -Command "cargo tauri build --config src-tauri/tauri.microsoftstore.conf.json --bundles msi,updater --target x86_64-pc-windows-msvc"
+```
