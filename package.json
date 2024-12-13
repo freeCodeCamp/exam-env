@@ -1,14 +1,15 @@
 {
   "name": "exam-env",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "prisma-generate": "npx prisma generate",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "windows": "./scripts/WindowsEnv.ps1"
   },
   "dependencies": {
     "@chakra-ui/icons": "2.2.5",

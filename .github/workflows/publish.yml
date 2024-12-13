@@ -46,7 +46,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # TODO: Error failed to bundle project: Failed to copy directory "embedded.provisionprofile" to "embedded.provisionprofile": `"embedded.provisionprofile" does not exist`
           - platform: "macos-latest"
             args: "--target aarch64-apple-darwin"
           - platform: "macos-latest"
@@ -54,7 +53,7 @@ jobs:
           - platform: "ubuntu-22.04"
             args: ""
           - platform: "windows-latest"
-            args: ""
+            args: "--config src-tauri/tauri.microsoftstore.conf.json"
 
     runs-on: ${{ matrix.platform }}
     env:
@@ -156,7 +155,6 @@ jobs:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }} --verbose
           includeDebug: false
-          # TODO: Include release at v1.0.0
           includeRelease: true
           includeUpdaterJson: true
 
