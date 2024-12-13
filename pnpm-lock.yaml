@@ -21,8 +21,8 @@ importers:
         specifier: 11.13.5
         version: 11.13.5(@emotion/react@11.13.5(@types/react@18.3.12)(react@18.3.1))(@types/react@18.3.12)(react@18.3.1)
       '@freecodecamp/ui':
-        specifier: 3.1.0
-        version: 3.1.0(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.1.1
+        version: 3.1.1(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: 5.62.0
         version: 5.62.0(react@18.3.1)
@@ -1019,16 +1019,16 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fortawesome/fontawesome-common-types@6.6.0':
-    resolution: {integrity: sha512-xyX0X9mc0kyz9plIyryrRbl7ngsA9jz77mCZJsUkLl+ZKs0KWObgaEBoSgQiYWAsSmjz/yjl0F++Got0Mdp4Rw==}
+  '@fortawesome/fontawesome-common-types@6.7.1':
+    resolution: {integrity: sha512-gbDz3TwRrIPT3i0cDfujhshnXO9z03IT1UKRIVi/VEjpNHtSBIP2o5XSm+e816FzzCFEzAxPw09Z13n20PaQJQ==}
     engines: {node: '>=6'}
 
-  '@fortawesome/fontawesome-svg-core@6.6.0':
-    resolution: {integrity: sha512-KHwPkCk6oRT4HADE7smhfsKudt9N/9lm6EJ5BVg0tD1yPA5hht837fB87F8pn15D8JfTqQOjhKTktwmLMiD7Kg==}
+  '@fortawesome/fontawesome-svg-core@6.7.1':
+    resolution: {integrity: sha512-8dBIHbfsKlCk2jHQ9PoRBg2Z+4TwyE3vZICSnoDlnsHA6SiMlTwfmW6yX0lHsRmWJugkeb92sA0hZdkXJhuz+g==}
     engines: {node: '>=6'}
 
-  '@fortawesome/free-solid-svg-icons@6.6.0':
-    resolution: {integrity: sha512-IYv/2skhEDFc2WGUcqvFJkeK39Q+HyPf5GHUrT/l2pKbtgEIv1al1TKd6qStR5OIwQdN1GZP54ci3y4mroJWjA==}
+  '@fortawesome/free-solid-svg-icons@6.7.1':
+    resolution: {integrity: sha512-BTKc0b0mgjWZ2UDKVgmwaE0qt0cZs6ITcDgjrti5f/ki7aF5zs+N91V6hitGo3TItCFtnKg6cUVGdTmBFICFRg==}
     engines: {node: '>=6'}
 
   '@fortawesome/react-fontawesome@0.2.2':
@@ -1037,8 +1037,8 @@ packages:
       '@fortawesome/fontawesome-svg-core': ~1 || ~6
       react: '>=16.3'
 
-  '@freecodecamp/ui@3.1.0':
-    resolution: {integrity: sha512-V92HKnOyfGXFDDBqKm2yYILTJIuxWOxSiBLZ4d4kULJXlCSHW8pqsALHw6dsQj6LCTTuUBabQNIwD9RHsHq+yg==}
+  '@freecodecamp/ui@3.1.1':
+    resolution: {integrity: sha512-tenTSsf4HiTS4gEdUeg9rRxEaCdQqJSDnP+8MufT5zLj3kLkUrIc5ugbHju3kuM9BexgYiwzcVLJtjeRBXLtDQ==}
     engines: {node: '>=20', pnpm: '9'}
     peerDependencies:
       react: ^16.14.0 || ^17.0.0 || ^18.0.0
@@ -3299,27 +3299,27 @@ snapshots:
   '@esbuild/win32-x64@0.24.0':
     optional: true
 
-  '@fortawesome/fontawesome-common-types@6.6.0': {}
+  '@fortawesome/fontawesome-common-types@6.7.1': {}
 
-  '@fortawesome/fontawesome-svg-core@6.6.0':
+  '@fortawesome/fontawesome-svg-core@6.7.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.6.0
+      '@fortawesome/fontawesome-common-types': 6.7.1
 
-  '@fortawesome/free-solid-svg-icons@6.6.0':
+  '@fortawesome/free-solid-svg-icons@6.7.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.6.0
+      '@fortawesome/fontawesome-common-types': 6.7.1
 
-  '@fortawesome/react-fontawesome@0.2.2(@fortawesome/fontawesome-svg-core@6.6.0)(react@18.3.1)':
+  '@fortawesome/react-fontawesome@0.2.2(@fortawesome/fontawesome-svg-core@6.7.1)(react@18.3.1)':
     dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.6.0
+      '@fortawesome/fontawesome-svg-core': 6.7.1
       prop-types: 15.8.1
       react: 18.3.1
 
-  '@freecodecamp/ui@3.1.0(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@freecodecamp/ui@3.1.1(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.6.0
-      '@fortawesome/free-solid-svg-icons': 6.6.0
-      '@fortawesome/react-fontawesome': 0.2.2(@fortawesome/fontawesome-svg-core@6.6.0)(react@18.3.1)
+      '@fortawesome/fontawesome-svg-core': 6.7.1
+      '@fortawesome/free-solid-svg-icons': 6.7.1
+      '@fortawesome/react-fontawesome': 0.2.2(@fortawesome/fontawesome-svg-core@6.7.1)(react@18.3.1)
       '@headlessui/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-tabs': 1.1.1(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       babel-plugin-prismjs: 2.1.0(prismjs@1.29.0)
