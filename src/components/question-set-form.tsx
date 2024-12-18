@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import Markdown from "markdown-to-jsx";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
-import { audioCDN } from "../utils/cdn";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
@@ -75,7 +74,7 @@ export function QuestionSetForm({
             controls
             controlsList="nodownload"
             ref={audioRef}
-            src={audioCDN + audioSource}
+            src={audioSource}
           ></audio>
         </Box>
       )}
