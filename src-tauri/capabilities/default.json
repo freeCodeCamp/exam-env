@@ -27,6 +27,9 @@
         },
         {
           "url": "http://localhost:*"
+        },
+        {
+          "url": "https://*.gitpod.io"
         }
       ]
     }
