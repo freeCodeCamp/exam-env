@@ -55,7 +55,7 @@ jobs:
           - platform: "windows-latest"
             args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi,updater"
           - platform: "windows-latest"
-            args: "--bundles exe,updater"
+            args: "--bundles nsis,updater"
 
     runs-on: ${{ matrix.platform }}
     env:
