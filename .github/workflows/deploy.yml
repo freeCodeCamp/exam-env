@@ -2,9 +2,6 @@ name: 'deploy'
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feat/macos-deployment
 
 jobs:
   deploy-macos-app:
@@ -56,6 +53,12 @@ jobs:
           echo -n "$MAC_INSTALLER_DISTRIBUTION_CERT" | base64 --decode -o $MAC_INSTALLER_DISTRIBUTION_CERT_PATH
           echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
           echo -n "$APPLE_API_KEY" | base64 --decode -o $APPLE_API_KEY_PATH
+
+          # List file permissions
+          ls -l $DISTRIBUTION_CERT_PATH
+          ls -l $MAC_INSTALLER_DISTRIBUTION_CERT_PATH
+          ls -l $PP_PATH
+          ls -l $APPLE_API_KEY_PATH
 
           # create temporary keychain
           keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
