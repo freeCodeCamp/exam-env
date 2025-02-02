@@ -25,7 +25,7 @@ jobs:
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Install Rust targets
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
@@ -61,8 +61,8 @@ jobs:
           keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
 
           # import certificate to keychain
-          keychain add-certificates
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          keychain add-certificates -A
+          security set-key-partition-list -S apple-tool:,apple:, -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security find-identity -v
 
       - name: install frontend dependencies
@@ -76,21 +76,24 @@ jobs:
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: "Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)"
+          APPLE_SIGNING_IDENTITY: 'Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)'
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
           VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
         with:
-          args: "--target universal-apple-darwin --verbose"
+          args: '--target universal-apple-darwin --verbose'
           includeDebug: false
           includeRelease: true
           includeUpdaterJson: true
 
-      - name: generate and upload installer package
+      - name: generate installer package
+        run: |
+          xcrun productbuild --sign "3rd Party Mac Developer Installer: Free Code Camp, Inc. (L33K9LWVP9)" --component "./src-tauri/target/universal-apple-darwin/release/bundle/macos/Exam Environment.app" /Applications "Exam Environment.pkg"
+
+      - name: upload installer package
         env:
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: |
-          xcrun productbuild --sign "3rd Party Mac Developer Installer: Free Code Camp, Inc. (L33K9LWVP9)" --component "./src-tauri/target/universal-apple-darwin/release/bundle/macos/Exam Environment.app" /Applications "Exam Environment.pkg"
           xcrun altool --upload-app --type macos --file "Exam Environment.pkg" --apiKey $APPLE_API_KEY_ID --apiIssuer $APPLE_API_ISSUER
