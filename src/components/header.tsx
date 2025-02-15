@@ -57,7 +57,7 @@ export function Header() {
                 mr="12px"
                 borderRadius="5px"
               />
-              Exam Enivronment
+              Exam Environment
             </Box>
           </Flex>
         </Box>
