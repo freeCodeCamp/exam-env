@@ -2,16 +2,13 @@ name: 'deploy'
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feat/macos-deployment
 
 jobs:
   deploy-macos-app:
     runs-on: macos-latest
     env:
-      VITE_MOCK_DATA: false
-      VITE_FREECODECAMP_API: https://test-api.freecodecamp.dev
+      VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
+      VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +26,9 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install Rust targets
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
       - name: install codemagic cli tools
         run: pip3 install codemagic-cli-tools --break-system-packages
 
@@ -37,7 +37,7 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           APPLE_DISTRIBUTION_CERT: ${{ secrets.APPLE_DISTRIBUTION_CERT }}
           MAC_INSTALLER_DISTRIBUTION_CERT: ${{ secrets.MAC_INSTALLER_DISTRIBUTION_CERT }}
-          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          MAC_APP_STORE_PROVISIONING_PROFILE: ${{ secrets.MAC_APP_STORE_PROVISIONING_PROFILE }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
         run: |
@@ -54,32 +54,46 @@ jobs:
           # import certificate and provisioning profile from secrets
           echo -n "$APPLE_DISTRIBUTION_CERT" | base64 --decode -o $DISTRIBUTION_CERT_PATH
           echo -n "$MAC_INSTALLER_DISTRIBUTION_CERT" | base64 --decode -o $MAC_INSTALLER_DISTRIBUTION_CERT_PATH
-          echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
+          echo -n "$MAC_APP_STORE_PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
           echo -n "$APPLE_API_KEY" | base64 --decode -o $APPLE_API_KEY_PATH
 
           # create temporary keychain
           keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
 
           # import certificate to keychain
-          keychain add-certificates
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          keychain add-certificates -A
+          security set-key-partition-list -S apple-tool:,apple:, -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security find-identity -v
 
       - name: install frontend dependencies
         run: pnpm install && pnpm run prisma-generate
 
+      # The rust build requires the `.env` file to exist, even if none of the variables are used
+      - name: prep env
+        run: cp sample.env .env
+
       - uses: tauri-apps/tauri-action@v0
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        with:
-          args: "--target universal-apple-darwin"
-          # includeUpdaterJson: true
+          APPLE_SIGNING_IDENTITY: 'Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)'
 
-      - name: generate and upload installer package
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
+          VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
+        with:
+          args: '--target universal-apple-darwin --verbose'
+          includeDebug: false
+          includeRelease: true
+          includeUpdaterJson: true
+
+      - name: generate installer package
+        run: |
+          xcrun productbuild --sign "3rd Party Mac Developer Installer: Free Code Camp, Inc. (L33K9LWVP9)" --component "./src-tauri/target/universal-apple-darwin/release/bundle/macos/Exam Environment.app" /Applications "Exam Environment.pkg"
+
+      - name: upload installer package
         env:
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: |
-          xcrun productbuild --sign "3rd Party Mac Developer Installer: Free Code Camp, Inc. (L33K9LWVP9)" --component "./src-tauri/target/universal-apple-darwin/release/bundle/macos/Exam Environment.app" /Applications "Exam Environment.pkg"
           xcrun altool --upload-app --type macos --file "Exam Environment.pkg" --apiKey $APPLE_API_KEY_ID --apiIssuer $APPLE_API_ISSUER

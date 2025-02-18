@@ -34,12 +34,12 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "entitlements": "Release.entitlements",
+      "entitlements": "./Entitlements.plist",
       "exceptionDomain": "",
       "frameworks": [],
-      "signingIdentity": "Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)",
+      "signingIdentity": "Developer ID Application: Free Code Camp, Inc. (L33K9LWVP9)",
       "files": {
-        "embedded.provisionprofile": "embedded.provisionprofile"
+        "embedded.provisionprofile": "./embedded.provisionprofile"
       }
     },
     "publisher": "Free Code Camp, Inc.",
