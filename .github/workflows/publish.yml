@@ -47,9 +47,9 @@ jobs:
       matrix:
         include:
           - platform: "macos-latest"
-            args: "--target aarch64-apple-darwin"
+            args: "--target aarch64-apple-darwin --bundles dmg"
           - platform: "macos-latest"
-            args: "--target x86_64-apple-darwin"
+            args: "--target x86_64-apple-darwin --bundles dmg"
           - platform: "ubuntu-22.04"
             args: ""
           - platform: "windows-latest"
@@ -118,19 +118,24 @@ jobs:
         if: matrix.platform == 'macos-latest'
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          APPLE_DISTRIBUTION_CERT: ${{ secrets.APPLE_DISTRIBUTION_CERT }}
-          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          APPLE_DEVELOPER_ID_CERT: ${{ secrets.APPLE_DEVELOPER_ID_CERT }}
+          PROVISIONING_PROFILE: ${{ secrets.MAC_APP_DIRECT_PROVISIONING_PROFILE }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
         run: |
           # create variables
+          mkdir -p ~/.appstoreconnect/private_keys
           CERT_BASE_PATH=/Users/runner/Library/MobileDevice/Certificates
           mkdir -p $CERT_BASE_PATH
-          DISTRIBUTION_CERT_PATH=$CERT_BASE_PATH/distribution_certificate.p12
+          DEVELOPER_ID_CERT_PATH=$CERT_BASE_PATH/developer_id_certificate.p12
           PP_PATH=./src-tauri/embedded.provisionprofile
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          APPLE_API_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY_ID.p8
 
           # import certificate and provisioning profile from secrets
-          echo -n "$APPLE_DISTRIBUTION_CERT" | base64 --decode -o $DISTRIBUTION_CERT_PATH
+          echo -n "$APPLE_DEVELOPER_ID_CERT" | base64 --decode -o $DEVELOPER_ID_CERT_PATH
           echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
+          echo -n "$APPLE_API_KEY" | base64 --decode -o $APPLE_API_KEY_PATH
 
           # create temporary keychain
           keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
@@ -149,6 +154,11 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+
+          # MacOS specific
+          APPLE_SIGNING_IDENTITY: "Developer ID Application: Free Code Camp, Inc. (L33K9LWVP9)"
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
