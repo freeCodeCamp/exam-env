@@ -474,12 +474,16 @@
             "type": "string"
           },
           "description": "ObjectIds for required challenges/blocks to take the exam"
+        },
+        "deprecated": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "description": "If `deprecated`, the exam should no longer be considered for users"
         }
       },
       "required": [
         "prerequisites",
-        "config",
-        "questionSets"
+        "deprecated"
       ]
     },
     "EnvExamAttempt": {
@@ -511,8 +515,7 @@
         "examId",
         "generatedExamId",
         "startTimeInMS",
-        "needsRetake",
-        "questionSets"
+        "needsRetake"
       ]
     },
     "EnvGeneratedExam": {
@@ -656,29 +659,6 @@
         "provider",
         "subscriptionId",
         "userId"
-      ]
-    },
-    "UserRateLimit": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "originalType": "String"
-        },
-        "counter": {
-          "type": "integer",
-          "originalType": "Int"
-        },
-        "expirationDate": {
-          "type": "string",
-          "originalType": "DateTime",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "counter",
-        "expirationDate"
       ]
     },
     "UserToken": {
@@ -1184,9 +1164,7 @@
       },
       "required": [
         "id",
-        "type",
-        "context",
-        "questions"
+        "type"
       ]
     },
     "EnvMultipleChoiceQuestion": {
@@ -1239,9 +1217,7 @@
         "id",
         "text",
         "tags",
-        "deprecated",
-        "audio",
-        "answers"
+        "deprecated"
       ]
     },
     "EnvAudio": {
@@ -1334,9 +1310,7 @@
         "name",
         "note",
         "totalTimeInMS",
-        "retakeTimeInMS",
-        "tags",
-        "questionSets"
+        "retakeTimeInMS"
       ]
     },
     "EnvQuestionSetConfig": {
@@ -1444,7 +1418,8 @@
       },
       "required": [
         "id",
-        "answers"
+        "answers",
+        "submissionTimeInMS"
       ]
     },
     "EnvGeneratedQuestionSet": {
@@ -1705,9 +1680,6 @@
     },
     "donation": {
       "$ref": "#/definitions/Donation"
-    },
-    "userRateLimit": {
-      "$ref": "#/definitions/UserRateLimit"
     },
     "userToken": {
       "$ref": "#/definitions/UserToken"
