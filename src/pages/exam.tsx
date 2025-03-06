@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { Button, Modal } from "@freecodecamp/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -41,6 +41,9 @@ export function Exam() {
     queryKey: ["exam", examId],
     queryFn: examQueryFn,
     retry: false,
+  });
+  const submitQuestionMutation = useMutation({
+    mutationFn: submitQuestion,
   });
 
   async function examQueryFn() {
@@ -257,10 +260,13 @@ export function Exam() {
     return true;
   }
 
-  async function submitQuestion(
-    fullQuestion: FullQuestion,
-    selectedAnswers: Answers[number]["id"][]
-  ) {
+  async function submitQuestion({
+    fullQuestion,
+    selectedAnswers,
+  }: {
+    fullQuestion: FullQuestion;
+    selectedAnswers: Answers[number]["id"][];
+  }) {
     if (!examAttempt) {
       throw "Unreachable. Exam attempt should exist";
     }
@@ -288,9 +294,10 @@ export function Exam() {
 
     const { response, error } = await postExamAttempt(examAttempt);
 
-    if (response.status !== 200 || error) {
-      setIsOffline(true);
-      return;
+    // TODO: Use response to determine next action
+
+    if (error) {
+      throw new Error(error.message);
     }
 
     setIsOffline(false);
@@ -352,6 +359,17 @@ export function Exam() {
       1000
   );
 
+  if (submitQuestionMutation.isError) {
+    // TODO: Return modal allowing retry
+    return (
+      <Box width={"full"} m="1em" mt="4em">
+        <Center height={"100%"}>
+          <Text>{submitQuestionMutation.error.message}</Text>
+        </Center>
+      </Box>
+    );
+  }
+
   return (
     <>
       <Box
@@ -372,7 +390,7 @@ export function Exam() {
         <Center height={"100%"}>
           <OfflineModal
             isOffline={isOffline}
-            submitQuestion={submitQuestion}
+            submitQuestionMutation={submitQuestionMutation}
             fullQuestion={fullQuestion}
             selectedAnswers={newSelectedAnswers}
           />
@@ -402,7 +420,7 @@ export function Exam() {
             </Flex>
             <QuestionSetForm
               fullQuestion={fullQuestion}
-              submitQuestion={submitQuestion}
+              submitQuestionMutation={submitQuestionMutation}
               examAttempt={examAttempt}
               setNewSelectedAnswers={setNewSelectedAnswers}
               newSelectedAnswers={newSelectedAnswers}
