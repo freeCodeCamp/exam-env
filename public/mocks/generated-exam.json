@@ -14,7 +14,7 @@
     "config": {
       "name": "First Exam",
       "note": "This exam includes listening comprehension",
-      "totalTimeInMS": 30000
+      "totalTimeInMS": 600000
     },
     "questionSets": [
       {
@@ -42,6 +42,74 @@
               {
                 "id": "66b522e714a1cd98b5d3dc08",
                 "text": "Madrid"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "6748182f0f9d6e80fa2eb04d",
+        "type": "MultipleChoice",
+        "context": null,
+        "questions": [
+          {
+            "id": "674818354cd5f347eb35df91",
+            "deprecated": false,
+            "audio": {
+              "captions": null,
+              "url": "https://cdn.freecodecamp.org/curriculum/english/animation-assets/sounds/1.1-1.mp3"
+            },
+            "text": "This is an example of a multiple-choice question with audio. Listen to the audio to answer this question: When was freeCodeCamp started?",
+            "answers": [
+              {
+                "id": "6748183cbc00e4a0a3c2ebf8",
+                "text": "2014"
+              },
+              {
+                "id": "674818446784013ac9152ec1",
+                "text": "2010"
+              },
+              {
+                "id": "67481849a2178d78a1c33fc0",
+                "text": "2016"
+              },
+              {
+                "id": "6748184f8ec2864e9138a127",
+                "text": "2019"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "6748182f0f9d6e80fa2eb04e",
+        "type": "MultipleChoice",
+        "context": null,
+        "questions": [
+          {
+            "id": "674818354cd5f347eb35df92",
+            "deprecated": false,
+            "audio": {
+              "captions": null,
+              "url": "https://cdn.freecodecamp.org/curriculum/english/animation-assets/sounds/1.1-1.mp3"
+            },
+            "text": "This is a continuation of the same audio question from the previous. When was `freeCodeCamp` founded?",
+            "answers": [
+              {
+                "id": "6748183cbc00e4a0a3c2ebf9",
+                "text": "2014"
+              },
+              {
+                "id": "674818446784013ac9152ec2",
+                "text": "2010"
+              },
+              {
+                "id": "67481849a2178d78a1c33fc1",
+                "text": "2016"
+              },
+              {
+                "id": "6748184f8ec2864e9138a128",
+                "text": "2019"
               }
             ]
           }
