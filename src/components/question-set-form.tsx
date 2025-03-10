@@ -27,7 +27,7 @@ export function QuestionSetForm({
 }: QuestionTypeFormProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioSource, setAudioSource] = useState("");
-  const loadNextAudio = () => {
+  function resetAudio() {
     if (audioRef.current) {
       // This is to prevent a stupid UI bug (all Shaun's fault)
       audioRef.current.load();
@@ -40,7 +40,7 @@ export function QuestionSetForm({
         })
         .catch(console.error);
     }
-  };
+  }
 
   useEffect(() => {
     setNewSelectedAnswers(
@@ -55,9 +55,14 @@ export function QuestionSetForm({
     if (fullQuestion.audio) {
       setAudioSource(fullQuestion.audio.url);
     }
+    return () => {
+      // https://github.com/freeCodeCamp/exam-env/issues/21
+      // This is done during unmount to ensure the audio pauses after submission.
+      resetAudio();
+    };
   }, [fullQuestion]);
 
-  useEffect(loadNextAudio, [audioSource]);
+  useEffect(resetAudio, [audioSource]);
 
   return (
     <>
