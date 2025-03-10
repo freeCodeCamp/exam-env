@@ -1,16 +1,22 @@
-import { Button, QuizQuestion } from "@freecodecamp/ui";
+import { QuizQuestion } from "@freecodecamp/ui";
 import { Box, Text, Spacer } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import Markdown from "markdown-to-jsx";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
+import { ButtonLoading } from "./button-loading";
+import { UseMutationResult } from "@tanstack/react-query";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
-  submitQuestion: (
-    fullQuestion: FullQuestion,
-    selectedAnswers: Answers[number]["id"][]
-  ) => void;
+  submitQuestionMutation: UseMutationResult<
+    void,
+    Error,
+    {
+      fullQuestion: FullQuestion;
+      selectedAnswers: Answers[number]["id"][];
+    }
+  >;
   newSelectedAnswers: Answers[number]["id"][];
   setNewSelectedAnswers: (newSelectedAnswers: Answers[number]["id"][]) => void;
   maxTimeReached: boolean;
@@ -19,7 +25,7 @@ type QuestionTypeFormProps = {
 
 export function QuestionSetForm({
   fullQuestion,
-  submitQuestion,
+  submitQuestionMutation,
   maxTimeReached,
   newSelectedAnswers,
   setNewSelectedAnswers,
@@ -95,19 +101,26 @@ export function QuestionSetForm({
       />
       <Spacer />
       <Box pt={"1em"}>
-        <Button
-          block={true}
+        <ButtonLoading
           onClick={() => {
             if (!newSelectedAnswers) {
               return;
             }
 
-            submitQuestion(fullQuestion, newSelectedAnswers);
+            submitQuestionMutation.mutate({
+              fullQuestion,
+              selectedAnswers: newSelectedAnswers,
+            });
           }}
-          disabled={!newSelectedAnswers?.length || maxTimeReached}
+          disabled={
+            !newSelectedAnswers.length ||
+            maxTimeReached ||
+            submitQuestionMutation.isPending
+          }
+          isPending={submitQuestionMutation.isPending}
         >
           Submit
-        </Button>
+        </ButtonLoading>
       </Box>
     </>
   );
