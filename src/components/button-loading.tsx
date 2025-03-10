@@ -22,7 +22,6 @@ export function ButtonLoading({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        opacity: isPending ? 0.5 : 1,
       }}
       {...rest}
       type="button"
