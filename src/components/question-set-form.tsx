@@ -33,9 +33,8 @@ export function QuestionSetForm({
 }: QuestionTypeFormProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioSource, setAudioSource] = useState("");
-  const loadNextAudio = () => {
+  function loadNextAudio() {
     if (audioRef.current) {
-      // This is to prevent a stupid UI bug (all Shaun's fault)
       audioRef.current.load();
       audioRef.current
         .play()
@@ -46,7 +45,7 @@ export function QuestionSetForm({
         })
         .catch(console.error);
     }
-  };
+  }
 
   useEffect(() => {
     setNewSelectedAnswers(
@@ -61,6 +60,14 @@ export function QuestionSetForm({
     if (fullQuestion.audio) {
       setAudioSource(fullQuestion.audio.url);
     }
+    return () => {
+      // https://github.com/freeCodeCamp/exam-env/issues/21
+      // on unmount/re-render we need to reset the audio source to prevent the audio from playing
+      // when the user navigates to another question.
+      if (audioRef.current) {
+        audioRef.current.src = audioSource;
+      }
+    };
   }, [fullQuestion]);
 
   useEffect(loadNextAudio, [audioSource]);
