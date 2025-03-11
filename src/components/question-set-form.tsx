@@ -33,8 +33,9 @@ export function QuestionSetForm({
 }: QuestionTypeFormProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioSource, setAudioSource] = useState("");
-  function loadNextAudio() {
+  function resetAudio() {
     if (audioRef.current) {
+      // This is to prevent a stupid UI bug (all Shaun's fault)
       audioRef.current.load();
       audioRef.current
         .play()
@@ -62,15 +63,12 @@ export function QuestionSetForm({
     }
     return () => {
       // https://github.com/freeCodeCamp/exam-env/issues/21
-      // on unmount/re-render we need to reset the audio source to prevent the audio from playing
-      // when the user navigates to another question.
-      if (audioRef.current) {
-        audioRef.current.src = audioSource;
-      }
+      // This is done during unmount to ensure the audio pauses after submission.
+      resetAudio();
     };
   }, [fullQuestion]);
 
-  useEffect(loadNextAudio, [audioSource]);
+  useEffect(resetAudio, [audioSource]);
 
   return (
     <>
