@@ -72,7 +72,7 @@
               "deprecated": false,
               "audio": {
                 "captions": null,
-                "url": "curriculum/english/animation-assets/sounds/1.1-1.mp3"
+                "url": "https://cdn.freecodecamp.org/curriculum/english/animation-assets/sounds/1.1-1.mp3"
               },
               "tags": [],
               "text": "This is an example of a multiple-choice question with audio. Listen to the audio to answer this question: When was freeCodeCamp started?",

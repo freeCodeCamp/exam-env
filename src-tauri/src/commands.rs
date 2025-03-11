@@ -30,16 +30,20 @@ pub async fn take_screenshot(window: Window) -> Result<(), Error> {
             .map_err(|e| Error::Screenshot(format!("Unable to capture screen: {}", e)))
             .capture()?;
 
-        // Inability to set window to content_protected == true should not prevent continuation
-        let _window_protected = window
-            .set_content_protected(true)
-            .map_err(|e| {
-                Error::Screenshot(format!(
-                    "Unable to set window back to protected mode after screenshot: {}",
-                    e
-                ))
-            })
-            .capture();
+        // If in debug mode, do not set the window back to protected mode.
+        #[cfg(not(debug_assertions))]
+        {
+            // Inability to set window to content_protected == true should not prevent continuation
+            let _window_protected = window
+                .set_content_protected(true)
+                .map_err(|e| {
+                    Error::Screenshot(format!(
+                        "Unable to set window back to protected mode after screenshot: {}",
+                        e
+                    ))
+                })
+                .capture();
+        }
 
         let image = utils::image_to_bytes(main_screen_img);
         post_screenshot(image).await?;
