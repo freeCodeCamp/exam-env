@@ -60,7 +60,11 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
     if (!audioRef.current) {
       return;
     }
-    setProgress(audioRef.current.currentTime);
+    const currentTime = audioRef.current.currentTime;
+    if (typeof currentTime !== "number") {
+      return;
+    }
+    setProgress(currentTime);
   }
 
   function onPause() {
@@ -106,7 +110,7 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
       <Flex direction="column">
         <Flex alignItems="center">
           <Button onClick={togglePlay}>
-            {isPlaying ? "=" : <TriangleUpIcon style={{ rotate: "90deg" }} />}
+            {isPlaying ? "| |" : <TriangleUpIcon style={{ rotate: "90deg" }} />}
           </Button>
           <Text ml={2}>
             {formatTime(audioRef.current.currentTime)} / {formatTime(duration)}
