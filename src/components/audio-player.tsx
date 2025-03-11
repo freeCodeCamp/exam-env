@@ -28,6 +28,8 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
       return;
     }
     audioRef.current = new Audio(fullQuestion.audio.url);
+    setIsPlaying(false);
+    setProgress(0);
 
     audioRef.current.onloadedmetadata = onLoadedMetadata;
     audioRef.current.ontimeupdate = onTimeUpdate;
@@ -47,7 +49,11 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
     if (!audioRef.current) {
       return;
     }
-    setDuration(audioRef.current.duration);
+    const d = audioRef.current.duration;
+    if (typeof d !== "number") {
+      return;
+    }
+    setDuration(d);
   }
 
   function onTimeUpdate() {
@@ -81,7 +87,11 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
     setProgress(value);
   }
 
-  function formatTime(time: number): string {
+  function formatTime(time: unknown): string {
+    if (typeof time !== "number") {
+      // Somehow, `audioRef.current.currentTime` can be unset
+      return "0:00";
+    }
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
