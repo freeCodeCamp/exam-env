@@ -28,8 +28,15 @@ export function Camera({
       const stream = await navigator.mediaDevices.getUserMedia(
         constraints || { video: true }
       );
-      const video = videoRef.current;
 
+      stream.getTracks().forEach((track) => {
+        track.addEventListener("ended", () => {
+          onUserMediaSetupError(
+            "Your Camera is not accessible. Please allow access to your camera and refresh the page."
+          );
+        });
+      });
+      const video = videoRef.current;
       if (video) {
         video.srcObject = stream;
         // Video is "paused" when component is unmounted :shrug:
@@ -38,11 +45,6 @@ export function Camera({
           stream.getTracks().forEach((track) => {
             track.stop();
           });
-        };
-        // Event "suspend" is emitted if permissions are revoked for camera
-        video.onsuspend = (e) => {
-          console.debug(e);
-          onUserMediaSetupError("Camera is unavailable.");
         };
       }
     } catch (err) {
