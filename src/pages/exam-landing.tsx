@@ -28,7 +28,6 @@ export function ExamLanding() {
     const enumberatedDevices = await navigator.mediaDevices.enumerateDevices();
     const devices = enumberatedDevices.flat();
     const cameraPermission = await navigator.permissions.query({
-      // @ts-expect-error "camera" does exist on PermissionName. The type is wrong.
       name: "camera",
     });
     if (cameraPermission.state !== "granted") {

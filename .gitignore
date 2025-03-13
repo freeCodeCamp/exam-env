@@ -26,3 +26,5 @@ dist-ssr
 .tauri
 
 .env
+
+embedded.provisionprofile
