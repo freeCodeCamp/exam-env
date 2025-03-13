@@ -252,6 +252,7 @@ async function checkForUpdate() {
       version: string;
       date?: string;
       body?: string;
+      rawJson: Record<string, unknown>;
     }
 
     class MockUpdate extends Update {
@@ -304,6 +305,7 @@ async function checkForUpdate() {
       version: "0.0.2",
       date: new Date().toUTCString(),
       body: "New update",
+      rawJson: {},
     });
   }
 
@@ -336,7 +338,6 @@ async function updateDeviceList() {
     const enumeratedDevices = await navigator.mediaDevices.enumerateDevices();
     const devices = enumeratedDevices.flat();
     const cameraPermission = await navigator.permissions.query({
-      // @ts-expect-error "camera" does exist on PermissionName. The type is wrong.
       name: "camera",
     });
     try {

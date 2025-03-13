@@ -292,7 +292,7 @@ export function Exam() {
       questionSets,
     };
 
-    const { response, error } = await postExamAttempt(examAttempt);
+    const { error } = await postExamAttempt(examAttempt);
 
     // TODO: Use response to determine next action
 
