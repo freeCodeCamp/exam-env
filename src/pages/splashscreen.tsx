@@ -348,6 +348,12 @@ async function updateDeviceList() {
       return new Error(`Unable to access camera. ${e}`);
     }
 
+    if (cameraPermission.state === "prompt") {
+      return new Error(
+        "Camera permission not granted. Please allow camera access."
+      );
+    }
+
     if (cameraPermission.state !== "granted") {
       return new Error("Camera permission denied. Please allow camera access.");
     }
