@@ -30,11 +30,11 @@ export function Camera({
       );
 
       stream.getTracks().forEach((track) => {
-        track.addEventListener("ended", () => {
+        track.onended = () => {
           onUserMediaSetupError(
             "Your Camera is not accessible. Please allow access to your camera and refresh the page."
           );
-        });
+        };
       });
       const video = videoRef.current;
       if (video) {
