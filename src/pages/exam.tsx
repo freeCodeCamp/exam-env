@@ -448,11 +448,11 @@ export function Exam() {
               to quit the exam?
             </Text>
           )}
-          <Text>Thank you for taking the exam.</Text>
+          {maxTimeReached && <Text>Thank you for taking the exam.</Text>}
         </Modal.Body>
         <Modal.Footer>
           <Button block={true} onClick={handleExamEnd}>
-            End Exam
+            {maxTimeReached ? "Close" : "End Exam"}
           </Button>
         </Modal.Footer>
       </Modal>
