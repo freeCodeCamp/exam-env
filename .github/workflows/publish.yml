@@ -53,9 +53,9 @@ jobs:
           - platform: "ubuntu-22.04"
             args: ""
           - platform: "windows-latest"
-            args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi,updater"
+            args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi"
           - platform: "windows-latest"
-            args: "--bundles nsis,updater"
+            args: "--bundles nsis"
 
     runs-on: ${{ matrix.platform }}
     env:
