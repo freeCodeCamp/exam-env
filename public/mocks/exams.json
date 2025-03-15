@@ -196,7 +196,8 @@
           ]
         }
       ],
-      "prerequisites": []
+      "prerequisites": [],
+      "deprecated": false
     }
   ]
 }
