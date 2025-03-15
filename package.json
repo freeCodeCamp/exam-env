@@ -1,7 +1,7 @@
 {
   "name": "exam-env",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "prisma-generate": "npx prisma generate",
@@ -21,8 +21,8 @@
     "@tanstack/react-router": "1.112.8",
     "@tauri-apps/api": "2.3.0",
     "@tauri-apps/plugin-dialog": "2.2.0",
-    "@tauri-apps/plugin-http": "2.3.0",
-    "@tauri-apps/plugin-updater": "2.5.1",
+    "@tauri-apps/plugin-http": "2.4.1",
+    "@tauri-apps/plugin-updater": "2.6.0",
     "framer-motion": "11.14.4",
     "markdown-to-jsx": "7.7.4",
     "openapi-fetch": "0.13.4",
