@@ -337,33 +337,19 @@ async function updateDeviceList() {
   try {
     const enumeratedDevices = await navigator.mediaDevices.enumerateDevices();
     const devices = enumeratedDevices.flat();
-    const cameraPermission = await navigator.permissions.query({
-      name: "camera",
-    });
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // Unassociate track with stream to free resource
-      stream.getTracks().forEach((track) => track.stop());
-    } catch (e) {
-      return new Error(`Unable to access camera. ${e}`);
-    }
-
-    if (cameraPermission.state === "prompt") {
-      return new Error(
-        "Camera permission not granted. Please allow camera access."
-      );
-    }
-
-    if (cameraPermission.state !== "granted") {
-      return new Error("Camera permission denied. Please allow camera access.");
-    }
     const atLeastOneCamera = devices.some((d) => d.kind === "videoinput");
     if (!atLeastOneCamera) {
       return new Error("No Camera found!");
     }
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    stream.getTracks().forEach((track) => track.stop());
+
     return null;
   } catch (e) {
-    return new Error("Error checking device compatibility. Try again.");
+    return new Error(
+      "Please make sure you have a camera and have granted permission to use it."
+    );
   }
 }
 
