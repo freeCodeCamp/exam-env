@@ -1,6 +1,6 @@
 [package]
 name = "exam-env"
-version = "0.3.0"
+version = "0.4.0"
 description = "Exam environment for freeCodeCamp"
 authors = ["freeCodeCamp"]
 edition = "2021"
@@ -9,10 +9,10 @@ license = "BSD-3-Clause"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.0.6", features = [] }
+tauri-build = { version = "2.1.0", features = [] }
 
 [dependencies]
-tauri = { version = "2.3.1", features = ["macos-private-api"] }
+tauri = { version = "2.4.0", features = ["macos-private-api"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 screenshots = "0.8.10"
@@ -27,8 +27,8 @@ keyring = { version = "3.6.2", features = [
   "apple-native",
   "linux-native",
 ] }
-tauri-plugin-http = { version = "2.4.1", features = ["multipart"] }
+tauri-plugin-http = { version = "2.4.2", features = ["multipart"] }
 base64 = "0.22.1"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-updater = "2.6.0"
+tauri-plugin-updater = "2.6.1"
