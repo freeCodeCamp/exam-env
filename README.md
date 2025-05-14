@@ -1,5 +1,54 @@
 # Exam Environment
 
+## MRUGESH
+
+### Getting Started
+
+1. Clone fork, fetch branches, use `feat_auth0` branch
+
+```bash
+git clone https://github.com/ShaunSHamilton/exam-env.git
+git fetch origin feat_auth0
+git checkout feat_auth0
+```
+
+2. Install prerequisites: https://v2.tauri.app/start/prerequisites/
+
+```bash
+curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+```
+
+```bash
+[[ "$(node --version)" == "v22."* ]] && echo "All good." || echo "Nodejs version must be 22"
+```
+
+```bash
+cargo install tauri-cli
+```
+
+```bash
+curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=10.5.2 sh -
+```
+
+3. Install dependencies
+
+```bash
+pnpm i
+```
+
+4. Copy `sample.env` to `.env` and fill in the values
+
+```bash
+cp .env.sample .env
+```
+
+5. Add needed keys (message)
+6. Run the development build
+
+```bash
+cargo tauri dev --config src-tauri/tauri.dev.conf.json
+```
+
 ## Development
 
 https://v2.tauri.app/start/prerequisites/

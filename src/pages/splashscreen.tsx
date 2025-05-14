@@ -54,7 +54,7 @@ export function Splashscreen() {
   const update = updateQuery.data;
   const downloadAndInstallQuery = useQuery({
     queryKey: ["downloadAndInstall", [update, isStartDownload]],
-    enabled: update?.available && isStartDownload,
+    enabled: !!update && isStartDownload,
     queryFn: async () => {
       let downloaded = 0;
       let contentLength: number | undefined = 0;
@@ -124,7 +124,7 @@ export function Splashscreen() {
     );
   }
 
-  if (update?.available && !isStartDownload) {
+  if (!!update && !isStartDownload) {
     return (
       <SplashParents>
         <ListItem>
@@ -142,7 +142,7 @@ export function Splashscreen() {
       </SplashParents>
     );
   }
-  if (update?.available && downloadAndInstallQuery.isPending) {
+  if (!!update && downloadAndInstallQuery.isPending) {
     return (
       <SplashParents>
         <ListItem>
@@ -160,7 +160,7 @@ export function Splashscreen() {
     );
   }
 
-  if (update?.available && downloadAndInstallQuery.isError) {
+  if (!!update && downloadAndInstallQuery.isError) {
     return (
       <SplashParents>
         <ListItem>
@@ -247,7 +247,7 @@ async function checkForUpdate() {
 
     interface UpdateMetadata {
       rid: number;
-      available: boolean;
+      available: true;
       currentVersion: string;
       version: string;
       date?: string;
@@ -297,12 +297,13 @@ async function checkForUpdate() {
         return new Promise((res) => res());
       }
     }
+    // Comment out to test update functionality
+    return null;
     return new MockUpdate({
       rid: 0,
-      // Change to `true` to test the download and restart
-      available: false,
-      currentVersion: "0.0.1",
-      version: "0.0.2",
+      available: true,
+      currentVersion: "0.4.1",
+      version: "0.4.1",
       date: new Date().toUTCString(),
       body: "New update",
       rawJson: {},
@@ -325,6 +326,7 @@ async function checkForUpdate() {
 
 // Check device compatibility
 async function checkDeviceCompatibility() {
+  return null;
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     await delayForTesting(1000);
   }
