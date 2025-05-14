@@ -49,6 +49,18 @@ cp .env.sample .env
 cargo tauri dev --config src-tauri/tauri.dev.conf.json
 ```
 
+### Extra Information
+
+Everything needs to be done through the backend (Rust). Tauri provides plugins and hooks which make this possible through IPC on the JS side.
+
+What this means, is things like the global `fetch` cannot be used. Instead, `@tauri-apps/plugin-http` provides a `fetch` function that is almost identical.
+
+When the Auth0 login works, you can only tell by what is in the app console (F12). The logic is not implemented to actually use the `auth_token` yet. So, all redirects go to the `/login` page.
+
+All relevant code is in `src/pages/login.tsx` and `src/main.tsx`.
+
+Global search for `MRUGESH` to find comments around relevant code.
+
 ## Development
 
 https://v2.tauri.app/start/prerequisites/
