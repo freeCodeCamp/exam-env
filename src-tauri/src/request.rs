@@ -25,7 +25,7 @@ pub async fn post_screenshot(image: Vec<u8>) -> Result<(), Error> {
 
         // TODO: Consider passing Response 4XX/5XX to client
         let _res = post
-            .header("Exam-Environment-Authorization-Token", authorization_token)
+            .header("Authorization", format!("Bearer {authorization_token}"))
             .multipart(form)
             .send()
             .await

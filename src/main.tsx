@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { Auth0Provider } from "@auth0/auth0-react";
 
 import { ErrorRoute } from "./pages/error";
 import { LandingRoute } from "./pages/landing";
@@ -43,22 +42,11 @@ const router = createRouter({ routeTree, context: { queryClient } });
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Auth0Provider
-        domain={import.meta.env.VITE_AUTH0_DOMAIN}
-        clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-        authorizationParams={{
-          // MRUGESH: This is the deep link callback
-          redirect_uri: import.meta.env.VITE_AUTH0_REDIRECT_URI,
-          // MRUGESH: This is the webview callback
-          // redirect_uri: "http://localhost:1420/login",
-        }}
-      >
-        <AuthProvider>
-          <ChakraProvider>
-            <RouterProvider router={router} />
-          </ChakraProvider>
-        </AuthProvider>
-      </Auth0Provider>
+      <AuthProvider>
+        <ChakraProvider>
+          <RouterProvider router={router} />
+        </ChakraProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

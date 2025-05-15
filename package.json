@@ -12,7 +12,6 @@
     "windows": "./scripts/WindowsEnv.ps1"
   },
   "dependencies": {
-    "@auth0/auth0-react": "2.3.0",
     "@chakra-ui/icons": "2.2.6",
     "@chakra-ui/react": "2.8.2",
     "@emotion/react": "11.14.0",
