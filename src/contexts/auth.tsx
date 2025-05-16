@@ -4,55 +4,51 @@ import { invoke } from "@tauri-apps/api/core";
 import { verifyToken } from "../utils/fetch";
 
 export const AuthContext = createContext<{
-  examEnvironmentAuthenticationToken: string | null;
+  accessToken: string | null;
   login: (token: string) => Promise<void>;
   logout: () => void;
 } | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [
-    examEnvironmentAuthenticationToken,
-    setExamEnvironmentAuthenticationToken,
-  ] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const token = await invoke<null | string>("get_authorization_token");
+        const token = await invoke<null | string>("get_access_token");
         // If token exists in key storage, try login
         if (token) {
           await login(token);
         }
       } catch (e) {
-        setExamEnvironmentAuthenticationToken(null);
+        setAccessToken(null);
       }
     })();
   }, []);
 
   const login = async (token: string) => {
     const res = await verifyToken(token);
-    // TODO: Add check that token will not expire soon
-    //       If it will, tell user
     if (res.data) {
-      setExamEnvironmentAuthenticationToken(token);
+      setAccessToken(token);
     } else {
-      setExamEnvironmentAuthenticationToken(null);
+      setAccessToken(null);
       throw new Error(res.error.message);
     }
   };
 
   const logout = async () => {
-    await invoke("remove_authorization_token");
-    setExamEnvironmentAuthenticationToken(null);
+    // TODO: Invalidate in Auth0
+    await invoke("remove_access_token");
+    setAccessToken(null);
   };
 
   const value = useMemo(
     () => ({
-      examEnvironmentAuthenticationToken,
+      accessToken,
       login,
       logout,
     }),
-    [examEnvironmentAuthenticationToken]
+    [accessToken]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -29,7 +29,7 @@ export async function verifyToken(token: string) {
   const res = await client.GET("/exam-environment/token-meta", {
     params: {
       header: {
-        "exam-environment-authorization-token": token,
+        authorization: `Bearer ${token}`,
       },
     },
   });
@@ -63,7 +63,7 @@ export async function getGeneratedExam(examId: string) {
     body: { examId },
     params: {
       header: {
-        "exam-environment-authorization-token": token,
+        authorization: `Bearer ${token}`,
       },
     },
   });
@@ -87,7 +87,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     body: { attempt: examAttempt },
     params: {
       header: {
-        "exam-environment-authorization-token": token,
+        authorization: `Bearer ${token}`,
       },
     },
   });
@@ -126,7 +126,7 @@ export async function getExams() {
   const res = await client.GET("/exam-environment/exams", {
     params: {
       header: {
-        "exam-environment-authorization-token": token,
+        authorization: `Bearer ${token}`,
       },
     },
   });

@@ -41,6 +41,13 @@
       "endpoints": [
         "http://localhost:1420/mocks/latest.json"
       ]
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "exam-environment"
+        ]
+      }
     }
   }
 }

@@ -55,6 +55,13 @@
       "endpoints": [
         "https://github.com/freeCodeCamp/exam-env/releases/latest/download/latest.json"
       ]
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "exam-environment"
+        ]
+      }
     }
   }
 }

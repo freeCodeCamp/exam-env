@@ -30,6 +30,23 @@
         },
         {
           "url": "https://*.gitpod.io"
+        },
+        {
+          "url": "https://freecodecamp-dev.auth0.com"
+        },
+        {
+          "url": "https://auth.freecodecamp.dev"
+        }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://freecodecamp-dev.auth0.com/*"
+        },
+        {
+          "url": "https://*.freecodecamp.dev/*"
         }
       ]
     }
