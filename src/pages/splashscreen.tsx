@@ -85,7 +85,7 @@ export function Splashscreen() {
 
   const compatibilityCheckQuery = useQuery({
     queryKey: ["compatabilityCheck"],
-    enabled: downloadAndInstallQuery.isSuccess || !!update,
+    enabled: downloadAndInstallQuery.isSuccess || !update,
     queryFn: async () => {
       const compatibilityError = await checkDeviceCompatibility();
       if (compatibilityError) {
