@@ -30,10 +30,7 @@ export const rootRoute = createRootRoute({
         }
       );
 
-      console.debug(unlisten);
-
       return () => {
-        console.debug("unlisten");
         unlisten.then((u) => u());
       };
     }, []);
