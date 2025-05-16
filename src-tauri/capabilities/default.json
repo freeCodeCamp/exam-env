@@ -37,10 +37,10 @@
       "identifier": "opener:allow-open-url",
       "allow": [
         {
-          "url": "https://*.freecodecamp.org/*"
+          "url": "https://freecodecamp.org/*"
         },
         {
-          "url": "https://*.freecodecamp.dev/*"
+          "url": "https://freecodecamp.dev/*"
         }
       ]
     }
