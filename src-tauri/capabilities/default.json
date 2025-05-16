@@ -32,6 +32,17 @@
           "url": "https://*.gitpod.io"
         }
       ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://*.freecodecamp.org/*"
+        },
+        {
+          "url": "https://*.freecodecamp.dev/*"
+        }
+      ]
     }
   ]
 }

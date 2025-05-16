@@ -12,6 +12,7 @@ import {
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Spacer } from "@freecodecamp/ui";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { useInvoke } from "../components/use-invoke";
 import { AuthContext } from "../contexts/auth";
@@ -57,6 +58,10 @@ export function Login() {
     }
   }
 
+  async function openSettings() {
+    await openUrl("https://freecodecamp.org/settings");
+  }
+
   return (
     <>
       <Header />
@@ -82,8 +87,11 @@ export function Login() {
                 <FormErrorMessage>{JSON.stringify(error)}</FormErrorMessage>
               )}
               <FormHelperText>
-                Go to https://freecodecamp.org/settings to generate a token if
-                you do not already have one.
+                Go to
+                <Button onClick={openSettings} variant="info" size="small">
+                  https://freecodecamp.org/settings
+                </Button>{" "}
+                to generate a token if you do not already have one.
               </FormHelperText>
               <Spacer size="m" />
               <Button
