@@ -8,6 +8,7 @@ import {
   FormLabel,
   Heading,
   Input,
+  Button as ChakraButton,
 } from "@chakra-ui/react";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { createRoute, useNavigate } from "@tanstack/react-router";
@@ -58,8 +59,8 @@ export function Login() {
     }
   }
 
-  async function openSettings() {
-    await openUrl("https://freecodecamp.org/settings");
+  async function openPage(page: string) {
+    await openUrl(page);
   }
 
   return (
@@ -87,10 +88,23 @@ export function Login() {
                 <FormErrorMessage>{JSON.stringify(error)}</FormErrorMessage>
               )}
               <FormHelperText>
-                Go to
-                <Button onClick={openSettings} variant="info" size="small">
+                Go to{" "}
+                <ChakraButton
+                  onClick={() => openPage("https://freecodecamp.org/settings")}
+                  variant="link"
+                  colorScheme="blue"
+                  size="sm"
+                  textDecoration="underline"
+                  textUnderlineOffset="0.2em"
+                  textDecorationThickness="0.1em"
+                  textDecorationColor="blue.500"
+                  _hover={{
+                    textDecoration: "underline",
+                    textDecorationColor: "blue.300",
+                  }}
+                >
                   https://freecodecamp.org/settings
-                </Button>{" "}
+                </ChakraButton>{" "}
                 to generate a token if you do not already have one.
               </FormHelperText>
               <Spacer size="m" />
@@ -110,13 +124,26 @@ export function Login() {
               <ul>
                 <li>
                   1. Go To{" "}
-                  <a
-                    href="https://freecodecamp.org/settings#exam-environment-authorization-token"
-                    style={{ textDecoration: "underline" }}
-                    target="_blank"
+                  <ChakraButton
+                    onClick={() =>
+                      openPage(
+                        "https://freecodecamp.org/settings#exam-environment-authorization-token"
+                      )
+                    }
+                    variant="link"
+                    colorScheme="blue"
+                    size="sm"
+                    textDecoration="underline"
+                    textUnderlineOffset="0.2em"
+                    textDecorationThickness="0.1em"
+                    textDecorationColor="blue.500"
+                    _hover={{
+                      textDecoration: "underline",
+                      textDecorationColor: "blue.300",
+                    }}
                   >
                     The freeCodeCamp settings page.
-                  </a>{" "}
+                  </ChakraButton>{" "}
                 </li>
                 <li>2. Press "Generate Exam Token."</li>
                 <li>3. Copy the token and paste it into the input field.</li>
