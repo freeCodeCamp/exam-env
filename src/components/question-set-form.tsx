@@ -1,12 +1,12 @@
 import { UseMutationResult } from "@tanstack/react-query";
 import { Box, Text, Spacer } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
-import Markdown from "markdown-to-jsx";
 import { useEffect } from "react";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { ButtonLoading } from "./button-loading";
 import { AudioPlayer } from "./audio-player";
+import { parseMarkdown } from "../utils/markdown";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
@@ -49,7 +49,11 @@ export function QuestionSetForm({
       {fullQuestion.questionSet.context && (
         <>
           <Text fontWeight={"bold"}>Context</Text>
-          <Markdown>{fullQuestion.questionSet.context}</Markdown>
+          <Text
+            dangerouslySetInnerHTML={{
+              __html: parseMarkdown(fullQuestion.questionSet.context),
+            }}
+          ></Text>
         </>
       )}
       {fullQuestion.audio && (
@@ -61,7 +65,7 @@ export function QuestionSetForm({
       )}
       <Text fontWeight={"bold"}>Question</Text>
       <QuizQuestion
-        question={fullQuestion.text}
+        question={parseMarkdown(fullQuestion.text)}
         selectedAnswer={newSelectedAnswers?.[0]}
         onChange={(newAnswer) => {
           // This is an array, because, in the future, checkboxes might be used.
@@ -69,7 +73,7 @@ export function QuestionSetForm({
         }}
         answers={fullQuestion.answers.map((answer) => {
           return {
-            label: answer.text,
+            label: parseMarkdown(answer.text),
             value: answer.id,
           };
         })}
