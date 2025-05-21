@@ -47,3 +47,10 @@ export type UnrecoverableError = {
   source: String;
   message: String;
 };
+
+export enum AppStore {
+  Microsoft = "Microsoft",
+  Apple = "Apple",
+  GitHub = "GitHub",
+  Unknown = "Unknown",
+}
