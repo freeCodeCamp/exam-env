@@ -2,6 +2,8 @@ import { marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import Prism from "prismjs";
 
+Prism.manual = true;
+
 marked.use(
   markedHighlight({
     highlight: (code, lang) => {

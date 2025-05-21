@@ -54,16 +54,3 @@
 audio {
   width: 100%;
 }
-
-code {
-  background-color: #dfdfe2;
-  border-radius: 0;
-  color: #2a2a40;
-  font-size: 90%;
-  overflow-wrap: anywhere;
-  padding: 1px 4px;
-}
-
-pre {
-  overflow-x: auto;
-}
