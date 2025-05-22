@@ -2,6 +2,7 @@ use screenshots::Screen;
 use tauri::{AppHandle, State, Window};
 
 use crate::{
+    config::AppStore,
     error::{Error, PassToSentry},
     request::post_screenshot,
     secret, utils, SentryState,
@@ -85,5 +86,44 @@ pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: 
 
     if let Some(client) = &sentry_state.client {
         client.flush(None);
+    }
+}
+
+/// Returns the store the app was installed/downloaded from
+#[tauri::command]
+pub fn get_app_store() -> AppStore {
+    #[cfg(target_os = "windows")]
+    {
+        let package = windows::ApplicationModel::Package::Current();
+        match package {
+            Ok(package) => {
+                dbg!("Package: {:?}", package);
+                // if package
+                //     .Id()
+                //     .unwrap()
+                //     .FamilyName()
+                //     .unwrap()
+                //     .to_string()
+                //     .contains("Microsoft")
+                // {
+                //     return AppStore::Microsoft;
+                // } else {
+                //     return AppStore::Unknown;
+                // }
+                return AppStore::Microsoft;
+            }
+            Err(_) => return AppStore::GitHub,
+        }
+    }
+
+    // TODO: Determine app store for MacOS
+    #[cfg(target_os = "macos")]
+    {
+        return AppStore::Unknown;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        return AppStore::GitHub;
     }
 }

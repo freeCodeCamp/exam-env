@@ -16,10 +16,10 @@ tauri = { version = "2.5.1", features = ["macos-private-api"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 screenshots = "0.8.10"
-bson = "2.14.0"
+bson = "2.15.0"
 typify = "0.4.1"
 chrono = { version = "0.4.41", features = ["serde"] }
-tauri-plugin-dialog = "2.2.1"
+tauri-plugin-dialog = "2.2.2"
 sentry = "0.38.1"
 dotenvy_macro = "0.15.7"
 keyring = { version = "3.6.2", features = [
@@ -29,7 +29,11 @@ keyring = { version = "3.6.2", features = [
 ] }
 tauri-plugin-http = { version = "2.4.3", features = ["multipart"] }
 base64 = "0.22.1"
-tauri-plugin-opener = "2"
+tauri-plugin-opener = "2.2.7"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2.7.1"
+
+[dependencies.windows]
+version = "0.61.1"
+features = ["ApplicationModel"]
