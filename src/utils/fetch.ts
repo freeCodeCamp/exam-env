@@ -41,6 +41,7 @@ export async function verifyToken(token: string) {
 
 export async function getGeneratedExam(examId: string) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(800);
     const generatedExam = (await (
       await fetch("/mocks/generated-exam.json")
     ).json()) as { exam: UserExam; examAttempt: UserExamAttempt };
@@ -97,6 +98,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
 
 export async function getExams() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(1000);
     const res = await fetch("/mocks/exams.json");
     const {
       exams: [exam],
@@ -132,4 +134,8 @@ export async function getExams() {
   });
 
   return res;
+}
+
+export async function delayForTesting(t: number) {
+  await new Promise((res, _) => setTimeout(res, t));
 }

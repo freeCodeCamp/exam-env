@@ -134,6 +134,21 @@ cargo tauri signer generate -w ./.tauri/exam-env.key
 
 A manual run of the `publish` action can build and cut the release of the app. The `version` field in the `package.json` and `src-tauri/tauri.conf.json` files should be updated.
 
+This is often best done in its own PR:
+
+```bash
+# Create patch, minor, major branch
+git checkout -b release_<kind>
+# Update version in package.json and src-tauri/tauri.conf.json
+# Commit with message
+git commit -m "release(<version>): <info>"
+# Tag commit
+git tag -a <version> -m "<info>"
+# Push to remote
+git push origin release_<kind>
+# Merge PR, start GH Action
+```
+
 ### Local
 
 ```bash

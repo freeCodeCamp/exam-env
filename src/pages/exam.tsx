@@ -1,5 +1,5 @@
 import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
-import { Box, Center, Flex, IconButton, Text } from "@chakra-ui/react";
+import { Box, Center, Flex, IconButton, Spinner, Text } from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
@@ -326,7 +326,18 @@ export function Exam() {
 
   if (examQuery.isPending) {
     // TODO: Improve this loading
-    return <Text>Loading...</Text>;
+    return (
+      <Center>
+        <Spinner
+          alignSelf={"center"}
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="var(--dark-blue)"
+          size="xl"
+        />
+      </Center>
+    );
   }
 
   if (examQuery.isError) {
