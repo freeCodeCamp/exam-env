@@ -1,6 +1,6 @@
 import { createRoute, useNavigate } from "@tanstack/react-router";
-import { Center, Flex, Text, Heading } from "@chakra-ui/react";
-import { Fragment, useEffect, useState } from "react";
+import { Center, Flex, Text, Heading, Spinner } from "@chakra-ui/react";
+import { Fragment } from "react";
 import { Button, Spacer } from "@freecodecamp/ui";
 
 import { ProtectedRoute } from "../components/protected-route";
@@ -9,47 +9,72 @@ import { Header } from "../components/header";
 import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
 import { rootRoute } from "./root";
-
-interface ExamInfo {
-  id: string;
-  canTake: boolean;
-  config: {
-    name: string;
-    note: string;
-    totalTimeInMS: number;
-  };
-}
+import { useQuery } from "@tanstack/react-query";
 
 export function Landing() {
   const { flashKind, flashMessage } = LandingRoute.useSearch();
 
-  const [exams, setExams] = useState<ExamInfo[] | null>(null);
-  const [examError, setExamError] = useState<string | null>(null);
-
   const navigate = useNavigate();
 
-  const fetchAvailableExams = async () => {
-    try {
+  const examsQuery = useQuery({
+    queryKey: ["exams"],
+    queryFn: async () => {
       const { data, error } = await getExams();
       if (error) {
-        return setExamError(error.message);
+        throw new Error(error.message);
       }
+      return data.exams;
+    },
+  });
 
-      setExams(data.exams);
-      setExamError(null);
-    } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        setExamError(e.message);
-      } else {
-        setExamError("Something went wrong.");
-      }
-    }
-  };
+  if (examsQuery.isPending) {
+    return (
+      <>
+        <Flash {...{ flashKind, flashMessage }} />
+        <Header />
+        <Center>
+          <Flex flexDirection={"column"}>
+            <Spacer size="m" />
+            <Heading>Welcome to the exam environment</Heading>
+            <Spinner
+              alignSelf={"center"}
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="var(--dark-blue)"
+              size="xl"
+            />
+          </Flex>
+        </Center>
+      </>
+    );
+  }
 
-  useEffect(() => {
-    fetchAvailableExams();
-  }, []);
+  if (examsQuery.isError) {
+    return (
+      <>
+        <Flash {...{ flashKind, flashMessage }} />
+        <Header />
+        <Center>
+          <Flex flexDirection={"column"}>
+            <Spacer size="m" />
+            <Heading>Welcome to the exam environment</Heading>
+            <Text textAlign={"center"} style={{ color: "red" }}>
+              {examsQuery.error.message}
+            </Text>
+            <Button
+              variant={"danger"}
+              onClick={() => {
+                examsQuery.refetch();
+              }}
+            >
+              Reload List
+            </Button>
+          </Flex>
+        </Center>
+      </>
+    );
+  }
 
   return (
     <>
@@ -59,45 +84,27 @@ export function Landing() {
         <Flex flexDirection={"column"}>
           <Spacer size="m" />
           <Heading>Welcome to the exam environment</Heading>
-          {!examError && (
-            <Text>
-              Please select the exam you would like to take from the list below:
-            </Text>
-          )}
-          {examError && (
-            <>
-              <Text textAlign={"center"} style={{ color: "red" }}>
-                {examError}
-              </Text>
-              <Button
-                variant={"danger"}
-                onClick={() => {
-                  fetchAvailableExams();
-                }}
-              >
-                Reload List
-              </Button>
-            </>
-          )}
-          {exams &&
-            exams.map((exam) => {
-              return (
-                <Fragment key={exam.id}>
-                  <Button
-                    disabled={!exam.canTake}
-                    onClick={() => {
-                      navigate({
-                        to: ExamLandingRoute.to,
-                        params: { examId: exam.id, note: exam.config.note },
-                      });
-                    }}
-                  >
-                    {exam.config.name}
-                  </Button>
-                  <Spacer size="s" />
-                </Fragment>
-              );
-            })}
+          <Text textAlign={"center"}>
+            Please select the exam you would like to take from the list below.
+          </Text>
+          {examsQuery.data.map((exam) => {
+            return (
+              <Fragment key={exam.id}>
+                <Button
+                  disabled={!exam.canTake}
+                  onClick={() => {
+                    navigate({
+                      to: ExamLandingRoute.to,
+                      params: { examId: exam.id, note: exam.config.note },
+                    });
+                  }}
+                >
+                  {exam.config.name}
+                </Button>
+                <Spacer size="s" />
+              </Fragment>
+            );
+          })}
         </Flex>
       </Center>
     </>

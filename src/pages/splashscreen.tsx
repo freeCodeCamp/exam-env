@@ -22,10 +22,7 @@ import { Button, Spacer } from "@freecodecamp/ui";
 import { createRoute, useNavigate } from "@tanstack/react-router";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
-
-async function delayForTesting(t: number) {
-  await new Promise((res, _) => setTimeout(res, t));
-}
+import { delayForTesting } from "../utils/fetch";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
