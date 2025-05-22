@@ -25,7 +25,7 @@
           {
             "id": "66b522e714a1cd98b5d3dc04",
             "audio": null,
-            "text": "What is the capital of France?",
+            "text": "What is the capital of France? Also, some code:\n\n```js\nconst a = 1;\n```",
             "answers": [
               {
                 "id": "66b522e714a1cd98b5d3dc05",
@@ -37,7 +37,7 @@
               },
               {
                 "id": "66b522e714a1cd98b5d3dc07",
-                "text": "Berlin"
+                "text": "`Berlin`"
               },
               {
                 "id": "66b522e714a1cd98b5d3dc08",
@@ -50,16 +50,16 @@
       {
         "id": "66b522f014a1cd98b5d3dc05",
         "type": "Dialogue",
-        "text": "During their travels, Alex marveled at the vibrant culture and rich history of Madrid, the capital of Spain. They recounted their adventures across Asia, the largest continent by area, with its breathtaking landscapes and diverse cultures. History fascinated them, especially stories of George Washington, the first president of the United States, whose leadership helped shape the nation. Their curiosity extended to science, where they discussed the importance of water, known chemically as H2O, vital for all living beings. Their conversation flowed into literature, where they shared a mutual admiration for the timeless works of William Shakespeare, particularly the tragic love story of 'Romeo and Juliet'.",
+        "text": "During their travels, Alex marveled at the vibrant culture and rich history of Madrid, the capital of Spain. They recounted their adventures across Asia, the largest continent by area, with its breathtaking landscapes and diverse cultures. History fascinated them, especially stories of George Washington, the first president of the United States, whose leadership helped shape the nation. Their curiosity extended to science, where they discussed the importance of water, known chemically as H2O, vital for all living beings. Their conversation flowed into literature, where they shared a mutual admiration for the timeless works of William Shakespeare, particularly the tragic love story of 'Romeo and Juliet'. Also, some code:\n\n```js\nconst a = 1;\n```",
         "questions": [
           {
             "id": "66b522f714a1cd98b5d3dc06",
             "audio": null,
-            "text": "What is the capital of Spain?",
+            "text": "What is the capital of Spain? Also, some code:\n\n```js\nconst a = 1;\n```",
             "answers": [
               {
                 "id": "66b522f714a1cd98b5d3dc07",
-                "text": "Paris"
+                "text": "`Paris`"
               },
               {
                 "id": "66b522f714a1cd98b5d3dc08",

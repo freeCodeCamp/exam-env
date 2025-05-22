@@ -36,7 +36,7 @@
               "deprecated": false,
               "audio": null,
               "tags": [],
-              "text": "This is an example of a multiple-choice question without audio. Which answer has the most text?",
+              "text": "This is an example of a multiple-choice question without audio. Which answer has the most text? Also, some code:\n\n```js\nconst a = 1;\n```",
               "answers": [
                 {
                   "id": "674818271ff8b2a575a57251",
@@ -45,12 +45,12 @@
                 },
                 {
                   "id": "6748180f23e95e2e9791b08c",
-                  "text": "Lorem ipsum",
+                  "text": "`Lorem ipsum`",
                   "isCorrect": false
                 },
                 {
                   "id": "67481818ce784b666ac445ca",
-                  "text": "Dolor sit amet",
+                  "text": "Dolor `sit` amet",
                   "isCorrect": false
                 },
                 {
@@ -104,7 +104,7 @@
         {
           "id": "6748185695ebfe93a2334ffd",
           "type": "Dialogue",
-          "context": "This is part of a dialogue question. This paragraph of text is the content of the dialogue, and is common for multiple, associated multiple-choice questions.",
+          "context": "This is part of a dialogue question. This paragraph of text is the content of the dialogue, and is common for multiple, associated multiple-choice questions. Here is some code:\n\n```js\nconst a = 1;\n```",
           "questions": [
             {
               "id": "6748185feb760604d3e1012d",

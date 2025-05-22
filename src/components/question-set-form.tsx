@@ -1,12 +1,13 @@
 import { UseMutationResult } from "@tanstack/react-query";
 import { Box, Text, Spacer } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
-import Markdown from "markdown-to-jsx";
 import { useEffect } from "react";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { ButtonLoading } from "./button-loading";
 import { AudioPlayer } from "./audio-player";
+import { parseMarkdown } from "../utils/markdown";
+import { PrismFormatted } from "./prism-formatted";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
@@ -49,7 +50,10 @@ export function QuestionSetForm({
       {fullQuestion.questionSet.context && (
         <>
           <Text fontWeight={"bold"}>Context</Text>
-          <Markdown>{fullQuestion.questionSet.context}</Markdown>
+          <PrismFormatted
+            text={parseMarkdown(fullQuestion.questionSet.context)}
+            getCodeBlockAriaLabel={(codeName) => `${codeName} code example`}
+          />
         </>
       )}
       {fullQuestion.audio && (
@@ -61,7 +65,12 @@ export function QuestionSetForm({
       )}
       <Text fontWeight={"bold"}>Question</Text>
       <QuizQuestion
-        question={fullQuestion.text}
+        question={
+          <PrismFormatted
+            text={parseMarkdown(fullQuestion.text)}
+            getCodeBlockAriaLabel={(codeName) => `${codeName} code example`}
+          />
+        }
         selectedAnswer={newSelectedAnswers?.[0]}
         onChange={(newAnswer) => {
           // This is an array, because, in the future, checkboxes might be used.
@@ -69,7 +78,12 @@ export function QuestionSetForm({
         }}
         answers={fullQuestion.answers.map((answer) => {
           return {
-            label: answer.text,
+            label: (
+              <PrismFormatted
+                text={parseMarkdown(answer.text)}
+                getCodeBlockAriaLabel={(codeName) => `${codeName} code example`}
+              />
+            ),
             value: answer.id,
           };
         })}

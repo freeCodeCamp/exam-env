@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
+import "prismjs/themes/prism-okaidia.min.css";
+import "prismjs/plugins/line-numbers/prism-line-numbers.css";
+
 import { ErrorRoute } from "./pages/error";
 import { LandingRoute } from "./pages/landing";
 import { ExamRoute } from "./pages/exam";
