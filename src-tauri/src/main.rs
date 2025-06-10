@@ -43,7 +43,8 @@ fn main() {
             commands::remove_authorization_token,
             commands::take_screenshot,
             commands::restart_app,
-            commands::emit_to_sentry
+            commands::emit_to_sentry,
+            commands::get_app_store
         ])
         .manage(sentry_state)
         .run(tauri::generate_context!())

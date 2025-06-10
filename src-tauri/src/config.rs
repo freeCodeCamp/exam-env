@@ -6,6 +6,14 @@ pub struct AppConfig {
     pub authorization_token: Option<String>,
 }
 
+#[derive(Deserialize, Serialize)]
+pub enum AppStore {
+    Microsoft,
+    Apple,
+    GitHub,
+    Unknown,
+}
+
 typify::import_types!(schema = "../prisma/json-schema.json");
 
 #[derive(Deserialize)]

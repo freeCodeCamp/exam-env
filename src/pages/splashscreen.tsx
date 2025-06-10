@@ -4,7 +4,7 @@ import {
   DownloadOptions,
   Update,
 } from "@tauri-apps/plugin-updater";
-import { restartApp } from "../utils/commands";
+import { getAppStore, restartApp } from "../utils/commands";
 import { ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -42,6 +42,11 @@ export function Splashscreen() {
   const [progress, setProgress] = useState(0);
   const [isStartDownload, setIsStartDownload] = useState(false);
   const navigate = useNavigate();
+
+  const appStoreQuery = useQuery({
+    queryKey: ["getAppStore"],
+    queryFn: getAppStore,
+  });
 
   const updateQuery = useQuery({
     queryKey: ["checkForUpdate"],
@@ -93,6 +98,36 @@ export function Splashscreen() {
     retry: false,
   });
 
+  if (appStoreQuery.isPending) {
+    return (
+      <SplashParents>
+        <ListItem fontWeight={900}>
+          <ListIcon as={SpinnerIcon} color="blue.500" />
+          Checking app store
+        </ListItem>
+        <Progress isIndeterminate />
+        <ListItem opacity={0.5}>Checking for app updates</ListItem>
+        <ListItem opacity={0.5}>Downloading update</ListItem>
+        <ListItem>Check device compatibility</ListItem>
+      </SplashParents>
+    );
+  }
+
+  if (appStoreQuery.isError) {
+    return (
+      <SplashParents>
+        <ListItem fontWeight={900}>
+          <ListIcon as={CloseIcon} color="red.500" />
+          Failed to check app store
+        </ListItem>
+        <Text>{appStoreQuery.error.message}</Text>
+        <ListItem>Checking for app updates</ListItem>
+        <ListItem>Downloading update</ListItem>
+        <ListItem>Check device compatibility</ListItem>
+      </SplashParents>
+    );
+  }
+
   if (updateQuery.isPending) {
     return (
       <SplashParents>
@@ -122,8 +157,16 @@ export function Splashscreen() {
   }
 
   if (!!update && !isStartDownload) {
+    // If there is an update,
+    // and the app was downloaded from the Microsoft Store
+    // show button to open the Microsoft Store at the app page
+    // show text explaining MS might not have the latest version?
     return (
       <SplashParents>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
+          App store determined
+        </ListItem>
         <ListItem>
           <ListIcon as={CheckIcon} color="green.500" />
           App update found
@@ -144,6 +187,10 @@ export function Splashscreen() {
       <SplashParents>
         <ListItem>
           <ListIcon as={CheckIcon} color="green.500" />
+          App store determined
+        </ListItem>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
           App update found
         </ListItem>
         <ListItem fontWeight={900}>
@@ -160,6 +207,10 @@ export function Splashscreen() {
   if (!!update && downloadAndInstallQuery.isError) {
     return (
       <SplashParents>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
+          App store determined
+        </ListItem>
         <ListItem>
           <ListIcon as={CheckIcon} color="green.500" />
           Checking for app updates
@@ -179,6 +230,10 @@ export function Splashscreen() {
       <SplashParents>
         <ListItem>
           <ListIcon as={CheckIcon} color="green.500" />
+          App store determined
+        </ListItem>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
           App is up to date
         </ListItem>
         <ListItem fontWeight={900}>
@@ -193,6 +248,10 @@ export function Splashscreen() {
   if (compatibilityCheckQuery.isError) {
     return (
       <SplashParents>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
+          App store determined
+        </ListItem>
         <ListItem>
           <ListIcon as={SpinnerIcon} color="green.500" />
           App is up to date
@@ -216,6 +275,10 @@ export function Splashscreen() {
 
   return (
     <SplashParents>
+      <ListItem>
+        <ListIcon as={CheckIcon} color="green.500" />
+        App store determined
+      </ListItem>
       <ListItem>
         <ListIcon as={CheckIcon} color="green.500" />
         App is up to date
