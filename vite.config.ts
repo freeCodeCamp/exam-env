@@ -10,7 +10,7 @@ export default defineConfig(async () => ({
     prism({
       languages: "all",
       plugins: ["line-numbers"],
-      theme: "okaidia",
+      theme: "default",
       css: true,
     }),
   ],
