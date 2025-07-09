@@ -10,7 +10,6 @@ use crate::secret::get_authorization_token;
 pub enum Error {
     Credential(String),
     FS(String),
-    Screenshot(String),
     Serialization(String),
     Request(String),
     Client(String),
@@ -21,7 +20,6 @@ impl Error {
         match self {
             Error::Credential(s) => s.push_str(context),
             Error::FS(s) => s.push_str(context),
-            Error::Screenshot(s) => s.push_str(context),
             Error::Serialization(s) => s.push_str(context),
             Error::Request(s) => s.push_str(context),
             Error::Client(s) => s.push_str(context),
@@ -34,7 +32,6 @@ impl std::fmt::Display for Error {
         let stringed = match self {
             Error::Credential(s) => format!("Credential: {s}"),
             Error::FS(s) => format!("FS: {s}"),
-            Error::Screenshot(s) => format!("Screenshot: {s}"),
             Error::Serialization(s) => format!("Serialization: {s}"),
             Error::Request(s) => format!("Request: {s}"),
             Error::Client(s) => format!("Client: {s}"),

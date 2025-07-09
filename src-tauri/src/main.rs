@@ -4,9 +4,7 @@
 use utils::valid_sentry_dsn;
 
 mod commands;
-mod config;
 mod error;
-mod request;
 mod secret;
 mod utils;
 
@@ -41,7 +39,7 @@ fn main() {
             commands::get_authorization_token,
             commands::set_authorization_token,
             commands::remove_authorization_token,
-            commands::take_screenshot,
+            // commands::take_screenshot,
             commands::restart_app,
             commands::emit_to_sentry
         ])

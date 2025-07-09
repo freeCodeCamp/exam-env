@@ -13,13 +13,10 @@ import {
 } from "@chakra-ui/icons";
 
 import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
-import { IncompatibleDeviceModal } from "../components/incompatible-device-modal";
 import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
 import { QuestionSetForm } from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
-import { useAppFocus } from "../components/use-app-focus";
 import OfflineModal from "../components/offline-modal";
-import { Camera } from "../components/camera";
 import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
 import {
@@ -30,7 +27,7 @@ import {
 } from "../utils/types";
 import { invoke } from "@tauri-apps/api/core";
 import { err, QueryFn, QueryFnError } from "../utils/errors";
-import { takeScreenshot } from "../utils/commands";
+import { ButtonLoading } from "../components/button-loading";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -66,9 +63,6 @@ export function Exam() {
   const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
 
   const [isOffline, setIsOffline] = useState(false);
-  const [incompatibleDevice, setIncompatibleDevice] = useState<string | null>(
-    null
-  );
 
   const [maxTimeReached, setMaxTimeReached] = useState(false);
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
@@ -126,18 +120,6 @@ export function Exam() {
 
   usePreventImmediateExit({
     onCloseRequested,
-  });
-
-  async function onFocusChanged(focused: boolean) {
-    console.debug(`App ${focused ? "is" : "is not"} focused`);
-    const { error } = await takeScreenshot();
-    if (error) {
-      console.error("TODO: Unable to take screenshot");
-    }
-  }
-
-  useAppFocus({
-    onFocusChanged,
   });
 
   function handleCloseModal() {
@@ -315,15 +297,6 @@ export function Exam() {
     navigate({ to: LandingRoute.to });
   }
 
-  function onUserMediaSetupError(err: unknown) {
-    console.log(err);
-    if (typeof err === "string") {
-      setIncompatibleDevice(err);
-    } else if (err instanceof Error) {
-      setIncompatibleDevice(err.message);
-    }
-  }
-
   if (examQuery.isPending) {
     // TODO: Improve this loading
     return (
@@ -370,17 +343,6 @@ export function Exam() {
       1000
   );
 
-  if (submitQuestionMutation.isError) {
-    // TODO: Return modal allowing retry
-    return (
-      <Box width={"full"} m="1em" mt="4em">
-        <Center height={"100%"}>
-          <Text>{submitQuestionMutation.error.message}</Text>
-        </Center>
-      </Box>
-    );
-  }
-
   return (
     <>
       <Box
@@ -389,14 +351,7 @@ export function Exam() {
         justifyContent={"flex-end"}
         position={"fixed"}
         width={"100%"}
-      >
-        <Camera
-          height={100}
-          width={200}
-          autoPlay
-          onUserMediaSetupError={onUserMediaSetupError}
-        />
-      </Box>
+      ></Box>
       <Box width={"full"} m="1em" mt="4em">
         <Center height={"100%"}>
           <OfflineModal
@@ -405,9 +360,30 @@ export function Exam() {
             fullQuestion={fullQuestion}
             selectedAnswers={newSelectedAnswers}
           />
-          {incompatibleDevice && (
-            <IncompatibleDeviceModal incompatibleDevice={incompatibleDevice} />
-          )}
+          {/* TODO: Move to own component */}
+          <Modal
+            open={submitQuestionMutation.isError}
+            onClose={() => {}}
+            variant="danger"
+          >
+            <Modal.Header showCloseButton={false}>
+              Question Submission Error
+            </Modal.Header>
+            <Modal.Body>
+              {submitQuestionMutation?.error?.message || "Something went wrong"}
+              <ButtonLoading
+                onClick={() => {
+                  submitQuestionMutation.mutate({
+                    fullQuestion,
+                    selectedAnswers: newSelectedAnswers,
+                  });
+                }}
+                isPending={submitQuestionMutation.isPending}
+              >
+                Retry Question Submission
+              </ButtonLoading>
+            </Modal.Body>
+          </Modal>
           <Box
             display={"flex"}
             flexDirection={"column"}

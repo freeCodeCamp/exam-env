@@ -5,8 +5,7 @@ export type Result<T> =
 export type FCCError =
   | { ValidationError: { message: string; id?: string } }
   | { FSError: string }
-  | { SerializationError: string }
-  | { ScreenshotError: string };
+  | { SerializationError: string };
 
 /**
  * Asserts the given value is not null or undefined.
@@ -20,9 +19,7 @@ export function assertError(value: unknown): asserts value is FCCError {
 
   if (
     typeof value !== "object" ||
-    (!("FSError" in value) &&
-      !("SerializationError" in value) &&
-      !("ScreenshotError" in value))
+    (!("FSError" in value) && !("SerializationError" in value))
   ) {
     throw new Error("Invalid error object " + JSON.stringify(value));
   }

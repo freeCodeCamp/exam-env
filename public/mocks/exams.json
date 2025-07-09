@@ -23,7 +23,8 @@
             "numberOfIncorrectAnswers": 3
           }
         ],
-        "retakeTimeInMS": 0
+        "retakeTimeInMS": 0,
+        "passingPercent": 80.0
       },
       "questionSets": [
         {
