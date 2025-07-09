@@ -1,6 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
-import { fetch } from "@tauri-apps/plugin-http";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { UserExam, UserExamAttempt } from "./types";
+
+const fetch = (r: URL | Request | string) =>
+  tauriFetch(r, { connectTimeout: 5_000 });
 
 import createClient from "openapi-fetch";
 import type { paths } from "../../prisma/api-schema";
@@ -78,8 +81,14 @@ export async function getGeneratedExam(examId: string) {
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(800);
     const response = new Response(null, { status: 200 });
-    return { response, data: undefined as never, error: undefined };
+    const error = {
+      code: "EXAMPLE_ERROR",
+      message: "Example error when posting exam",
+    };
+    return { response, data: undefined as never, error };
+    // return { response, data: undefined as never, error: undefined };
   }
 
   const token = await invoke<string>("get_authorization_token");

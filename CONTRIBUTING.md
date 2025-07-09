@@ -14,6 +14,8 @@ https://v2.tauri.app/start/prerequisites/
 ```bash
 cp sample.env .env
 pnpm i
+# If the install did not automatically run this:
+pnpm run prisma generate
 ```
 
 ```bash
@@ -21,12 +23,6 @@ cargo tauri build --config src-tauri/tauri.dev.conf.json
 ```
 
 ### Miscellaneous
-
-Generating TypeScript types from Rust types to keep them in sync:
-
-```bash
-cargo test
-```
 
 Mock data is located in `public/mocks/`.
 

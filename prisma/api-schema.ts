@@ -1,78 +1,4 @@
 export interface paths {
-    "/coderoad-challenge-completed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header: {
-                    "coderoad-user-token": string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        tutorialId: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            type: "success";
-                            msg: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            type: "error";
-                            msg: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                default: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            message: "flash.generic-error";
-                            /** @enum {string} */
-                            type: "danger";
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/project-completed": {
         parameters: {
             query?: never;
@@ -334,6 +260,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/daily-coding-challenge-completed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: objectid */
+                        id: string;
+                        language: "javascript" | "python";
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            completedDate: number;
+                            points: number;
+                            alreadyCompleted: boolean;
+                            completedDailyCodingChallenges: {
+                                id: string;
+                                completedDate: number;
+                                languages: ("javascript" | "python")[];
+                            }[];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "That does not appear to be a valid challenge submission.";
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/save-challenge": {
         parameters: {
             query?: never;
@@ -398,21 +390,7 @@ export interface paths {
                             message: "That does not appear to be a valid challenge submission.";
                             /** @enum {string} */
                             type: "error";
-                        };
-                    };
-                };
-                /** @description Default Response */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": "That challenge type is not saveable." | {
-                            /** @enum {string} */
-                            message: "flash.generic-error";
-                            /** @enum {string} */
-                            type: "danger";
-                        };
+                        } | "That challenge type is not saveable.";
                     };
                 };
                 /** @description Default Response */
@@ -999,6 +977,21 @@ export interface paths {
                                 message: string;
                                 type: "UserActionRequired" | "PaymentMethodRequired";
                                 client_secret?: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: {
+                                message: string;
+                                /** @enum {string} */
+                                type: "EmailRequiredError";
                             };
                         };
                     };
@@ -2381,7 +2374,7 @@ export interface paths {
                     };
                 };
                 /** @description Default Response */
-                400: {
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2390,12 +2383,12 @@ export interface paths {
                             /** @enum {string} */
                             type: "danger";
                             /** @enum {string} */
-                            message: "flash.provide-username";
+                            message: "flash.report-error";
                         };
                     };
                 };
                 /** @description Default Response */
-                default: {
+                500: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2750,12 +2743,16 @@ export interface paths {
                                         };
                                     }[];
                                     quizAttempts: {
-                                        /** Format: objectid */
                                         challengeId: string;
                                         quizId: string;
                                         timestamp: number;
                                     }[];
                                     completedChallengeCount: number;
+                                    completedDailyCodingChallenges: {
+                                        id: string;
+                                        completedDate: number;
+                                        languages: ("javascript" | "python")[];
+                                    }[];
                                     currentChallengeId: string;
                                     email: string;
                                     emailVerified: boolean;
@@ -2906,6 +2903,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/coderoad-challenge-completed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    "coderoad-user-token": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        tutorialId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "success";
+                            msg: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            msg: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            msg: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/mobile-login": {
         parameters: {
             query?: never;
@@ -3004,6 +3074,7 @@ export interface paths {
                                     note: string;
                                     totalTimeInMS: number;
                                     retakeTimeInMS: number;
+                                    passingPercent: number;
                                 };
                                 canTake: boolean;
                             }[];
@@ -3152,10 +3223,13 @@ export interface paths {
                 content: {
                     "application/json": {
                         attempt: {
+                            /** Format: objectid */
                             examId: string;
                             questionSets: {
+                                /** Format: objectid */
                                 id: string;
                                 questions: {
+                                    /** Format: objectid */
                                     id: string;
                                     answers: string[];
                                 }[];
@@ -3166,31 +3240,175 @@ export interface paths {
             };
             responses: {
                 /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exam-environment/exam/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    "exam-environment-authorization-token": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            startTimeInMS: number;
+                            questionSets: {
+                                id: string;
+                                questions: {
+                                    id: string;
+                                    answers: string[];
+                                    submissionTimeInMS: number;
+                                }[];
+                            }[];
+                            result: null | {
+                                score: number;
+                                passingPercent: number;
+                            };
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exam-environment/exam/attempt/{attemptId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    "exam-environment-authorization-token": string;
+                };
+                path: {
+                    attemptId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            startTimeInMS: number;
+                            questionSets: {
+                                id: string;
+                                questions: {
+                                    id: string;
+                                    answers: string[];
+                                    submissionTimeInMS: number;
+                                }[];
+                            }[];
+                            result: null | {
+                                score: number;
+                                passingPercent: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exam-environment/screenshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    "exam-environment-authorization-token": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3214,31 +3432,6 @@ export interface paths {
                     };
                 };
             };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/exam-environment/screenshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
         };
         delete?: never;
         options?: never;
@@ -3546,7 +3739,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/get-public-profile": {
+    "/users/get-public-profile": {
         parameters: {
             query?: never;
             header?: never;
@@ -3737,7 +3930,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/exists": {
+    "/users/exists": {
         parameters: {
             query?: never;
             header?: never;
@@ -3773,8 +3966,10 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @enum {boolean} */
-                            exists: true;
+                            /** @enum {string} */
+                            type: "danger";
+                            /** @enum {string} */
+                            message: "username parameter is required";
                         };
                     };
                 };
@@ -3878,16 +4073,10 @@ export interface paths {
                                 };
                             }[];
                         } | {
-                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
+                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "a2-professional-spanish-v8" | "a2-professional-chinese-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
                             certTitle: string;
                             username: string;
-                            date: number;
-                            completionTime: number;
-                        } | {
-                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
-                            certTitle: string;
-                            username: string;
-                            name: string;
+                            name?: string;
                             date: number;
                             completionTime: number;
                         } | {
@@ -4116,6 +4305,39 @@ export interface paths {
         trace?: never;
     };
     "/status/ping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/status/version": {
         parameters: {
             query?: never;
             header?: never;

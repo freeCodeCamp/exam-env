@@ -80,19 +80,6 @@ export function Splashscreen() {
     },
   });
 
-  const compatibilityCheckQuery = useQuery({
-    queryKey: ["compatabilityCheck"],
-    enabled: downloadAndInstallQuery.isSuccess || !update,
-    queryFn: async () => {
-      const compatibilityError = await checkDeviceCompatibility();
-      if (compatibilityError) {
-        throw compatibilityError;
-      }
-      return null;
-    },
-    retry: false,
-  });
-
   if (updateQuery.isPending) {
     return (
       <SplashParents>
@@ -174,46 +161,6 @@ export function Splashscreen() {
     );
   }
 
-  if (compatibilityCheckQuery.isPending) {
-    return (
-      <SplashParents>
-        <ListItem>
-          <ListIcon as={CheckIcon} color="green.500" />
-          App is up to date
-        </ListItem>
-        <ListItem fontWeight={900}>
-          <ListIcon as={SpinnerIcon} color="blue.500" />
-          Checking device compatibility
-        </ListItem>
-        <Progress isIndeterminate />
-      </SplashParents>
-    );
-  }
-
-  if (compatibilityCheckQuery.isError) {
-    return (
-      <SplashParents>
-        <ListItem>
-          <ListIcon as={SpinnerIcon} color="green.500" />
-          App is up to date
-        </ListItem>
-        <ListItem fontWeight={900}>
-          <ListIcon as={CloseIcon} color="red.500" />
-          Error checking device compatibility
-        </ListItem>
-        <Text>{compatibilityCheckQuery.error.message}</Text>
-        <Button
-          block={true}
-          onClick={() => {
-            compatibilityCheckQuery.refetch();
-          }}
-        >
-          Retry
-        </Button>
-      </SplashParents>
-    );
-  }
-
   return (
     <SplashParents>
       <ListItem>
@@ -229,7 +176,8 @@ export function Splashscreen() {
       <Button
         block={true}
         onClick={() => navigate({ to: LandingRoute.to })}
-        disabled={!!compatibilityCheckQuery.error || update?.available}
+        // disabled={!!compatibilityCheckQuery.error || update?.available}
+        disabled={!!update}
       >
         Continue to Landing Page
       </Button>
@@ -319,36 +267,6 @@ async function checkForUpdate() {
     throw new Error(e as string);
   }
   return null;
-}
-
-// Check device compatibility
-async function checkDeviceCompatibility() {
-  if (import.meta.env.VITE_MOCK_DATA === "true") {
-    await delayForTesting(1000);
-  }
-  const compatError = await updateDeviceList();
-  return compatError;
-}
-
-// Check devices and permissions
-async function updateDeviceList() {
-  try {
-    const enumeratedDevices = await navigator.mediaDevices.enumerateDevices();
-    const devices = enumeratedDevices.flat();
-    const atLeastOneCamera = devices.some((d) => d.kind === "videoinput");
-    if (!atLeastOneCamera) {
-      return new Error("No Camera found!");
-    }
-
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    stream.getTracks().forEach((track) => track.stop());
-
-    return null;
-  } catch (e) {
-    return new Error(
-      "Please make sure you have a camera and have granted permission to use it."
-    );
-  }
 }
 
 export const SplashscreenRoute = createRoute({

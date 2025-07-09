@@ -14,31 +14,6 @@ export function ExamLanding() {
 
   const { examId, note } = ExamLandingRoute.useParams();
 
-  const checkDevice = async () => {
-    // This is a workaround to make sure Tauri knows that the user has
-    // granted permission to use the camera on MacOS.
-    // https://github.com/tauri-apps/tauri/issues/2600#issuecomment-1970358866
-    try {
-      await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-    } catch (e) {
-      console.log(e);
-    }
-    const enumberatedDevices = await navigator.mediaDevices.enumerateDevices();
-    const devices = enumberatedDevices.flat();
-    const cameraPermission = await navigator.permissions.query({
-      name: "camera",
-    });
-    if (cameraPermission.state !== "granted") {
-      return "Grant this app permission to use your camera";
-    }
-    const atLeastOneCamera = devices.some((d) => d.kind === "videoinput");
-    if (!atLeastOneCamera) {
-      return "No Camera found!";
-    }
-  };
-
   return (
     <>
       <Header />
@@ -71,9 +46,8 @@ export function ExamLanding() {
               </Text>
 
               <Text align={"center"}>
-                During the exam, your screen and webcam will be monitored to
-                ensure you are not cheating. Screen captures will be reviewed by
-                staff, and deleted once the review is complete.
+                Once you have completed the attempt, within 7 days you will be
+                able to check your results.
               </Text>
               <Checkbox onChange={(e) => setHasAgreed(e.target.checked)}>
                 I agree to the terms and conditions
@@ -85,13 +59,7 @@ export function ExamLanding() {
                   disabled={!hasAgreed}
                   block={true}
                   onClick={() => {
-                    checkDevice().then((reason) => {
-                      if (reason) {
-                        alert(reason);
-                      } else {
-                        navigate({ to: ExamRoute.to, params: { examId } });
-                      }
-                    });
+                    navigate({ to: ExamRoute.to, params: { examId } });
                   }}
                 >
                   Start Exam
