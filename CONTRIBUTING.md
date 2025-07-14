@@ -6,8 +6,10 @@
 
 https://v2.tauri.app/start/prerequisites/
 
+https://v2.tauri.app/reference/cli/
+
 > [!NOTE]
-> This repo uses `pnpm`.
+> This repo uses `pnpm`. It is recommended to use `cargo` for the tauri cli commands, but pnpm may also be used.
 
 ### Start
 
@@ -19,7 +21,7 @@ pnpm run prisma generate
 ```
 
 ```bash
-cargo tauri build --config src-tauri/tauri.dev.conf.json
+cargo tauri dev --config src-tauri/tauri.dev.conf.json
 ```
 
 ### Miscellaneous
