@@ -3,6 +3,11 @@
   padding: 0;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 :root {
   --title-bar-height: 35px;
 
@@ -53,4 +58,21 @@
 
 audio {
   width: 100%;
+}
+
+/* Prevent horizontal scrolling for code blocks and content */
+pre,
+code {
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Ensure images and other content don't overflow */
+img,
+video,
+audio {
+  max-width: 100%;
+  height: auto;
 }

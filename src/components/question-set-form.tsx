@@ -1,34 +1,21 @@
-import { UseMutationResult } from "@tanstack/react-query";
-import { Box, Text, Spacer } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
 import { useEffect } from "react";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
-import { ButtonLoading } from "./button-loading";
 import { AudioPlayer } from "./audio-player";
 import { parseMarkdown } from "../utils/markdown";
 import { PrismFormatted } from "./prism-formatted";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
-  submitQuestionMutation: UseMutationResult<
-    void,
-    Error,
-    {
-      fullQuestion: FullQuestion;
-      selectedAnswers: Answers[number]["id"][];
-    }
-  >;
   newSelectedAnswers: Answers[number]["id"][];
   setNewSelectedAnswers: (newSelectedAnswers: Answers[number]["id"][]) => void;
-  maxTimeReached: boolean;
   examAttempt: UserExamAttempt;
 };
 
 export function QuestionSetForm({
   fullQuestion,
-  submitQuestionMutation,
-  maxTimeReached,
   newSelectedAnswers,
   setNewSelectedAnswers,
   examAttempt,
@@ -46,7 +33,7 @@ export function QuestionSetForm({
   }, [fullQuestion]);
 
   return (
-    <>
+    <Box width="65vw" height="100%">
       {fullQuestion.questionSet.context && (
         <>
           <Text fontWeight={"bold"}>Context</Text>
@@ -63,7 +50,6 @@ export function QuestionSetForm({
           <AudioPlayer fullQuestion={fullQuestion} />
         </Box>
       )}
-      <Text fontWeight={"bold"}>Question</Text>
       <QuizQuestion
         question={
           <PrismFormatted
@@ -88,29 +74,6 @@ export function QuestionSetForm({
           };
         })}
       />
-      <Spacer />
-      <Box pt={"1em"}>
-        <ButtonLoading
-          onClick={() => {
-            if (!newSelectedAnswers) {
-              return;
-            }
-
-            submitQuestionMutation.mutate({
-              fullQuestion,
-              selectedAnswers: newSelectedAnswers,
-            });
-          }}
-          disabled={
-            !newSelectedAnswers.length ||
-            maxTimeReached ||
-            submitQuestionMutation.isPending
-          }
-          isPending={submitQuestionMutation.isPending}
-        >
-          Submit
-        </ButtonLoading>
-      </Box>
-    </>
+    </Box>
   );
 }

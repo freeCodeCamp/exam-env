@@ -25,7 +25,7 @@
           {
             "id": "66b522e714a1cd98b5d3dc04",
             "audio": null,
-            "text": "What is the capital of France? Also, some code:\n\n```js\nconst a = 1;\n```\n\n```rust\nfn main() {\n    println!(\"Hello World!\");\n}\n```\n",
+            "text": "What is the capital of France?\n\nNot to mention this really long, distracting sentence to take up all your time and viewport space. You better have a decent way to handle text that goes this long?? Maybe even some way to handle 🤫.\n\n As well as some Markdown with _italics_ and **emboldened** words...\n\n Check out this table:\n\n| H1 | H2 |\n| --- | --- |\n| Something | `inline code something` |\n\nAlso, some long code:\n\n```js\nconst a = 1;\nconst s = 'this string should be long enough to overflow in the x-direction. Check if this is handled in an appropriate way.'\n\nfunction myFunc() {\n  const d = 5;\n  const e = myFunc(3);\n  return e;\n}\n\nconst b = 2;\n```",
             "answers": [
               {
                 "id": "66b522e714a1cd98b5d3dc05",
