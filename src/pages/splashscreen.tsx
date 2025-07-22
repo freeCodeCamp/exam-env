@@ -8,8 +8,10 @@ import { restartApp } from "../utils/commands";
 import { ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Box,
   Center,
   Flex,
+  Heading,
   ListIcon,
   ListItem,
   OrderedList,
@@ -28,12 +30,16 @@ function SplashParents({ children }: { children: ReactNode }) {
   return (
     <>
       <Header />
-      <Center>
-        <Flex direction="column">
-          <Spacer size="m" />
-          <OrderedList spacing={3}>{children}</OrderedList>
-        </Flex>
-      </Center>
+      <Box width="full">
+        <Center height="100%">
+          <Flex direction="column">
+            <Spacer size="m" />
+            <Heading color="black">Environment Requirements</Heading>
+            <Spacer size="s" />
+            <OrderedList spacing={3}>{children}</OrderedList>
+          </Flex>
+        </Center>
+      </Box>
     </>
   );
 }
@@ -179,7 +185,7 @@ export function Splashscreen() {
         // disabled={!!compatibilityCheckQuery.error || update?.available}
         disabled={!!update}
       >
-        Continue to Landing Page
+        Select Exam
       </Button>
     </SplashParents>
   );
