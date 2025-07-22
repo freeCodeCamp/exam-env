@@ -6,12 +6,18 @@ import {
   IconButton,
   Spinner,
   Text,
+  Modal,
   Button,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalContent,
+  ModalOverlay,
 } from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
-import { Modal, Spacer } from "@freecodecamp/ui";
+// import { Modal } from "@freecodecamp/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
@@ -359,7 +365,7 @@ export function Exam() {
 
   return (
     <Box overflowY="hidden">
-      <Box width={"full"} mb="1em" mt="3em">
+      <Box width={"full"} mt="2em">
         <Center height={"100%"} display={"flex"} flexDirection={"column"}>
           <OfflineModal
             isOffline={isOffline}
@@ -369,34 +375,31 @@ export function Exam() {
           />
           {/* TODO: Move to own component */}
           <Modal
-            open={submitQuestionMutation.isError}
+            isOpen={submitQuestionMutation.isError}
             onClose={() => {}}
             variant="danger"
           >
-            <Modal.Header showCloseButton={false}>
-              Question Submission Error
-            </Modal.Header>
-            <Modal.Body>
-              {submitQuestionMutation?.error?.message || "Something went wrong"}
-              <ButtonLoading
-                onClick={() => {
-                  submitQuestionMutation.mutate({
-                    fullQuestion,
-                    selectedAnswers: newSelectedAnswers,
-                  });
-                }}
-                isPending={submitQuestionMutation.isPending}
-              >
-                Retry Question Submission
-              </ButtonLoading>
-            </Modal.Body>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Question Submission Error</ModalHeader>
+              <ModalBody>
+                {submitQuestionMutation?.error?.message ||
+                  "Something went wrong"}
+                <ButtonLoading
+                  onClick={() => {
+                    submitQuestionMutation.mutate({
+                      fullQuestion,
+                      selectedAnswers: newSelectedAnswers,
+                    });
+                  }}
+                  isPending={submitQuestionMutation.isPending}
+                >
+                  Retry Question Submission
+                </ButtonLoading>
+              </ModalBody>
+            </ModalContent>
           </Modal>
-          <Center
-            width="full"
-            borderBottom={"2px"}
-            borderColor={"gray.300"}
-            paddingRight={`${scrollBarWidth}px`}
-          >
+          <Center width="full" borderBottom={"2px"} borderColor={"gray.300"}>
             <Flex justifyContent={"space-between"} width={"65vw"}>
               <Text
                 fontWeight={"bold"}
@@ -408,15 +411,16 @@ export function Exam() {
               />
             </Flex>
           </Center>
-          <Spacer size="xs" />
           <Box
             display={"flex"}
             flexDirection={"column"}
             alignItems={"center"}
             width={"full"}
-            height={"80vh"}
+            height={"77vh"}
             overflowY="scroll"
             ref={scrollableElementRef}
+            paddingLeft={`${scrollBarWidth}px`}
+            paddingTop={"1rem"}
           >
             <QuestionSetForm
               fullQuestion={fullQuestion}
@@ -431,12 +435,55 @@ export function Exam() {
       <Box
         display={"flex"}
         justifyContent={"center"}
+        alignItems={"center"}
         borderTop={"2px"}
         borderColor={"gray.300"}
         paddingTop={"1rem"}
         flexWrap={"wrap"}
+        flexDirection={"column"}
         overflowX={"hidden"}
       >
+        <Flex width={"65%"}>
+          <Button
+            onClick={handleExamEnd}
+            disabled={true}
+            marginRight="0.4em"
+            width={"50%"}
+            isLoading={submitQuestionMutation.isPending}
+            loadingText="Exiting Exam"
+          >
+            Submit Exam
+          </Button>
+          <Button
+            width={"50%"}
+            onClick={() => {
+              if (!newSelectedAnswers) {
+                return;
+              }
+
+              submitQuestionMutation.mutate({
+                fullQuestion,
+                selectedAnswers: newSelectedAnswers,
+              });
+            }}
+            disabled={
+              !newSelectedAnswers.length ||
+              maxTimeReached ||
+              submitQuestionMutation.isPending
+            }
+            backgroundColor={"rgb(48, 48, 204)"}
+            color={"white"}
+            _hover={{
+              color: "blue",
+              background: "gray.300",
+            }}
+            marginLeft="0.4em"
+            isLoading={submitQuestionMutation.isPending}
+            loadingText="Submitting"
+          >
+            Submit Question
+          </Button>
+        </Flex>
         <NavigationBubbles
           questions={questions}
           currentQuestionNumber={currentQuestionNumber}
@@ -445,50 +492,13 @@ export function Exam() {
           nextQuestion={nextQuestion}
           previousQuestion={previousQuestion}
         />
-
-        <Button
-          onClick={() => {
-            if (!newSelectedAnswers) {
-              return;
-            }
-
-            submitQuestionMutation.mutate({
-              fullQuestion,
-              selectedAnswers: newSelectedAnswers,
-            });
-          }}
-          disabled={
-            !newSelectedAnswers.length ||
-            maxTimeReached ||
-            submitQuestionMutation.isPending
-          }
-          backgroundColor={"rgb(48, 48, 204)"}
-          color={"white"}
-          _hover={{
-            color: "blue",
-            background: "gray.300",
-          }}
-          margin="0.3em"
-          isLoading={submitQuestionMutation.isPending}
-          loadingText="Submitting"
-        >
-          Submit Question
-        </Button>
-        <Button
-          onClick={handleExamEnd}
-          disabled={true}
-          margin="0.3em"
-          isLoading={submitQuestionMutation.isPending}
-          loadingText="Exiting Exam"
-        >
-          Submit Exam
-        </Button>
       </Box>
-      <Modal onClose={handleCloseModal} open={hasFinishedExam}>
-        <Modal.Header showCloseButton={!maxTimeReached}>
+      <Modal onClose={handleCloseModal} isOpen={hasFinishedExam}>
+        {/* <ModalHeader showCloseButton={!maxTimeReached}> */}
+        <ModalHeader>
           {maxTimeReached ? "Time's up!" : "Submit Exam"}
-        </Modal.Header>
-        <Modal.Body>
+        </ModalHeader>
+        <ModalBody>
           {!maxTimeReached && !answeredAll() && (
             <Text color="tomato" fontWeight={"bold"}>
               It seems you haven't answered all questions, are you sure you want
@@ -496,12 +506,12 @@ export function Exam() {
             </Text>
           )}
           <Text>Thank you for taking the exam.</Text>
-        </Modal.Body>
-        <Modal.Footer>
+        </ModalBody>
+        <ModalFooter>
           <Button onClick={handleExamEnd}>
             {maxTimeReached ? "Close" : "End Exam"}
           </Button>
-        </Modal.Footer>
+        </ModalFooter>
       </Modal>
     </Box>
   );
@@ -608,7 +618,7 @@ function NavigationBubbles({
   const bubblesArr = getCurrentBubbleIndex(wantedIndex);
 
   return (
-    <>
+    <Flex width="80%" justifyContent={"center"}>
       <IconButton
         aria-label="previous question"
         icon={<ChevronLeftIcon />}
@@ -633,6 +643,10 @@ function NavigationBubbles({
           key={question_num}
           onClick={() => {
             specificQuestion(question_num);
+          }}
+          _hover={{
+            backgroundColor: "gray.200",
+            color: "black",
           }}
           className={`bottom-bubble-nav ${
             currentQuestionNumber === question_num ? "bubble-active" : ""
@@ -659,7 +673,7 @@ function NavigationBubbles({
           nextQuestion();
         }}
       />
-    </>
+    </Flex>
   );
 }
 

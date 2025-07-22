@@ -33,7 +33,7 @@ export function QuestionSetForm({
   }, [fullQuestion]);
 
   return (
-    <Box width="65vw" height="100%">
+    <Box width="65vw" paddingBottom={"1rem"}>
       {fullQuestion.questionSet.context && (
         <>
           <Text fontWeight={"bold"}>Context</Text>
