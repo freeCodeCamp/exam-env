@@ -36,7 +36,13 @@ function SplashParents({ children }: { children: ReactNode }) {
             <Spacer size="m" />
             <Heading color="black">Environment Requirements</Heading>
             <Spacer size="s" />
-            <OrderedList spacing={3}>{children}</OrderedList>
+            <OrderedList
+              spacing={3}
+              marginInlineStart={0}
+              listStyleType={"none"}
+            >
+              {children}
+            </OrderedList>
           </Flex>
         </Center>
       </Box>
@@ -178,6 +184,8 @@ export function Splashscreen() {
         <ListIcon as={CheckIcon} color="green.500" />
         Device is compatible
       </ListItem>
+
+      <Spacer size="s" />
 
       <Button
         block={true}
