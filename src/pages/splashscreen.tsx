@@ -39,6 +39,7 @@ function SplashParents({ children }: { children: ReactNode }) {
             <OrderedList
               spacing={3}
               marginInlineStart={0}
+              paddingInlineStart={0}
               listStyleType={"none"}
             >
               {children}
