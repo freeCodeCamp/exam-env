@@ -1,4 +1,4 @@
-import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createRoute, Navigate } from "@tanstack/react-router";
 import {
   Box,
   Center,
@@ -6,13 +6,8 @@ import {
   IconButton,
   Spinner,
   Text,
-  Modal,
   Button,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalContent,
-  ModalOverlay,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
@@ -30,7 +25,6 @@ import { usePreventImmediateExit } from "../components/use-prevent-immediate-exi
 import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
 import { QuestionSetForm } from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
-import OfflineModal from "../components/offline-modal";
 import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
 import {
@@ -41,7 +35,8 @@ import {
 } from "../utils/types";
 import { invoke } from "@tauri-apps/api/core";
 import { err, QueryFn, QueryFnError } from "../utils/errors";
-import { ButtonLoading } from "../components/button-loading";
+import { ExamSubmissionModal } from "../components/exam-submission-modal";
+import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -67,7 +62,6 @@ export function Exam() {
     return res.data;
   }
 
-  const navigate = useNavigate();
   const [examAttempt, setExamAttempt] = useState<UserExamAttempt | null>(null);
   const [newSelectedAnswers, setNewSelectedAnswers] = useState<
     Answers[number]["id"][]
@@ -75,8 +69,6 @@ export function Exam() {
 
   const [fullQuestion, setFullQuestion] = useState<FullQuestion | null>(null);
   const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
-
-  const [isOffline, setIsOffline] = useState(false);
 
   const [maxTimeReached, setMaxTimeReached] = useState(false);
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
@@ -137,14 +129,6 @@ export function Exam() {
   usePreventImmediateExit({
     onCloseRequested,
   });
-
-  function handleCloseModal() {
-    setHasFinishedExam(false);
-
-    if (maxTimeReached) {
-      setHasFinishedExam(true);
-    }
-  }
 
   const questions = useMemo(
     () =>
@@ -298,19 +282,15 @@ export function Exam() {
       throw new Error(error.message);
     }
 
-    setIsOffline(false);
-
     if (currentQuestionNumber < questions.length) {
       nextQuestion();
-    } else {
-      setHasFinishedExam(true);
     }
 
     setExamAttempt(updatedExamAttempt);
   }
 
   function handleExamEnd() {
-    navigate({ to: LandingRoute.to });
+    setHasFinishedExam(true);
   }
 
   if (examQuery.isPending) {
@@ -363,157 +343,140 @@ export function Exam() {
     (scrollableElementRef.current?.offsetWidth ?? 0) -
     (scrollableElementRef.current?.clientWidth ?? 0);
 
+  const allQuestionsAnswered = answeredAll();
+
   return (
-    <Box overflowY="hidden">
-      <Box width={"full"} mt="2em">
-        <Center height={"100%"} display={"flex"} flexDirection={"column"}>
-          <OfflineModal
-            isOffline={isOffline}
-            submitQuestionMutation={submitQuestionMutation}
-            fullQuestion={fullQuestion}
-            selectedAnswers={newSelectedAnswers}
-          />
-          {/* TODO: Move to own component */}
-          <Modal
-            isOpen={submitQuestionMutation.isError}
-            onClose={() => {}}
-            variant="danger"
-          >
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Question Submission Error</ModalHeader>
-              <ModalBody>
-                {submitQuestionMutation?.error?.message ||
-                  "Something went wrong"}
-                <ButtonLoading
-                  onClick={() => {
-                    submitQuestionMutation.mutate({
-                      fullQuestion,
-                      selectedAnswers: newSelectedAnswers,
-                    });
-                  }}
-                  isPending={submitQuestionMutation.isPending}
-                >
-                  Retry Question Submission
-                </ButtonLoading>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-          <Center width="full" borderBottom={"2px"} borderColor={"gray.300"}>
-            <Flex justifyContent={"space-between"} width={"65vw"}>
-              <Text
-                fontWeight={"bold"}
-              >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
-              <Timer
-                secondsLeft={secondsLeft}
-                setHasFinishedExam={setHasFinishedExam}
-                setMaxTimeReached={setMaxTimeReached}
+    <>
+      <ExamSubmissionModal
+        maxTimeReached={maxTimeReached}
+        hasFinishedExam={hasFinishedExam}
+        setHasFinishedExam={setHasFinishedExam}
+      />
+      <QuestionSubmissionErrorModal
+        submitQuestionMutation={submitQuestionMutation}
+        fullQuestion={fullQuestion}
+        newSelectedAnswers={newSelectedAnswers}
+      />
+      <Box overflowY="hidden">
+        <Box width={"full"} mt="2em">
+          <Center height={"100%"} display={"flex"} flexDirection={"column"}>
+            <Center width="full" borderBottom={"2px"} borderColor={"gray.300"}>
+              <Flex justifyContent={"space-between"} width={"65vw"}>
+                <Text
+                  fontWeight={"bold"}
+                >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
+                <Timer
+                  secondsLeft={secondsLeft}
+                  setHasFinishedExam={setHasFinishedExam}
+                  setMaxTimeReached={setMaxTimeReached}
+                />
+              </Flex>
+            </Center>
+            <Box
+              display={"flex"}
+              flexDirection={"column"}
+              alignItems={"center"}
+              width={"full"}
+              height={"77vh"}
+              overflowY="scroll"
+              ref={scrollableElementRef}
+              paddingLeft={`${scrollBarWidth}px`}
+              paddingTop={"1rem"}
+            >
+              <QuestionSetForm
+                fullQuestion={fullQuestion}
+                examAttempt={examAttempt}
+                setNewSelectedAnswers={setNewSelectedAnswers}
+                newSelectedAnswers={newSelectedAnswers}
               />
-            </Flex>
+            </Box>
           </Center>
-          <Box
-            display={"flex"}
-            flexDirection={"column"}
-            alignItems={"center"}
-            width={"full"}
-            height={"77vh"}
-            overflowY="scroll"
-            ref={scrollableElementRef}
-            paddingLeft={`${scrollBarWidth}px`}
-            paddingTop={"1rem"}
-          >
-            <QuestionSetForm
-              fullQuestion={fullQuestion}
-              examAttempt={examAttempt}
-              setNewSelectedAnswers={setNewSelectedAnswers}
-              newSelectedAnswers={newSelectedAnswers}
-            />
-          </Box>
-        </Center>
-      </Box>
+        </Box>
 
-      <Box
-        display={"flex"}
-        justifyContent={"center"}
-        alignItems={"center"}
-        borderTop={"2px"}
-        borderColor={"gray.300"}
-        paddingTop={"1rem"}
-        flexWrap={"wrap"}
-        flexDirection={"column"}
-        overflowX={"hidden"}
-      >
-        <Flex width={"65%"}>
-          <Button
-            onClick={handleExamEnd}
-            disabled={true}
-            marginRight="0.4em"
-            width={"50%"}
-            isLoading={submitQuestionMutation.isPending}
-            loadingText="Exiting Exam"
-          >
-            Submit Exam
-          </Button>
-          <Button
-            width={"50%"}
-            onClick={() => {
-              if (!newSelectedAnswers) {
-                return;
+        <Box
+          display={"flex"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          borderTop={"2px"}
+          borderColor={"gray.300"}
+          paddingTop={"1rem"}
+          flexWrap={"wrap"}
+          flexDirection={"column"}
+          overflowX={"hidden"}
+        >
+          <Flex width={"65%"}>
+            <Tooltip
+              label="Answer all questions to submit"
+              isDisabled={allQuestionsAnswered}
+            >
+              <Button
+                onClick={handleExamEnd}
+                isDisabled={!allQuestionsAnswered}
+                marginRight="0.4em"
+                width={"50%"}
+                backgroundColor={
+                  allQuestionsAnswered ? "rgb(48, 48, 204)" : undefined
+                }
+                color={allQuestionsAnswered ? "white" : undefined}
+                _hover={
+                  allQuestionsAnswered
+                    ? {
+                        color: "blue",
+                        background: "gray.300",
+                      }
+                    : undefined
+                }
+              >
+                Submit Exam
+              </Button>
+            </Tooltip>
+            <Button
+              width={"50%"}
+              onClick={() => {
+                if (!newSelectedAnswers) {
+                  return;
+                }
+
+                submitQuestionMutation.mutate({
+                  fullQuestion,
+                  selectedAnswers: newSelectedAnswers,
+                });
+              }}
+              isDisabled={
+                !newSelectedAnswers.length ||
+                maxTimeReached ||
+                submitQuestionMutation.isPending
               }
-
-              submitQuestionMutation.mutate({
-                fullQuestion,
-                selectedAnswers: newSelectedAnswers,
-              });
-            }}
-            disabled={
-              !newSelectedAnswers.length ||
-              maxTimeReached ||
-              submitQuestionMutation.isPending
-            }
-            backgroundColor={"rgb(48, 48, 204)"}
-            color={"white"}
-            _hover={{
-              color: "blue",
-              background: "gray.300",
-            }}
-            marginLeft="0.4em"
-            isLoading={submitQuestionMutation.isPending}
-            loadingText="Submitting"
-          >
-            Submit Question
-          </Button>
-        </Flex>
-        <NavigationBubbles
-          questions={questions}
-          currentQuestionNumber={currentQuestionNumber}
-          specificQuestion={specificQuestion}
-          isAnswered={isAnswered}
-          nextQuestion={nextQuestion}
-          previousQuestion={previousQuestion}
-        />
+              backgroundColor={
+                !allQuestionsAnswered ? "rgb(48, 48, 204)" : undefined
+              }
+              color={!allQuestionsAnswered ? "white" : undefined}
+              _hover={
+                !allQuestionsAnswered
+                  ? {
+                      color: "blue",
+                      background: "gray.300",
+                    }
+                  : undefined
+              }
+              marginLeft="0.4em"
+              isLoading={submitQuestionMutation.isPending}
+              loadingText="Submitting"
+            >
+              Submit Question
+            </Button>
+          </Flex>
+          <NavigationBubbles
+            questions={questions}
+            currentQuestionNumber={currentQuestionNumber}
+            specificQuestion={specificQuestion}
+            isAnswered={isAnswered}
+            nextQuestion={nextQuestion}
+            previousQuestion={previousQuestion}
+          />
+        </Box>
       </Box>
-      <Modal onClose={handleCloseModal} isOpen={hasFinishedExam}>
-        {/* <ModalHeader showCloseButton={!maxTimeReached}> */}
-        <ModalHeader>
-          {maxTimeReached ? "Time's up!" : "Submit Exam"}
-        </ModalHeader>
-        <ModalBody>
-          {!maxTimeReached && !answeredAll() && (
-            <Text color="tomato" fontWeight={"bold"}>
-              It seems you haven't answered all questions, are you sure you want
-              to quit the exam?
-            </Text>
-          )}
-          <Text>Thank you for taking the exam.</Text>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={handleExamEnd}>
-            {maxTimeReached ? "Close" : "End Exam"}
-          </Button>
-        </ModalFooter>
-      </Modal>
-    </Box>
+    </>
   );
 }
 
