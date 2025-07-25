@@ -87,8 +87,8 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
       code: "EXAMPLE_ERROR",
       message: "Example error when posting exam",
     };
-    return { response, data: undefined as never, error };
-    // return { response, data: undefined as never, error: undefined };
+    // return { response, data: undefined as never, error };
+    return { response, data: undefined as never, error: undefined };
   }
 
   const token = await invoke<string>("get_authorization_token");

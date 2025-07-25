@@ -1,8 +1,6 @@
-import { Spinner } from "@chakra-ui/react";
-import { Button } from "@freecodecamp/ui";
+import { Spinner, Button, ButtonProps } from "@chakra-ui/react";
 
-interface ButtonLoadingProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement | HTMLAnchorElement> {
+interface ButtonLoadingProps extends ButtonProps {
   children: React.ReactNode;
   isPending: boolean;
 }
@@ -15,14 +13,11 @@ export function ButtonLoading({
 }: ButtonLoadingProps) {
   return (
     <Button
-      block={true}
       onClick={onClick}
       disabled={isPending}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      display={"flex"}
+      justifyContent={"center"}
+      alignItems={"center"}
       {...rest}
       type="button"
     >

@@ -1,9 +1,18 @@
-import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
-import { Box, Center, Flex, IconButton, Spinner, Text } from "@chakra-ui/react";
+import { createRoute, Navigate } from "@tanstack/react-router";
+import {
+  Box,
+  Center,
+  Flex,
+  IconButton,
+  Spinner,
+  Text,
+  Button,
+  Tooltip,
+} from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
-import { Button, Modal } from "@freecodecamp/ui";
+// import { Modal } from "@freecodecamp/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
@@ -16,7 +25,6 @@ import { usePreventImmediateExit } from "../components/use-prevent-immediate-exi
 import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
 import { QuestionSetForm } from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
-import OfflineModal from "../components/offline-modal";
 import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
 import {
@@ -27,7 +35,8 @@ import {
 } from "../utils/types";
 import { invoke } from "@tauri-apps/api/core";
 import { err, QueryFn, QueryFnError } from "../utils/errors";
-import { ButtonLoading } from "../components/button-loading";
+import { ExamSubmissionModal } from "../components/exam-submission-modal";
+import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -53,7 +62,6 @@ export function Exam() {
     return res.data;
   }
 
-  const navigate = useNavigate();
   const [examAttempt, setExamAttempt] = useState<UserExamAttempt | null>(null);
   const [newSelectedAnswers, setNewSelectedAnswers] = useState<
     Answers[number]["id"][]
@@ -62,10 +70,10 @@ export function Exam() {
   const [fullQuestion, setFullQuestion] = useState<FullQuestion | null>(null);
   const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
 
-  const [isOffline, setIsOffline] = useState(false);
-
   const [maxTimeReached, setMaxTimeReached] = useState(false);
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
+
+  const scrollableElementRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!examQuery.data) {
@@ -121,14 +129,6 @@ export function Exam() {
   usePreventImmediateExit({
     onCloseRequested,
   });
-
-  function handleCloseModal() {
-    setHasFinishedExam(false);
-
-    if (maxTimeReached) {
-      setHasFinishedExam(true);
-    }
-  }
 
   const questions = useMemo(
     () =>
@@ -282,19 +282,15 @@ export function Exam() {
       throw new Error(error.message);
     }
 
-    setIsOffline(false);
-
     if (currentQuestionNumber < questions.length) {
       nextQuestion();
-    } else {
-      setHasFinishedExam(true);
     }
 
     setExamAttempt(updatedExamAttempt);
   }
 
   function handleExamEnd() {
-    navigate({ to: LandingRoute.to });
+    setHasFinishedExam(true);
   }
 
   if (examQuery.isPending) {
@@ -343,106 +339,143 @@ export function Exam() {
       1000
   );
 
+  const scrollBarWidth =
+    (scrollableElementRef.current?.offsetWidth ?? 0) -
+    (scrollableElementRef.current?.clientWidth ?? 0);
+
+  const allQuestionsAnswered = answeredAll();
+
   return (
     <>
-      <Box
-        display={"flex"}
-        zIndex={"-1"}
-        justifyContent={"flex-end"}
-        position={"fixed"}
-        width={"100%"}
-      ></Box>
-      <Box width={"full"} m="1em" mt="4em">
-        <Center height={"100%"}>
-          <OfflineModal
-            isOffline={isOffline}
-            submitQuestionMutation={submitQuestionMutation}
-            fullQuestion={fullQuestion}
-            selectedAnswers={newSelectedAnswers}
-          />
-          {/* TODO: Move to own component */}
-          <Modal
-            open={submitQuestionMutation.isError}
-            onClose={() => {}}
-            variant="danger"
-          >
-            <Modal.Header showCloseButton={false}>
-              Question Submission Error
-            </Modal.Header>
-            <Modal.Body>
-              {submitQuestionMutation?.error?.message || "Something went wrong"}
-              <ButtonLoading
-                onClick={() => {
-                  submitQuestionMutation.mutate({
-                    fullQuestion,
-                    selectedAnswers: newSelectedAnswers,
-                  });
-                }}
-                isPending={submitQuestionMutation.isPending}
-              >
-                Retry Question Submission
-              </ButtonLoading>
-            </Modal.Body>
-          </Modal>
-          <Box
-            display={"flex"}
-            flexDirection={"column"}
-            border={"1px"}
-            borderColor={"gray.300"}
-            width={"65%"}
-            minHeight={"80vh"}
-            maxHeight={"80vh"}
-            overflow={"auto"}
-            p={"1.5em"}
-          >
-            <Flex justifyContent={"space-between"}>
-              <Text
-                fontWeight={"bold"}
-              >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
-              <Timer
-                secondsLeft={secondsLeft}
-                setHasFinishedExam={setHasFinishedExam}
-                setMaxTimeReached={setMaxTimeReached}
-              />
-            </Flex>
-            <QuestionSetForm
-              fullQuestion={fullQuestion}
-              submitQuestionMutation={submitQuestionMutation}
-              examAttempt={examAttempt}
-              setNewSelectedAnswers={setNewSelectedAnswers}
-              newSelectedAnswers={newSelectedAnswers}
-              maxTimeReached={maxTimeReached}
-            />
-          </Box>
-        </Center>
-      </Box>
-      <NavigationBubbles
-        questions={questions}
-        currentQuestionNumber={currentQuestionNumber}
-        specificQuestion={specificQuestion}
-        isAnswered={isAnswered}
-        nextQuestion={nextQuestion}
-        previousQuestion={previousQuestion}
+      <ExamSubmissionModal
+        maxTimeReached={maxTimeReached}
+        hasFinishedExam={hasFinishedExam}
+        setHasFinishedExam={setHasFinishedExam}
       />
-      <Modal onClose={handleCloseModal} open={hasFinishedExam}>
-        <Modal.Header showCloseButton={!maxTimeReached}>
-          {maxTimeReached ? "Time's up!" : "Submit Exam"}
-        </Modal.Header>
-        <Modal.Body>
-          {!maxTimeReached && !answeredAll() && (
-            <Text color="tomato" fontWeight={"bold"}>
-              It seems you haven't answered all questions, are you sure you want
-              to quit the exam?
-            </Text>
-          )}
-          <Text>Thank you for taking the exam.</Text>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button block={true} onClick={handleExamEnd}>
-            {maxTimeReached ? "Close" : "End Exam"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <QuestionSubmissionErrorModal
+        submitQuestionMutation={submitQuestionMutation}
+        fullQuestion={fullQuestion}
+        newSelectedAnswers={newSelectedAnswers}
+      />
+      <Box overflowY="hidden">
+        <Box width={"full"} mt="2em">
+          <Center height={"100%"} display={"flex"} flexDirection={"column"}>
+            <Center width="full" borderBottom={"2px"} borderColor={"gray.300"}>
+              <Flex justifyContent={"space-between"} width={"65vw"}>
+                <Text
+                  fontWeight={"bold"}
+                >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
+                <Timer
+                  secondsLeft={secondsLeft}
+                  setHasFinishedExam={setHasFinishedExam}
+                  setMaxTimeReached={setMaxTimeReached}
+                />
+              </Flex>
+            </Center>
+            <Box
+              display={"flex"}
+              flexDirection={"column"}
+              alignItems={"center"}
+              width={"full"}
+              height={"77vh"}
+              overflowY="scroll"
+              ref={scrollableElementRef}
+              paddingLeft={`${scrollBarWidth}px`}
+              paddingTop={"1rem"}
+            >
+              <QuestionSetForm
+                fullQuestion={fullQuestion}
+                examAttempt={examAttempt}
+                setNewSelectedAnswers={setNewSelectedAnswers}
+                newSelectedAnswers={newSelectedAnswers}
+              />
+            </Box>
+          </Center>
+        </Box>
+
+        <Box
+          display={"flex"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          borderTop={"2px"}
+          borderColor={"gray.300"}
+          paddingTop={"1rem"}
+          flexWrap={"wrap"}
+          flexDirection={"column"}
+          overflowX={"hidden"}
+        >
+          <Flex width={"65%"}>
+            <Tooltip
+              label="Answer all questions to submit"
+              isDisabled={allQuestionsAnswered}
+            >
+              <Button
+                onClick={handleExamEnd}
+                isDisabled={!allQuestionsAnswered}
+                marginRight="0.4em"
+                width={"50%"}
+                backgroundColor={
+                  allQuestionsAnswered ? "rgb(48, 48, 204)" : undefined
+                }
+                color={allQuestionsAnswered ? "white" : undefined}
+                _hover={
+                  allQuestionsAnswered
+                    ? {
+                        color: "blue",
+                        background: "gray.300",
+                      }
+                    : undefined
+                }
+              >
+                Submit Exam
+              </Button>
+            </Tooltip>
+            <Button
+              width={"50%"}
+              onClick={() => {
+                if (!newSelectedAnswers) {
+                  return;
+                }
+
+                submitQuestionMutation.mutate({
+                  fullQuestion,
+                  selectedAnswers: newSelectedAnswers,
+                });
+              }}
+              isDisabled={
+                !newSelectedAnswers.length ||
+                maxTimeReached ||
+                submitQuestionMutation.isPending
+              }
+              backgroundColor={
+                !allQuestionsAnswered ? "rgb(48, 48, 204)" : undefined
+              }
+              color={!allQuestionsAnswered ? "white" : undefined}
+              _hover={
+                !allQuestionsAnswered
+                  ? {
+                      color: "blue",
+                      background: "gray.300",
+                    }
+                  : undefined
+              }
+              marginLeft="0.4em"
+              isLoading={submitQuestionMutation.isPending}
+              loadingText="Submitting"
+            >
+              Submit Question
+            </Button>
+          </Flex>
+          <NavigationBubbles
+            questions={questions}
+            currentQuestionNumber={currentQuestionNumber}
+            specificQuestion={specificQuestion}
+            isAnswered={isAnswered}
+            nextQuestion={nextQuestion}
+            previousQuestion={previousQuestion}
+          />
+        </Box>
+      </Box>
     </>
   );
 }
@@ -548,60 +581,62 @@ function NavigationBubbles({
   const bubblesArr = getCurrentBubbleIndex(wantedIndex);
 
   return (
-    <>
-      <Box display={"flex"} justifyContent={"center"}>
-        <IconButton
-          aria-label="previous question"
-          icon={<ChevronLeftIcon />}
-          m={"0.3em"}
-          isDisabled={currentQuestionNumber === 1}
-          onClick={() => {
-            previousQuestion();
-          }}
-        />
-        <IconButton
-          aria-label="previous set of questions"
-          icon={<ArrowLeftIcon />}
-          m={"0.3em"}
-          isDisabled={wantedIndex === 0}
-          onClick={() => {
-            setWantedIndex(wantedIndex - 1);
-          }}
-        />
+    <Flex width="80%" justifyContent={"center"}>
+      <IconButton
+        aria-label="previous question"
+        icon={<ChevronLeftIcon />}
+        m={"0.3em"}
+        isDisabled={currentQuestionNumber === 1}
+        onClick={() => {
+          previousQuestion();
+        }}
+      />
+      <IconButton
+        aria-label="previous set of questions"
+        icon={<ArrowLeftIcon />}
+        m={"0.3em"}
+        isDisabled={wantedIndex === 0}
+        onClick={() => {
+          setWantedIndex(wantedIndex - 1);
+        }}
+      />
 
-        {bubblesArr.map((question_num) => (
-          <Box
-            key={question_num}
-            onClick={() => {
-              specificQuestion(question_num);
-            }}
-            className={`bottom-bubble-nav ${
-              currentQuestionNumber === question_num ? "bubble-active" : ""
-            } ${isAnswered(question_num) ? "bubble-answered" : ""}`}
-          >
-            <Text>{question_num.toString()}</Text>
-          </Box>
-        ))}
-        <IconButton
-          aria-label="next"
-          icon={<ArrowRightIcon />}
-          m={"0.3em"}
-          isDisabled={maxIndex == wantedIndex}
+      {bubblesArr.map((question_num) => (
+        <Box
+          key={question_num}
           onClick={() => {
-            setWantedIndex(wantedIndex + 1);
+            specificQuestion(question_num);
           }}
-        />
-        <IconButton
-          aria-label="next question"
-          icon={<ChevronRightIcon />}
-          m={"0.3em"}
-          isDisabled={currentQuestionNumber === questions.length}
-          onClick={() => {
-            nextQuestion();
+          _hover={{
+            backgroundColor: "gray.200",
+            color: "black",
           }}
-        />
-      </Box>
-    </>
+          className={`bottom-bubble-nav ${
+            currentQuestionNumber === question_num ? "bubble-active" : ""
+          } ${isAnswered(question_num) ? "bubble-answered" : ""}`}
+        >
+          <Text>{question_num.toString()}</Text>
+        </Box>
+      ))}
+      <IconButton
+        aria-label="next"
+        icon={<ArrowRightIcon />}
+        m={"0.3em"}
+        isDisabled={maxIndex == wantedIndex}
+        onClick={() => {
+          setWantedIndex(wantedIndex + 1);
+        }}
+      />
+      <IconButton
+        aria-label="next question"
+        icon={<ChevronRightIcon />}
+        m={"0.3em"}
+        isDisabled={currentQuestionNumber === questions.length}
+        onClick={() => {
+          nextQuestion();
+        }}
+      />
+    </Flex>
   );
 }
 
