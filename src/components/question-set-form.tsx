@@ -1,4 +1,4 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Divider, Text } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
 import { useEffect } from "react";
 
@@ -41,6 +41,7 @@ export function QuestionSetForm({
             text={parseMarkdown(fullQuestion.questionSet.context)}
             getCodeBlockAriaLabel={(codeName) => `${codeName} code example`}
           />
+          <Divider />
         </>
       )}
       {fullQuestion.audio && (
