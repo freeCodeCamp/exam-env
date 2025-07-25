@@ -9,6 +9,7 @@ import {
 import { ButtonLoading } from "./button-loading";
 import { UseMutationResult } from "@tanstack/react-query";
 import { Answers, FullQuestion } from "../utils/types";
+import { useEffect, useState } from "react";
 
 interface QuestionSubmissionErrorModalProps {
   submitQuestionMutation: UseMutationResult<
@@ -29,30 +30,46 @@ export function QuestionSubmissionErrorModal({
   fullQuestion,
   newSelectedAnswers,
 }: QuestionSubmissionErrorModalProps) {
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (submitQuestionMutation.isError) {
+      setError(submitQuestionMutation.error.message);
+    }
+  }, [submitQuestionMutation.isError]);
+
+  useEffect(() => {
+    if (submitQuestionMutation.isSuccess) {
+      setError(null);
+    }
+  }, [submitQuestionMutation.isSuccess]);
+
+  function onClick() {
+    submitQuestionMutation.mutate({
+      fullQuestion,
+      selectedAnswers: newSelectedAnswers,
+    });
+  }
+
   return (
     <Modal
-      isOpen={submitQuestionMutation.isError}
-      onClose={() => {}}
+      isOpen={!!error}
+      onClose={onClick}
       variant="danger"
       colorScheme="red"
+      closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader backgroundColor={"#edb1af"}>
           Question Submission Error
         </ModalHeader>
-        <ModalBody>
-          {submitQuestionMutation?.error?.message || "Something went wrong"}
-        </ModalBody>
+        <ModalBody>{error}</ModalBody>
         <ModalFooter justifyContent={"center"}>
           <ButtonLoading
-            onClick={() => {
-              submitQuestionMutation.mutate({
-                fullQuestion,
-                selectedAnswers: newSelectedAnswers,
-              });
-            }}
+            onClick={onClick}
             isPending={submitQuestionMutation.isPending}
+            loadingText={"Retrying Submission"}
           >
             Retry Question Submission
           </ButtonLoading>

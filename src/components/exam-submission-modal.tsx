@@ -24,13 +24,14 @@ export function ExamSubmissionModal({
   setHasFinishedExam,
 }: ExamSubmissionModalProps) {
   const navigate = useNavigate();
+
+  function onClose() {
+    setHasFinishedExam(true);
+    navigate({ to: LandingRoute.to });
+  }
+
   return (
-    <Modal
-      isOpen={hasFinishedExam}
-      onClose={() => {
-        navigate({ to: LandingRoute.to });
-      }}
-    >
+    <Modal isOpen={hasFinishedExam} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{maxTimeReached ? "Time's up!" : "Exam End"}</ModalHeader>
@@ -62,14 +63,8 @@ export function ExamSubmissionModal({
             time left.
           </Text>
         </ModalBody>
-        <ModalFooter>
-          <Button
-            onClick={() => {
-              setHasFinishedExam(true);
-            }}
-          >
-            Close Exam
-          </Button>
+        <ModalFooter justifyContent={"center"}>
+          <Button onClick={onClose}>Close Exam</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
