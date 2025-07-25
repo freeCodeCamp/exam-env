@@ -61,7 +61,7 @@ export function QuestionSubmissionErrorModal({
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader backgroundColor={"#edb1af"}>
+        <ModalHeader backgroundColor={"#edb1af"} borderRadius={"md"}>
           Question Submission Error
         </ModalHeader>
         <ModalBody>{error}</ModalBody>
