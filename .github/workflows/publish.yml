@@ -35,16 +35,18 @@ jobs:
       - name: create release
         id: create-release
         uses: actions/github-script@v7
+        env:
+          environment: ${{inputs.environment}}
         with:
           script: |
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}`,
-              name: `v${process.env.PACKAGE_VERSION}/${github.event.inputs.environment}`,
-              body: 'This release is for the ${github.event.inputs.environment} environment.',
+              name: `v${process.env.PACKAGE_VERSION}/${process.env.environment}`,
+              body: 'This release is for the ${process.env.environment} environment.',
               draft: true,
-              prerelease: github.event.inputs.environment != "production"
+              prerelease: process.env.environment != "production"
             })
             return data.id
 
@@ -201,6 +203,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
+          prerelease: ${{ inputs.environment != 'production' }}
         with:
           script: |
             github.rest.repos.updateRelease({
@@ -208,5 +211,5 @@ jobs:
               repo: context.repo.repo,
               release_id: process.env.release_id,
               draft: false,
-              prerelease: github.event.inputs.environment != "production"
+              prerelease: process.env.prerelease == "true"
             })
