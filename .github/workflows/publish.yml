@@ -44,7 +44,7 @@ jobs:
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}`,
               name: `v${process.env.PACKAGE_VERSION}/${process.env.environment}`,
-              body: 'This release is for the ${process.env.environment} environment.',
+              body: `This release is for the ${process.env.environment} environment.`,
               draft: true,
               prerelease: process.env.environment != "production"
             })
@@ -132,40 +132,41 @@ jobs:
         run: |
           go install github.com/sassoftware/relic/v8@latest
 
-      - name: install codemagic cli tools (macos)
-        if: matrix.platform == 'macos-latest'
-        run: pip3 install codemagic-cli-tools --break-system-packages
+      # Disabled until fixed: https://github.com/freeCodeCamp/exam-env/actions/runs/16912301976/job/47917003348
+      # - name: install codemagic cli tools (macos)
+      #   if: matrix.platform == 'macos-latest'
+      #   run: pip3 install codemagic-cli-tools --break-system-packages
 
-      - name: install apple certificates and provisioning profiles
-        if: matrix.platform == 'macos-latest'
-        env:
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          APPLE_DEVELOPER_ID_CERT: ${{ secrets.APPLE_DEVELOPER_ID_CERT }}
-          PROVISIONING_PROFILE: ${{ secrets.MAC_APP_DIRECT_PROVISIONING_PROFILE }}
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-        run: |
-          # create variables
-          mkdir -p ~/.appstoreconnect/private_keys
-          CERT_BASE_PATH=/Users/runner/Library/MobileDevice/Certificates
-          mkdir -p $CERT_BASE_PATH
-          DEVELOPER_ID_CERT_PATH=$CERT_BASE_PATH/developer_id_certificate.p12
-          PP_PATH=./src-tauri/embedded.provisionprofile
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          APPLE_API_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY_ID.p8
+      # - name: install apple certificates and provisioning profiles
+      #   if: matrix.platform == 'macos-latest'
+      #   env:
+      #     KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      #     APPLE_DEVELOPER_ID_CERT: ${{ secrets.APPLE_DEVELOPER_ID_CERT }}
+      #     PROVISIONING_PROFILE: ${{ secrets.MAC_APP_DIRECT_PROVISIONING_PROFILE }}
+      #     APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      #     APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      #   run: |
+      #     # create variables
+      #     mkdir -p ~/.appstoreconnect/private_keys
+      #     CERT_BASE_PATH=/Users/runner/Library/MobileDevice/Certificates
+      #     mkdir -p $CERT_BASE_PATH
+      #     DEVELOPER_ID_CERT_PATH=$CERT_BASE_PATH/developer_id_certificate.p12
+      #     PP_PATH=./src-tauri/embedded.provisionprofile
+      #     KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+      #     APPLE_API_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY_ID.p8
 
-          # import certificate and provisioning profile from secrets
-          echo -n "$APPLE_DEVELOPER_ID_CERT" | base64 --decode -o $DEVELOPER_ID_CERT_PATH
-          echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
-          echo -n "$APPLE_API_KEY" | base64 --decode -o $APPLE_API_KEY_PATH
+      #     # import certificate and provisioning profile from secrets
+      #     echo -n "$APPLE_DEVELOPER_ID_CERT" | base64 --decode -o $DEVELOPER_ID_CERT_PATH
+      #     echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
+      #     echo -n "$APPLE_API_KEY" | base64 --decode -o $APPLE_API_KEY_PATH
 
-          # create temporary keychain
-          keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
+      #     # create temporary keychain
+      #     keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
 
-          # import certificate to keychain
-          keychain add-certificates
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security find-identity -v
+      #     # import certificate to keychain
+      #     keychain add-certificates
+      #     security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+      #     security find-identity -v
 
       - uses: tauri-apps/tauri-action@v0
         env:
