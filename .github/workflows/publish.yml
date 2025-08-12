@@ -62,8 +62,9 @@ jobs:
             args: "--target x86_64-apple-darwin --bundles dmg,app"
           - platform: "ubuntu-22.04"
             args: ""
-          - platform: "windows-latest"
-            args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi"
+          # Disabled, until needed
+          # - platform: "windows-latest"
+          #   args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi"
           - platform: "windows-latest"
             args: "--bundles nsis"
 
