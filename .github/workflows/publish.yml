@@ -2,6 +2,16 @@ name: "publish"
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Release Environment"
+        type: choice
+        required: true
+        options:
+          - local
+          - production
+          - staging
+        default: production
 
 jobs:
   create-release:
@@ -31,10 +41,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}`,
-              name: `Exam Environment v${process.env.PACKAGE_VERSION}`,
-              body: 'Take a look at the assets to download and install this app.',
+              name: `v${process.env.PACKAGE_VERSION}/${github.events.inputs.environment}`,
+              body: 'This release is for the ${github.events.inputs.environment} environment.',
               draft: true,
-              prerelease: false
+              prerelease: github.event.inputs.environment != "production"
             })
             return data.id
 
@@ -59,11 +69,20 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     env:
-      VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
-      VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set VITE_FREECODECAMP_API based on environment
+        run: |
+          if [ "${{ inputs.environment }}" = "local" ]; then
+            echo "VITE_FREECODECAMP_API=http://localhost:3000" >> $GITHUB_ENV
+          elif [ "${{ inputs.environment }}" = "staging" ]; then
+            echo "VITE_FREECODECAMP_API=https://api.freecodecamp.dev" >> $GITHUB_ENV
+          elif [ "${{ inputs.environment }}" = "production" ]; then
+            echo "VITE_FREECODECAMP_API=https://api.freecodecamp.org" >> $GITHUB_ENV
+          fi
+        shell: bash
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d #v3.0.0
@@ -162,12 +181,11 @@ jobs:
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
-          VITE_MOCK_DATA: ${{ env.VITE_MOCK_DATA }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }} --verbose
-          includeDebug: false
-          includeRelease: true
+          includeDebug: ${{ inputs.environment != 'production' }}
+          includeRelease: ${{inputs.environment == 'production' }}
           includeUpdaterJson: true
 
   publish-release:
@@ -189,5 +207,5 @@ jobs:
               repo: context.repo.repo,
               release_id: process.env.release_id,
               draft: false,
-              prerelease: false
+              prerelease: github.event.inputs.environment != "production"
             })

@@ -1,5 +1,4 @@
 import {
-  check,
   DownloadEvent,
   DownloadOptions,
   Update,
@@ -25,6 +24,7 @@ import { createRoute, useNavigate } from "@tanstack/react-router";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { delayForTesting } from "../utils/fetch";
+import { invoke } from "@tauri-apps/api/core";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -200,20 +200,19 @@ export function Splashscreen() {
   );
 }
 
+interface UpdateMetadata {
+  rid: number;
+  currentVersion: string;
+  version: string;
+  date?: string;
+  body?: string;
+  rawJson: Record<string, unknown>;
+}
+
 // Check for updates
 async function checkForUpdate() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     await delayForTesting(1000);
-
-    interface UpdateMetadata {
-      rid: number;
-      available: true;
-      currentVersion: string;
-      version: string;
-      date?: string;
-      body?: string;
-      rawJson: Record<string, unknown>;
-    }
 
     class MockUpdate extends Update {
       constructor(metadata: UpdateMetadata) {
@@ -261,7 +260,6 @@ async function checkForUpdate() {
     return null;
     return new MockUpdate({
       rid: 0,
-      available: true,
       currentVersion: "0.0.1",
       version: "0.0.2",
       date: new Date().toUTCString(),
@@ -271,8 +269,9 @@ async function checkForUpdate() {
   }
 
   try {
-    const update = await check();
-    if (update) {
+    const metadata = await invoke<UpdateMetadata>("check");
+    if (metadata) {
+      const update = new Update(metadata);
       console.debug(
         `Found update ${update.version} from ${update.date} with notes ${update.body}`
       );

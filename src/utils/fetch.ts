@@ -83,10 +83,10 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     await delayForTesting(800);
     const response = new Response(null, { status: 200 });
-    const error = {
-      code: "EXAMPLE_ERROR",
-      message: "Example error when posting exam",
-    };
+    // const error = {
+    //   code: "EXAMPLE_ERROR",
+    //   message: "Example error when posting exam",
+    // };
     // return { response, data: undefined as never, error };
     return { response, data: undefined as never, error: undefined };
   }
