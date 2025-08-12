@@ -44,7 +44,7 @@ jobs:
               name: `v${process.env.PACKAGE_VERSION}/${github.events.inputs.environment}`,
               body: 'This release is for the ${github.events.inputs.environment} environment.',
               draft: true,
-              prerelease: github.event.inputs.environment != "production"
+              prerelease: github.events.inputs.environment != "production"
             })
             return data.id
 
@@ -208,5 +208,5 @@ jobs:
               repo: context.repo.repo,
               release_id: process.env.release_id,
               draft: false,
-              prerelease: github.event.inputs.environment != "production"
+              prerelease: github.events.inputs.environment != "production"
             })
