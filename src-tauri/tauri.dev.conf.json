@@ -1,6 +1,6 @@
 {
   "productName": "Exam Environment",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "identifier": "org.freecodecamp.exam",
   "app": {
     "windows": [
