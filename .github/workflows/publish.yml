@@ -167,6 +167,15 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security find-identity -v
 
+      - name: Set verbose flag if in debug mode
+        run: |
+          if [ "$ACTIONS_STEP_DEBUG" = "true" ]; then
+            echo "TAURI_VERBOSE_FLAG=--verbose" >> $GITHUB_ENV
+          else
+            echo "TAURI_VERBOSE_FLAG=" >> $GITHUB_ENV
+          fi
+        shell: bash
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -186,7 +195,7 @@ jobs:
           VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
-          args: ${{ matrix.args }} --verbose
+          args: ${{ matrix.args }} ${{ env.TAURI_VERBOSE_FLAG }}
           includeDebug: ${{ inputs.environment != 'production' }}
           includeRelease: ${{inputs.environment == 'production' }}
           includeUpdaterJson: true
