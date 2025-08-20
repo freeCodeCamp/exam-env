@@ -21,17 +21,17 @@ async function main() {
     return;
   }
 
-  const generator = `
-generator jsonSchema {
-  provider = "prisma-json-schema-generator"
-  output   = "../prisma"
-  includeRequiredFields = "true"
-  persistOriginalType = "true"
-  keepRelationFields = "false"
-}
-`;
+  //   const generator = `
+  // generator jsonSchema {
+  //   provider = "prisma-json-schema-generator"
+  //   output   = "../prisma"
+  //   includeRequiredFields = "true"
+  //   persistOriginalType = "true"
+  //   keepRelationFields = "false"
+  // }
+  // `;
 
-  schema += generator;
+  //   schema += generator;
 
   await writeFile("./prisma/schema.prisma", schema);
 }
