@@ -108,8 +108,10 @@ pub async fn check<R: Runtime>(
             "release to have latest.json asset".to_string(),
         ))
         .capture()?;
+
     let update_url =
         Url::parse(&asset.browser_download_url).map_err(|e| Error::Serialization(e.to_string()))?;
+
     let update = app
         .updater_builder()
         .endpoints(vec![update_url])

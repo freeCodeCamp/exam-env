@@ -43,7 +43,7 @@ export function Landing() {
       if (error) {
         throw new Error(error.message);
       }
-      return data.exams;
+      return data;
     },
   });
 

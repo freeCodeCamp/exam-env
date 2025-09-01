@@ -2658,7 +2658,7 @@ export interface paths {
             requestBody?: never;
             responses: {
                 /** @description Default Response */
-                200: {
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2668,8 +2668,152 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/exam-environment/exam/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    "exam-environment-authorization-token"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            examId: string;
+                            startTimeInMS: number;
+                            questionSets: {
+                                id: string;
+                                questions: {
+                                    id: string;
+                                    answers: string[];
+                                    submissionTimeInMS: number;
+                                }[];
+                            }[];
+                            result: null | {
+                                score: number;
+                                passingPercent: number;
+                            };
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/exam-environment/exam/attempt/{attemptId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    "exam-environment-authorization-token"?: string;
+                };
+                path: {
+                    attemptId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            examId: string;
+                            startTimeInMS: number;
+                            questionSets: {
+                                id: string;
+                                questions: {
+                                    id: string;
+                                    answers: string[];
+                                    submissionTimeInMS: number;
+                                }[];
+                            }[];
+                            result: null | {
+                                score: number;
+                                passingPercent: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2829,6 +2973,7 @@ export interface paths {
                                         lastSavedDate: number;
                                     }[];
                                     username: string;
+                                    usernameDisplay: string;
                                     userToken?: string;
                                     completedSurveys: {
                                         title: string;
@@ -3067,18 +3212,16 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            exams: {
-                                id: string;
-                                config: {
-                                    name: string;
-                                    note: string;
-                                    totalTimeInMS: number;
-                                    retakeTimeInMS: number;
-                                    passingPercent: number;
-                                };
-                                canTake: boolean;
-                            }[];
-                        };
+                            id: string;
+                            config: {
+                                name: string;
+                                note: string;
+                                totalTimeInMS: number;
+                                retakeTimeInMS: number;
+                                passingPercent: number;
+                            };
+                            canTake: boolean;
+                        }[];
                     };
                 };
                 /** @description Default Response */
@@ -3269,8 +3412,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
-                    "exam-environment-authorization-token": string;
+                header?: {
+                    "exam-environment-authorization-token"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -3284,6 +3427,8 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            id: string;
+                            examId: string;
                             startTimeInMS: number;
                             questionSets: {
                                 id: string;
@@ -3332,8 +3477,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
-                    "exam-environment-authorization-token": string;
+                header?: {
+                    "exam-environment-authorization-token"?: string;
                 };
                 path: {
                     attemptId: string;
@@ -3349,6 +3494,8 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            id: string;
+                            examId: string;
                             startTimeInMS: number;
                             questionSets: {
                                 id: string;
@@ -3381,58 +3528,6 @@ export interface paths {
         };
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/exam-environment/screenshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header: {
-                    "exam-environment-authorization-token": string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
         delete?: never;
         options?: never;
         head?: never;
@@ -3890,6 +3985,7 @@ export interface paths {
                                             lastSavedDate: number;
                                         }[];
                                         username: string;
+                                        usernameDisplay: string;
                                         msUsername?: string;
                                     };
                                 };
@@ -4073,7 +4169,7 @@ export interface paths {
                                 };
                             }[];
                         } | {
-                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "a2-professional-spanish-v8" | "a2-professional-chinese-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
+                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "a2-professional-spanish-v8" | "a2-professional-chinese-v8" | "a1-professional-chinese-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
                             certTitle: string;
                             username: string;
                             name?: string;
@@ -4429,6 +4525,339 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-coding-challenge/date/{date}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    date: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: objectid */
+                            id: string;
+                            /** Format: date-time */
+                            date: string;
+                            challengeNumber: number;
+                            title: string;
+                            description: string;
+                            javascript: {
+                                tests: {
+                                    text: string;
+                                    testString: string;
+                                }[];
+                                challengeFiles: {
+                                    contents: string;
+                                    fileKey: string;
+                                }[];
+                            };
+                            python: {
+                                tests: {
+                                    text: string;
+                                    testString: string;
+                                }[];
+                                challengeFiles: {
+                                    contents: string;
+                                    fileKey: string;
+                                }[];
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Invalid date format. Please use YYYY-MM-DD.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Challenge not found.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Internal server error.";
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-coding-challenge/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: objectid */
+                            id: string;
+                            /** Format: date-time */
+                            date: string;
+                            challengeNumber: number;
+                            title: string;
+                            description: string;
+                            javascript: {
+                                tests: {
+                                    text: string;
+                                    testString: string;
+                                }[];
+                                challengeFiles: {
+                                    contents: string;
+                                    fileKey: string;
+                                }[];
+                            };
+                            python: {
+                                tests: {
+                                    text: string;
+                                    testString: string;
+                                }[];
+                                challengeFiles: {
+                                    contents: string;
+                                    fileKey: string;
+                                }[];
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Challenge not found.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Internal server error.";
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-coding-challenge/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            /** Format: date-time */
+                            date: string;
+                            challengeNumber: number;
+                            title: string;
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "No challenges found.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Internal server error.";
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-coding-challenge/newest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: date-time */
+                            date: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "No challenges found.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Internal server error.";
+                        };
+                    };
                 };
             };
         };

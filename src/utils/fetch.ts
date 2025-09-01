@@ -109,24 +109,20 @@ export async function getExams() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     await delayForTesting(1000);
     const res = await fetch("/mocks/exams.json");
-    const {
-      exams: [exam],
-    } =
+    const [exam] =
       (await res.json()) as paths["/exam-environment/exams"]["get"]["responses"]["200"]["content"]["application/json"];
     return {
-      data: {
-        exams: [
-          {
-            id: exam.id,
-            canTake: true,
-            config: {
-              name: exam.config.name,
-              note: exam.config.note,
-              totalTimeInMS: exam.config.totalTimeInMS,
-            },
+      data: [
+        {
+          id: exam.id,
+          canTake: true,
+          config: {
+            name: exam.config.name,
+            note: exam.config.note,
+            totalTimeInMS: exam.config.totalTimeInMS,
           },
-        ],
-      },
+        },
+      ],
       response: new Response(null, { status: 200 }),
       error: undefined,
     };
