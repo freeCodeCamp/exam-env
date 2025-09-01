@@ -113,11 +113,11 @@ jobs:
       # The rust build requires the `.env` file to exist, even if none of the variables are used
       - name: prep env (non-windows)
         if: matrix.platform != 'windows-latest'
-        run: cp sample.env .env
+        run: touch .env
 
       - name: prep env (windows)
         if: matrix.platform == 'windows-latest'
-        run: copy sample.env .env
+        run: New-Item -Name ".env" -ItemType File
 
       - name: install Go stable (windows)
         if: matrix.platform == 'windows-latest'
