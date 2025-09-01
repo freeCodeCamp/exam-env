@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   Center,
+  Code,
   Flex,
   Heading,
   ListIcon,
@@ -113,8 +114,10 @@ export function Splashscreen() {
         <ListItem fontWeight={900}>
           <ListIcon as={CloseIcon} color="red.500" />
           Failed to check for app updates
+          <Code maxWidth={"80%"} display={"inline"}>
+            {JSON.stringify(updateQuery.error.message)}
+          </Code>
         </ListItem>
-        <Text>{updateQuery.error.message}</Text>
         <ListItem>Downloading update</ListItem>
         <ListItem>Check device compatibility</ListItem>
       </SplashParents>
@@ -278,7 +281,8 @@ async function checkForUpdate() {
       return update;
     }
   } catch (e) {
-    throw new Error(e as string);
+    console.error(e);
+    throw new Error(JSON.stringify(e));
   }
   return null;
 }

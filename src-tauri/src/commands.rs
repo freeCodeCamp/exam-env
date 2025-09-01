@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, Webview};
+use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::UpdaterExt;
 
@@ -68,10 +68,10 @@ pub struct Metadata {
 /// Dynamically uses the api location to determine what environment the app release comes from.
 ///
 /// Then, fetches the latest release for that environment from GitHub, and constructs update metadata from it.
-#[tauri::command(async)]
+#[tauri::command]
 pub async fn check<R: Runtime>(
-    webview: Webview<R>,
-    app: AppHandle,
+    app: AppHandle<R>,
+    webview: WebviewWindow<R>,
 ) -> Result<Option<Metadata>, Error> {
     let environment = match VITE_FREECODECAMP_API.trim_end_matches("/") {
         "https://api.freecodecamp.org" => "production",
@@ -80,13 +80,20 @@ pub async fn check<R: Runtime>(
         _ => "production",
     };
 
-    let releases: Vec<GitHubRelease> =
-        reqwest::blocking::get("https://api.github.com/repos/freeCodeCamp/exam-env/releases")
-            .map_err(|e| Error::Request(e.to_string()))
-            .capture()?
-            .json()
-            .map_err(|e| Error::Serialization(e.to_string()))
-            .capture()?;
+    let client = reqwest::Client::new();
+    let response = client
+        .get("https://api.github.com/repos/freeCodeCamp/exam-env/releases")
+        .header("User-Agent", "Exam-Environment")
+        .send()
+        .await
+        .map_err(|e| Error::Request(e.to_string()))
+        .capture()?;
+
+    let releases: Vec<GitHubRelease> = response
+        .json()
+        .await
+        .map_err(|e| Error::Serialization(e.to_string()))
+        .capture()?;
     // NOTE: This could fail if `/<ENVIRONMENT>` release has not been made in last 30 releases
     let release = releases
         .iter()

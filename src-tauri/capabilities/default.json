@@ -30,6 +30,9 @@
         },
         {
           "url": "https://*.gitpod.io"
+        },
+        {
+          "url": "https://api.github.com"
         }
       ]
     },
