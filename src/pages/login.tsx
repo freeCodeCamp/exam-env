@@ -20,6 +20,7 @@ import { AuthContext } from "../contexts/auth";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
+import { LEARN_BASE } from "../utils/env";
 
 export function Login() {
   const navigate = useNavigate();
@@ -90,7 +91,9 @@ export function Login() {
               <FormHelperText>
                 Go to{" "}
                 <ChakraButton
-                  onClick={() => openPage("https://freecodecamp.org/settings")}
+                  onClick={() =>
+                    openPage(new URL("/settings", LEARN_BASE).href)
+                  }
                   variant="link"
                   colorScheme="blue"
                   size="sm"
@@ -103,7 +106,7 @@ export function Login() {
                     textDecorationColor: "blue.300",
                   }}
                 >
-                  https://freecodecamp.org/settings
+                  {new URL("/settings", LEARN_BASE).href}
                 </ChakraButton>{" "}
                 to generate a token if you do not already have one.
               </FormHelperText>
@@ -127,7 +130,10 @@ export function Login() {
                   <ChakraButton
                     onClick={() =>
                       openPage(
-                        "https://freecodecamp.org/settings#exam-environment-authorization-token"
+                        new URL(
+                          "/settings#exam-environment-authorization-token",
+                          LEARN_BASE
+                        ).href
                       )
                     }
                     variant="link"

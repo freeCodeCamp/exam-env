@@ -1,20 +1,21 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import createClient from "openapi-fetch";
+
+import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
+import { VITE_FREECODECAMP_API, VITE_MOCK_DATA } from "./env";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
 
-import createClient from "openapi-fetch";
-import type { paths } from "../../prisma/api-schema";
-
 const client = createClient<paths>({
-  baseUrl: import.meta.env.VITE_FREECODECAMP_API,
+  baseUrl: VITE_FREECODECAMP_API,
   fetch,
 });
 
 export async function verifyToken(token: string) {
-  if (import.meta.env.VITE_MOCK_DATA === "true") {
+  if (VITE_MOCK_DATA) {
     if (token) {
       const TWO_DAYS_IN_MS = 2 * 24 * 60 * 60 * 1000;
       const data = { expireAt: Date.now() + TWO_DAYS_IN_MS };
@@ -43,7 +44,7 @@ export async function verifyToken(token: string) {
 }
 
 export async function getGeneratedExam(examId: string) {
-  if (import.meta.env.VITE_MOCK_DATA === "true") {
+  if (VITE_MOCK_DATA) {
     await delayForTesting(800);
     const generatedExam = (await (
       await fetch("/mocks/generated-exam.json")
@@ -80,7 +81,7 @@ export async function getGeneratedExam(examId: string) {
 }
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
-  if (import.meta.env.VITE_MOCK_DATA === "true") {
+  if (VITE_MOCK_DATA) {
     await delayForTesting(800);
     const response = new Response(null, { status: 200 });
     // const error = {
@@ -106,7 +107,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
 }
 
 export async function getExams() {
-  if (import.meta.env.VITE_MOCK_DATA === "true") {
+  if (VITE_MOCK_DATA) {
     await delayForTesting(1000);
     const res = await fetch("/mocks/exams.json");
     const [exam] =

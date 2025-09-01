@@ -26,6 +26,7 @@ import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { delayForTesting } from "../utils/fetch";
 import { invoke } from "@tauri-apps/api/core";
+import { VITE_MOCK_DATA } from "../utils/env";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -214,7 +215,7 @@ interface UpdateMetadata {
 
 // Check for updates
 async function checkForUpdate() {
-  if (import.meta.env.VITE_MOCK_DATA === "true") {
+  if (VITE_MOCK_DATA) {
     await delayForTesting(1000);
 
     class MockUpdate extends Update {

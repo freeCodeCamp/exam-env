@@ -19,8 +19,9 @@ import { AuthProvider } from "./contexts/auth";
 
 import "./index.css";
 import "@freecodecamp/ui/dist/base.css";
+import { VITE_MOCK_DATA } from "./utils/env";
 
-if (import.meta.env.VITE_MOCK_DATA === "true" && import.meta.env.PROD) {
+if (VITE_MOCK_DATA && import.meta.env.PROD) {
   throw new Error(
     "May not build application in production using VITE_MOCK_DATA flag"
   );
