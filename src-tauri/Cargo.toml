@@ -9,15 +9,12 @@ license = "BSD-3-Clause"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.4.0", features = [] }
+tauri-build = { version = "2.4.1", features = [] }
 
 [dependencies]
-tauri = { version = "2.8.2", features = ["macos-private-api"] }
+tauri = { version = "2.8.5", features = ["macos-private-api"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-bson = "2.15.0"
-typify = "0.4.3"
-chrono = { version = "0.4.41", features = ["serde"] }
 tauri-plugin-dialog = "2.3.3"
 sentry = "0.42.0"
 dotenvy_macro = "0.15.7"
@@ -27,7 +24,6 @@ keyring = { version = "3.6.3", features = [
   "linux-native",
 ] }
 tauri-plugin-http = { version = "2.5.2", features = ["multipart"] }
-base64 = "0.22.1"
 tauri-plugin-opener = "2"
 time = "0.3.41"
 
