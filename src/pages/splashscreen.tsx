@@ -16,9 +16,9 @@ import {
   ListItem,
   OrderedList,
   Progress,
-  Text,
+  Spinner,
 } from "@chakra-ui/react";
-import { CheckIcon, CloseIcon, SpinnerIcon } from "@chakra-ui/icons";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import { Header } from "../components/header";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { createRoute, useNavigate } from "@tanstack/react-router";
@@ -34,7 +34,7 @@ function SplashParents({ children }: { children: ReactNode }) {
       <Header />
       <Box width="full">
         <Center height="100%">
-          <Flex direction="column">
+          <Flex direction="column" maxWidth="50%" minWidth={"450px"}>
             <Spacer size="m" />
             <Heading color="black">Environment Requirements</Heading>
             <Spacer size="s" />
@@ -43,6 +43,7 @@ function SplashParents({ children }: { children: ReactNode }) {
               marginInlineStart={0}
               paddingInlineStart={0}
               listStyleType={"none"}
+              overflowX="hidden"
             >
               {children}
             </OrderedList>
@@ -98,13 +99,19 @@ export function Splashscreen() {
   if (updateQuery.isPending) {
     return (
       <SplashParents>
-        <ListItem fontWeight={900}>
-          <ListIcon as={SpinnerIcon} color="blue.500" />
+        <ListItem fontWeight={900} display="flex" alignItems="center">
+          <ListIcon as={Spinner} color="blue.500" marginTop="2px" />
           Checking for app updates
         </ListItem>
         <Progress isIndeterminate />
-        <ListItem opacity={0.5}>Downloading update</ListItem>
-        <ListItem>Check device compatibility</ListItem>
+        <ListItem opacity={0.5} display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Downloading update
+        </ListItem>
+        <ListItem display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Check device compatibility
+        </ListItem>
       </SplashParents>
     );
   }
@@ -112,15 +119,33 @@ export function Splashscreen() {
   if (updateQuery.isError) {
     return (
       <SplashParents>
-        <ListItem fontWeight={900}>
-          <ListIcon as={CloseIcon} color="red.500" />
+        <ListItem fontWeight={900} display="flex" alignItems="center">
+          <ListIcon as={CloseIcon} color="red.500" marginTop="2px" />
           Failed to check for app updates
-          <Code maxWidth={"80%"} display={"inline"}>
-            {JSON.stringify(updateQuery.error.message)}
-          </Code>
         </ListItem>
-        <ListItem>Downloading update</ListItem>
-        <ListItem>Check device compatibility</ListItem>
+        <ListItem pl={6} maxWidth="100%" overflowX="hidden">
+          <Box maxWidth="100%">
+            <Code
+              p={2}
+              display="block"
+              width="100%"
+              maxWidth="100%"
+              overflowX="auto"
+              wordBreak="break-word"
+              whiteSpace="pre-wrap"
+            >
+              {JSON.stringify(updateQuery.error.message, null, 2)}
+            </Code>
+          </Box>
+        </ListItem>
+        <ListItem display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Downloading update
+        </ListItem>
+        <ListItem display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Check device compatibility
+        </ListItem>
       </SplashParents>
     );
   }
@@ -128,35 +153,41 @@ export function Splashscreen() {
   if (!!update && !isStartDownload) {
     return (
       <SplashParents>
-        <ListItem>
-          <ListIcon as={CheckIcon} color="green.500" />
+        <ListItem display="flex" alignItems="center">
+          <ListIcon as={CheckIcon} color="green.500" marginTop="2px" />
           App update found
         </ListItem>
-        <ListItem fontWeight={900}>
-          <ListIcon as={SpinnerIcon} color="blue.500" />
+        <ListItem fontWeight={900} display="flex" alignItems="center">
+          <ListIcon as={Spinner} color="blue.500" marginTop="2px" />
           Download update (version {update.version})?
         </ListItem>
         <Button block={true} onClick={() => setIsStartDownload(true)}>
           Download Now
         </Button>
-        <ListItem>Check device compatibility</ListItem>
+        <ListItem display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Check device compatibility
+        </ListItem>
       </SplashParents>
     );
   }
   if (!!update && downloadAndInstallQuery.isPending) {
     return (
       <SplashParents>
-        <ListItem>
-          <ListIcon as={CheckIcon} color="green.500" />
+        <ListItem display="flex" alignItems="center">
+          <ListIcon as={CheckIcon} color="green.500" marginTop="2px" />
           App update found
         </ListItem>
-        <ListItem fontWeight={900}>
-          <ListIcon as={SpinnerIcon} color="blue.500" />
+        <ListItem fontWeight={900} display="flex" alignItems="center">
+          <ListIcon as={Spinner} color="blue.500" marginTop="2px" />
           Downloading update (version {update.version}). App will restart when
           finished.
         </ListItem>
         <Progress hasStripe value={progress} />
-        <ListItem>Check device compatibility</ListItem>
+        <ListItem display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Check device compatibility
+        </ListItem>
       </SplashParents>
     );
   }
@@ -164,29 +195,46 @@ export function Splashscreen() {
   if (!!update && downloadAndInstallQuery.isError) {
     return (
       <SplashParents>
-        <ListItem>
-          <ListIcon as={CheckIcon} color="green.500" />
+        <ListItem display="flex" alignItems="center">
+          <ListIcon as={CheckIcon} color="green.500" marginTop="2px" />
           Checking for app updates
         </ListItem>
-        <ListItem fontWeight={900}>
-          <ListIcon as={CloseIcon} color="red.500" />
+        <ListItem fontWeight={900} display="flex" alignItems="center">
+          <ListIcon as={CloseIcon} color="red.500" marginTop="2px" />
           Downloading update
         </ListItem>
-        <Text>{downloadAndInstallQuery.error.message}</Text>
-        <ListItem>Check device compatibility</ListItem>
+        <ListItem pl={6} maxWidth="100%" overflowX="hidden">
+          <Box maxWidth="100%">
+            <Code
+              p={2}
+              display="block"
+              width="100%"
+              maxWidth="100%"
+              overflowX="auto"
+              wordBreak="break-word"
+              whiteSpace="pre-wrap"
+            >
+              {JSON.stringify(downloadAndInstallQuery.error.message, null, 2)}
+            </Code>
+          </Box>
+        </ListItem>
+        <ListItem display="flex" alignItems="center">
+          <ListIcon marginTop="2px" />
+          Check device compatibility
+        </ListItem>
       </SplashParents>
     );
   }
 
   return (
     <SplashParents>
-      <ListItem>
-        <ListIcon as={CheckIcon} color="green.500" />
+      <ListItem display="flex" alignItems="center">
+        <ListIcon as={CheckIcon} color="green.500" marginTop="2px" />
         App is up to date
       </ListItem>
 
-      <ListItem>
-        <ListIcon as={CheckIcon} color="green.500" />
+      <ListItem display="flex" alignItems="center">
+        <ListIcon as={CheckIcon} color="green.500" marginTop="2px" />
         Device is compatible
       </ListItem>
 
