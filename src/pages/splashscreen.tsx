@@ -27,6 +27,7 @@ import { LandingRoute } from "./landing";
 import { delayForTesting } from "../utils/fetch";
 import { invoke } from "@tauri-apps/api/core";
 import { VITE_MOCK_DATA } from "../utils/env";
+import { captureException } from "@sentry/react";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -331,6 +332,7 @@ async function checkForUpdate() {
     }
   } catch (e) {
     console.error(e);
+    captureException(e);
     throw new Error(JSON.stringify(e));
   }
   return null;

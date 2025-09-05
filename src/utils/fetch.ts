@@ -4,13 +4,13 @@ import createClient from "openapi-fetch";
 
 import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
-import { VITE_FREECODECAMP_API, VITE_MOCK_DATA } from "./env";
+import { VITE_MOCK_DATA } from "./env";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
 
 const client = createClient<paths>({
-  baseUrl: VITE_FREECODECAMP_API,
+  baseUrl: __FREECODECAMP_API__,
   fetch,
 });
 
@@ -53,7 +53,10 @@ export async function getGeneratedExam(examId: string) {
 
     // return {
     //   response: new Response(null, { status: 500 }),
-    //   error: "Test error",
+    //   error: {
+    //     code: "FCC_EXAM_ERROR",
+    //     message: "Example error fetching generated exam.",
+    //   },
     // };
     return {
       data: generatedExam,

@@ -21,6 +21,7 @@ import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { LEARN_BASE } from "../utils/env";
+import { captureException } from "@sentry/react";
 
 export function Login() {
   const navigate = useNavigate();
@@ -35,6 +36,9 @@ export function Login() {
   );
 
   useEffect(() => {
+    if (setAuthTokenError) {
+      captureException(setAuthTokenError);
+    }
     setError(setAuthTokenError);
   }, [setAuthTokenError]);
 

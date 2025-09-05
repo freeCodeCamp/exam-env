@@ -1,3 +1,7 @@
+import { captureException } from "@sentry/react";
+import { useNavigate } from "@tanstack/react-router";
+import { LandingRoute } from "../pages/landing";
+
 export type Result<T> =
   | { error: null; data: T }
   | { error: FCCError; data: null };
@@ -40,4 +44,20 @@ export type QueryFnError<F extends (...args: any) => any> = NonNullable<
 
 export function err<T extends ErrorResponse<any>>(res: T) {
   return { ...res.error, _status: res.response.status };
+}
+
+export function captureAndNavigate(
+  errorStr: string,
+  navigate: ReturnType<typeof useNavigate>
+) {
+  const error = new Error(errorStr);
+  const eventId = captureException(error);
+  navigate({
+    to: LandingRoute.to,
+    search: {
+      flashKind: "error",
+      flashMessage: `An error has occured. freeCodeCamp have been notified. Error ID: ${eventId}`,
+    },
+  });
+  return error;
 }

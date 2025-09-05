@@ -1,4 +1,4 @@
-name: 'deploy'
+name: "deploy"
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ jobs:
     runs-on: macos-latest
     env:
       VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
-      VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
+      FREECODECAMP_API: ${{ vars.FREECODECAMP_API }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
@@ -76,13 +76,13 @@ jobs:
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: 'Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)'
+          APPLE_SIGNING_IDENTITY: "Apple Distribution: Free Code Camp, Inc. (L33K9LWVP9)"
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          VITE_FREECODECAMP_API: ${{ vars.VITE_FREECODECAMP_API }}
+          FREECODECAMP_API: ${{ vars.FREECODECAMP_API }}
           VITE_MOCK_DATA: ${{ vars.VITE_MOCK_DATA }}
         with:
-          args: '--target universal-apple-darwin --verbose'
+          args: "--target universal-apple-darwin --verbose"
           includeDebug: false
           includeRelease: true
           includeUpdaterJson: true
