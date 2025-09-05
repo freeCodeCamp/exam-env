@@ -8,7 +8,7 @@ on:
         type: choice
         required: true
         options:
-          - local
+          - development
           - production
           - staging
         default: production
@@ -36,17 +36,17 @@ jobs:
         id: create-release
         uses: actions/github-script@v7
         env:
-          environment: ${{inputs.environment}}
+          ENVIRONMENT: ${{inputs.environment}}
         with:
           script: |
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}`,
-              name: `v${process.env.PACKAGE_VERSION}/${process.env.environment}`,
-              body: `This release is for the ${process.env.environment} environment.`,
+              name: `v${process.env.PACKAGE_VERSION}/${process.env.ENVIRONMENT}`,
+              body: `This release is for the ${process.env.ENVIRONMENT} environment.`,
               draft: true,
-              prerelease: process.env.environment != "production"
+              prerelease: process.env.ENVIRONMENT != "production"
             })
             return data.id
 
@@ -76,14 +76,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set VITE_FREECODECAMP_API based on environment
+      - name: Set FREECODECAMP_API based on environment
         run: |
-          if [ "${{ inputs.environment }}" = "local" ]; then
-            echo "VITE_FREECODECAMP_API=http://localhost:3000" >> $GITHUB_ENV
+          if [ "${{ inputs.environment }}" = "development" ]; then
+            echo "FREECODECAMP_API=http://localhost:3000" >> $GITHUB_ENV
           elif [ "${{ inputs.environment }}" = "staging" ]; then
-            echo "VITE_FREECODECAMP_API=https://api.freecodecamp.dev" >> $GITHUB_ENV
+            echo "FREECODECAMP_API=https://api.freecodecamp.dev" >> $GITHUB_ENV
           elif [ "${{ inputs.environment }}" = "production" ]; then
-            echo "VITE_FREECODECAMP_API=https://api.freecodecamp.org" >> $GITHUB_ENV
+            echo "FREECODECAMP_API=https://api.freecodecamp.org" >> $GITHUB_ENV
           fi
         shell: bash
 
@@ -190,7 +190,8 @@ jobs:
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          VITE_FREECODECAMP_API: ${{ env.VITE_FREECODECAMP_API }}
+          FREECODECAMP_API: ${{ env.FREECODECAMP_API }}
+          ENVIRONMENT: ${{inputs.environment}}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }} ${{ env.TAURI_VERBOSE_FLAG }}

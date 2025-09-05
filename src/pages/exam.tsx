@@ -1,4 +1,4 @@
-import { createRoute, Navigate } from "@tanstack/react-router";
+import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import {
   Box,
   Center,
@@ -34,12 +34,19 @@ import {
   UserExamAttempt,
 } from "../utils/types";
 import { invoke } from "@tauri-apps/api/core";
-import { err, QueryFn, QueryFnError } from "../utils/errors";
+import {
+  captureAndNavigate,
+  err,
+  QueryFn,
+  QueryFnError,
+} from "../utils/errors";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
+import { captureException } from "@sentry/react";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
+  const navigate = useNavigate();
   const examQuery = useQuery<
     QueryFn<typeof examQueryFn>,
     QueryFnError<typeof getGeneratedExam>
@@ -56,6 +63,7 @@ export function Exam() {
     const res = await getGeneratedExam(examId);
 
     if (res.error) {
+      captureException(res.error);
       throw err(res);
     }
 
@@ -94,22 +102,59 @@ export function Exam() {
     const questionSets = examAttempt.questionSets;
 
     if (!questionSets.length) {
-      // TODO: Bad
-      const questionSet = exam.questionSets.at(0)!;
-      const question = questionSet.questions.at(0)!;
+      const questionSet = exam.questionSets.at(0);
+
+      if (!questionSet) {
+        throw captureAndNavigate(
+          `Unreachable. Exam ID: ${exam.examId}; No question sets found.`,
+          navigate
+        );
+      }
+
+      const question = questionSet.questions.at(0);
+
+      if (!question) {
+        throw captureAndNavigate(
+          `Unreachable. Exam ID: ${exam.examId}; No question found in question set.`,
+          navigate
+        );
+      }
 
       return {
         questionSet,
         ...question,
       };
     }
-    const latestQuestionSet = questionSets.at(-1)!;
+    const latestQuestionSet = questionSets.at(-1);
+
+    if (!latestQuestionSet) {
+      throw captureAndNavigate(
+        `Unreachable. Exam ID: ${exam.examId}; No question set found.`,
+        navigate
+      );
+    }
 
     const questionSet = exam.questionSets.find(
       (qs) => qs.id === latestQuestionSet.id
-    )!;
+    );
+    if (!questionSet) {
+      throw captureAndNavigate(
+        `Unreachable. Exam ID: ${exam.examId}; No question set found.`,
+        navigate
+      );
+    }
+
+    const latestQuestionSetQuestion = latestQuestionSet.questions.at(-1);
+
+    if (!latestQuestionSetQuestion) {
+      throw captureAndNavigate(
+        `Unreachable. Exam ID: ${exam.examId}; No question found in set.`,
+        navigate
+      );
+    }
+
     const latestQuestion = questionSet.questions.find(
-      (q) => q.id === latestQuestionSet.questions.at(-1)!.id
+      (q) => q.id === latestQuestionSetQuestion.id
     )!;
     const fullQuestion = {
       questionSet,
@@ -250,7 +295,9 @@ export function Exam() {
     selectedAnswers: Answers[number]["id"][];
   }) {
     if (!examAttempt) {
-      throw "Unreachable. Exam attempt should exist";
+      const error = new Error("Unreachable. Exam attempt should exist");
+      captureException(error);
+      throw error;
     }
 
     const questionSets = examAttempt.questionSets;

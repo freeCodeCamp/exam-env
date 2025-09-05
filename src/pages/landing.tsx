@@ -10,6 +10,7 @@ import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
 import { rootRoute } from "./root";
 import { useQuery } from "@tanstack/react-query";
+import { captureException } from "@sentry/react";
 
 function LandingParent({ children }: { children: ReactNode }) {
   const { flashKind, flashMessage } = LandingRoute.useSearch();
@@ -41,6 +42,7 @@ export function Landing() {
     queryFn: async () => {
       const { data, error } = await getExams();
       if (error) {
+        captureException(error);
         throw new Error(error.message);
       }
       return data;

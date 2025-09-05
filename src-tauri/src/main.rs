@@ -21,6 +21,7 @@ fn main() {
             sentry_dsn,
             sentry::ClientOptions {
                 release: sentry::release_name!(),
+                environment: Some(utils::ENVIRONMENT.into()),
                 ..Default::default()
             },
         )))

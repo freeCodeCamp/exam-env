@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
@@ -19,13 +20,12 @@ import { AuthProvider } from "./contexts/auth";
 
 import "./index.css";
 import "@freecodecamp/ui/dist/base.css";
-import { VITE_MOCK_DATA } from "./utils/env";
 
-if (VITE_MOCK_DATA && import.meta.env.PROD) {
-  throw new Error(
-    "May not build application in production using VITE_MOCK_DATA flag"
-  );
-}
+Sentry.init({
+  dsn: __SENTRY_DSN__,
+  release: __APP_VERSION__,
+  environment: __ENVIRONMENT__,
+});
 
 const queryClient = new QueryClient();
 
