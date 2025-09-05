@@ -61,7 +61,7 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
       return;
     }
     const currentTime = audioRef.current.currentTime;
-    if (typeof currentTime !== "number") {
+    if (isNaN(currentTime)) {
       return;
     }
     setProgress(currentTime);
@@ -84,7 +84,7 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
   };
 
   function handleSeek(value: number) {
-    if (!audioRef.current) {
+    if (!audioRef.current || isNaN(value)) {
       return;
     }
     audioRef.current.currentTime = value;
