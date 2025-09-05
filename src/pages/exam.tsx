@@ -555,11 +555,12 @@ function Timer({
     startTimeRef.current = new Date();
 
     const updateTimer = () => {
+      let timeLeft = 0;
       if (startTimeRef.current) {
         const elapsed = Math.floor(
           (new Date().getTime() - startTimeRef.current.getTime()) / 1000
         );
-        const timeLeft = Math.max(secondsLeft - elapsed, 0);
+        timeLeft = Math.max(secondsLeft - elapsed, 0);
 
         if (timeLeft === 0) {
           setHasFinishedExam(true);
@@ -569,7 +570,7 @@ function Timer({
         setAvailableTime(timeLeft);
       }
 
-      if (availableTime > 0) {
+      if (timeLeft > 0) {
         requestRef.current = requestAnimationFrame(updateTimer);
       }
     };
@@ -583,7 +584,9 @@ function Timer({
     };
   }, [secondsLeft]);
 
-  return <Text fontWeight={"bold"}>Time: {secondsToMMSS(availableTime)}</Text>;
+  return (
+    <Text fontWeight={"bold"}>Time: {secondsToHHMMSS(availableTime)}</Text>
+  );
 }
 
 function NavigationBubbles({
@@ -687,12 +690,14 @@ function NavigationBubbles({
   );
 }
 
-function secondsToMMSS(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  const minutesString = minutes.toString().padStart(2, "0");
-  const secondsString = remainingSeconds.toString().padStart(2, "0");
-  return `${minutesString}:${secondsString}`;
+function secondsToHHMMSS(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const h = hours.toString().padStart(2, "0");
+  const m = minutes.toString().padStart(2, "0");
+  const s = seconds.toString().padStart(2, "0");
+  return `${h}:${m}:${s}`;
 }
 
 export const ExamRoute = createRoute({
