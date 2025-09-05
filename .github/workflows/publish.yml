@@ -42,7 +42,7 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `v${process.env.PACKAGE_VERSION}`,
+              tag_name: `${process.env.ENVIRONMENT}/${process.env.PACKAGE_VERSION}`,
               name: `v${process.env.PACKAGE_VERSION}/${process.env.ENVIRONMENT}`,
               body: `This release is for the ${process.env.ENVIRONMENT} environment.`,
               draft: true,
