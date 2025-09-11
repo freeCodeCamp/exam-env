@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tracing::info;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use utils::valid_sentry_dsn;
 
 mod commands;
@@ -22,6 +24,7 @@ fn main() {
             sentry::ClientOptions {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
+                enable_logs: true,
                 ..Default::default()
             },
         )))
@@ -29,9 +32,46 @@ fn main() {
         None
     };
 
+    let sentry_layer =
+        sentry::integrations::tracing::layer().event_filter(|md| match *md.level() {
+            // Capture error level events as Sentry events
+            // These are grouped into issues, representing high-severity errors to act upon
+            tracing::Level::ERROR => {
+                sentry::integrations::tracing::EventFilter::Event
+                    | sentry::integrations::tracing::EventFilter::Log
+            }
+            // Ignore trace level events, as they're too verbose
+            tracing::Level::TRACE => sentry::integrations::tracing::EventFilter::Ignore,
+            // Capture everything else as a traditional structured log
+            _ => sentry::integrations::tracing::EventFilter::Log,
+        });
+
+    // Only enabled when debug assertions are on (i.e. in debug builds)
+    let stdio_layer = if cfg!(debug_assertions) {
+        Some(tracing_subscriber::fmt::layer().pretty())
+    } else {
+        None
+    };
+
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME")).into()),
+        )
+        .with(stdio_layer)
+        .with(sentry_layer)
+        .init();
+
     let sentry_state = SentryState { client: guard };
 
+    info!(
+        environment = utils::ENVIRONMENT,
+        version = ?sentry::release_name!().unwrap(),
+        "Start"
+    );
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::new().skip_logger().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())

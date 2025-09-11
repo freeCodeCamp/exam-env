@@ -1,6 +1,9 @@
 use keyring::Entry;
 
-use crate::error::{Error, PassToSentry};
+use crate::{
+    error::{Error, PassToSentry},
+    utils::ENVIRONMENT,
+};
 
 pub const EXAM_ENVIRONMENT_AUTHORIZATION_TOKEN_HANDLE: &str =
     "exam_environment_authorization_token";
@@ -35,12 +38,7 @@ pub fn remove_authorization_token() -> Result<(), Error> {
 ///
 /// SAFETY: As the arguments are hard-coded, the risk should be caught during development.
 fn get_entry() -> Entry {
-    let service = match std::env::var_os("TAURI_ENV_DEBUG") {
-        Some(s) if s == "true" => "development",
-        _ => "production",
-    };
-
-    let entry = Entry::new(service, EXAM_ENVIRONMENT_AUTHORIZATION_TOKEN_HANDLE);
+    let entry = Entry::new(ENVIRONMENT, EXAM_ENVIRONMENT_AUTHORIZATION_TOKEN_HANDLE);
     entry.expect("entry builder to passably validate service and user arguments")
 }
 

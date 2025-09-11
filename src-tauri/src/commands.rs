@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::UpdaterExt;
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::{
     error::{Error, PassToSentry},
@@ -43,12 +43,21 @@ pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: 
     }
 }
 
+/// "node_id": "RE_kwDONN3_Oc4OnRwu",
+/// "tag_name": "staging/0.5.3",
+/// "target_commitish": "main",
+/// "name": "v0.5.3/staging",
+/// "draft": false,
+/// "immutable": false,
+/// "prerelease": true,
+/// "created_at": "2025-09-05T11:30:13Z",
+/// "updated_at": "2025-09-05T20:59:23Z",
+/// "published_at": "2025-09-05T20:59:23Z",
 #[derive(Deserialize, Debug)]
 struct GitHubRelease {
     name: String,
     draft: bool,
     assets: Vec<GitHubReleaseAsset>,
-    tag_name: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -121,12 +130,16 @@ pub async fn check<R: Runtime>(
     let mut update_builder = app.updater_builder();
 
     match tauri_plugin_updater::target() {
-        Some("windows-aarch64") => {
-            update_builder = update_builder.target("windows-x86_64");
+        Some(t) => {
+            debug!("detected target: {t}");
+            if t == "windows-aarch64" {
+                update_builder = update_builder.target("windows-x86_64");
+            }
         }
+        _ => {}
     }
 
-    let update = updater_builder
+    let update = update_builder
         .endpoints(vec![update_url.clone()])
         .map_err(|e| {
             Error::Request(format!(
