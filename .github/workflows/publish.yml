@@ -208,96 +208,11 @@ jobs:
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
 
-  update-latest-json:
-    # Ensure the updater JSON includes a windows-aarch64 key by duplicating windows-x86_64
-    # Run after builds and before publishing the release
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    needs: [create-release, build-tauri]
-
-    steps:
-      - name: Duplicate windows-x86_64 to windows-aarch64 in latest.json
-        uses: actions/github-script@v7
-        env:
-          release_id: ${{ needs.create-release.outputs.release_id }}
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const release_id = process.env.release_id;
-
-            // Fetch the draft release
-            const { data: release } = await github.rest.repos.getRelease({ owner, repo, release_id });
-
-            // Find latest.json asset
-            const asset = release.assets.find(a => a.name === 'latest.json');
-            if (!asset) {
-              core.info('latest.json asset not found on release; nothing to do.');
-              return;
-            }
-
-            // Download raw asset bytes
-            const resp = await github.request('GET /repos/{owner}/{repo}/releases/assets/{asset_id}', {
-              owner,
-              repo,
-              asset_id: asset.id,
-              headers: { accept: 'application/octet-stream' }
-            });
-
-            // Convert to string
-            const buf = Buffer.isBuffer(resp.data) ? resp.data : Buffer.from(resp.data);
-            let json;
-            try {
-              json = JSON.parse(buf.toString('utf8'));
-            } catch (e) {
-              core.setFailed(`Failed to parse latest.json: ${e.message}`);
-              return;
-            }
-
-            if (!json.platforms) {
-              core.info('No platforms field in latest.json; nothing to do.');
-              return;
-            }
-
-            if (json.platforms['windows-aarch64']) {
-              core.info('windows-aarch64 already present; skipping update.');
-              return;
-            }
-
-            const winx64 = json.platforms['windows-x86_64'];
-            if (!winx64) {
-              core.info('windows-x86_64 not present; nothing to duplicate.');
-              return;
-            }
-
-            // Duplicate entry
-            json.platforms['windows-aarch64'] = { ...winx64 };
-
-            const updated = JSON.stringify(json, null, 2);
-
-            // Replace the asset: delete then upload with same name
-            await github.rest.repos.deleteReleaseAsset({ owner, repo, asset_id: asset.id });
-
-            await github.rest.repos.uploadReleaseAsset({
-              owner,
-              repo,
-              release_id,
-              name: 'latest.json',
-              data: Buffer.from(updated, 'utf8'),
-              headers: {
-                'content-type': 'application/json',
-                'content-length': Buffer.byteLength(updated, 'utf8')
-              }
-            });
-
-            core.info('latest.json updated with windows-aarch64 platform.');
-
   publish-release:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    needs: [create-release, build-tauri, update-latest-json]
+    needs: [create-release, build-tauri]
 
     steps:
       - name: publish release
