@@ -30,13 +30,19 @@ jobs:
           node-version: lts/*
 
       - name: get version
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        id: version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { version } = require('./package.json')
+            core.setOutput('version', version)
 
       - name: create release
         id: create-release
         uses: actions/github-script@v7
         env:
           ENVIRONMENT: ${{inputs.environment}}
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
         with:
           script: |
             const { data } = await github.rest.repos.createRelease({
@@ -96,7 +102,12 @@ jobs:
           node-version: 22.x
 
       - name: get version
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        id: version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { version } = require('./package.json')
+            core.setOutput('version', version)
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -204,7 +215,7 @@ jobs:
           # tagName is required to prevent all update URLs from pointing to `/latest/`:
           # https://github.com/freeCodeCamp/exam-env/issues/54
           # Must be URL encoded
-          tagName: ${{ inputs.environment }}%2F${{ env.PACKAGE_VERSION }}
+          tagName: ${{ inputs.environment }}%2F${{ steps.version.outputs.version }}
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
 
