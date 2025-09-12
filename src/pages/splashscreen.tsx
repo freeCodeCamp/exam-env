@@ -27,7 +27,6 @@ import { LandingRoute } from "./landing";
 import { delayForTesting } from "../utils/fetch";
 import { invoke } from "@tauri-apps/api/core";
 import { VITE_MOCK_DATA } from "../utils/env";
-import { captureException } from "@sentry/react";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -63,12 +62,14 @@ export function Splashscreen() {
   const updateQuery = useQuery({
     queryKey: ["checkForUpdate"],
     queryFn: checkForUpdate,
+    retry: false,
   });
 
   const update = updateQuery.data;
   const downloadAndInstallQuery = useQuery({
     queryKey: ["downloadAndInstall", [update, isStartDownload]],
     enabled: !!update && isStartDownload,
+    retry: false,
     queryFn: async () => {
       let downloaded = 0;
       let contentLength: number | undefined = 0;
@@ -332,7 +333,8 @@ async function checkForUpdate() {
     }
   } catch (e) {
     console.error(e);
-    captureException(e);
+    // Error is already captured on the backend
+    // captureException(e);
     throw new Error(JSON.stringify(e));
   }
   return null;
