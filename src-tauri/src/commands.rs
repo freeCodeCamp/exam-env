@@ -80,6 +80,7 @@ pub struct Metadata {
 /// Dynamically uses the api location to determine what environment the app release comes from.
 ///
 /// Then, fetches the latest release for that environment from GitHub, and constructs update metadata from it.
+#[tracing::instrument(skip(app, webview), err)]
 #[tauri::command]
 pub async fn check<R: Runtime>(
     app: AppHandle<R>,
@@ -91,13 +92,15 @@ pub async fn check<R: Runtime>(
         .header("User-Agent", "Exam-Environment")
         .send()
         .await
-        .map_err(|e| Error::Request(format!("failed to request releases: {}", e)))
+        .map_err(|e| Error::Request(format!("failed to request releases: {:#?}", e)))
         .capture()?;
 
     let releases: Vec<GitHubRelease> = response
         .json()
         .await
-        .map_err(|e| Error::Serialization(format!("failed to deserialize releases as json: {}", e)))
+        .map_err(|e| {
+            Error::Serialization(format!("failed to deserialize releases as json: {:#?}", e))
+        })
         .capture()?;
 
     let release = match releases
@@ -124,7 +127,7 @@ pub async fn check<R: Runtime>(
         .capture()?;
 
     let update_url = Url::parse(&asset.browser_download_url)
-        .map_err(|e| Error::Serialization(format!("failed to parse latest.json url: {}", e)))
+        .map_err(|e| Error::Serialization(format!("failed to parse latest.json url: {:#?}", e)))
         .capture()?;
 
     let mut update_builder = app.updater_builder();
@@ -143,17 +146,17 @@ pub async fn check<R: Runtime>(
         .endpoints(vec![update_url.clone()])
         .map_err(|e| {
             Error::Request(format!(
-                "failed to create updater builder with endpoint '{update_url:?}': {}",
+                "failed to create updater builder with endpoint '{update_url:?}': {:#?}",
                 e
             ))
         })
         .capture()?
         .build()
-        .map_err(|e| Error::Request(format!("failed to build updater : {}", e)))
+        .map_err(|e| Error::Request(format!("failed to build updater : {:#?}", e)))
         .capture()?
         .check()
         .await
-        .map_err(|e| Error::Request(format!("failed to check for updates: {}", e)))
+        .map_err(|e| Error::Request(format!("failed to check for updates: {:#?}", e)))
         .capture()?;
 
     // https://github.com/tauri-apps/plugins-workspace/blob/d3d290ab8a8913981a98e2eb7f2c5d4aba3bc36c/plugins/updater/src/commands.rs#L74
@@ -161,7 +164,7 @@ pub async fn check<R: Runtime>(
         let formatted_date = if let Some(date) = update.date {
             let formatted_date = date
                 .format(&time::format_description::well_known::Rfc3339)
-                .map_err(|e| Error::Serialization(format!("failed to format date: {}", e)))?;
+                .map_err(|e| Error::Serialization(format!("failed to format date: {:#?}", e)))?;
             Some(formatted_date)
         } else {
             None
