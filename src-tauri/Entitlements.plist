@@ -20,8 +20,9 @@
     <true/>
     <key>com.apple.security.inherit</key>
     <true/>
-    <key>com.apple.security.app-sandbox</key>
-    <true/>
+    <!-- https://github.com/tauri-apps/plugins-workspace/issues/2601 -->
+    <!-- <key>com.apple.security.app-sandbox</key>
+    <true/> -->
     <key>com.apple.application-identifier</key>
     <string>L33K9LWVP9.org.freecodecamp.exam</string>
     <key>com.apple.developer.team-identifier</key>
