@@ -4,8 +4,8 @@ import {
   Update,
 } from "@tauri-apps/plugin-updater";
 import { restartApp } from "../utils/commands";
-import { ReactNode, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { ReactNode, useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   Box,
   Center,
@@ -19,13 +19,15 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
-import { Header } from "../components/header";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { createRoute, useNavigate } from "@tanstack/react-router";
+import { captureException } from "@sentry/react";
+import { invoke } from "@tauri-apps/api/core";
+
+import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { delayForTesting } from "../utils/fetch";
-import { invoke } from "@tauri-apps/api/core";
 import { VITE_MOCK_DATA } from "../utils/env";
 
 function SplashParents({ children }: { children: ReactNode }) {
@@ -56,21 +58,32 @@ function SplashParents({ children }: { children: ReactNode }) {
 
 export function Splashscreen() {
   const [progress, setProgress] = useState(0);
-  const [isStartDownload, setIsStartDownload] = useState(false);
   const navigate = useNavigate();
 
-  const updateQuery = useQuery({
-    queryKey: ["checkForUpdate"],
-    queryFn: checkForUpdate,
+  const updateMutation = useMutation({
+    mutationKey: ["checkForUpdate"],
+    mutationFn: checkForUpdate,
+    // Already captured on backend
+    // onError: (error) => {
+    //   captureException(error);
+    // },
     retry: false,
   });
 
-  const update = updateQuery.data;
-  const downloadAndInstallQuery = useQuery({
-    queryKey: ["downloadAndInstall", [update, isStartDownload]],
-    enabled: !!update && isStartDownload,
+  useEffect(() => {
+    if (updateMutation.isIdle) {
+      // This is required to prevent double firing in StrictMode
+      // https://github.com/TanStack/query/issues/5341
+      const id = setTimeout(() => updateMutation.mutate(), 100);
+      return () => clearTimeout(id);
+    }
+  }, []);
+
+  const update = updateMutation.data;
+  const downloadAndInstallQuery = useMutation({
+    mutationKey: ["downloadAndInstall", [update]],
     retry: false,
-    queryFn: async () => {
+    mutationFn: async () => {
       let downloaded = 0;
       let contentLength: number | undefined = 0;
 
@@ -96,9 +109,12 @@ export function Splashscreen() {
       console.debug("Update installed");
       await restartApp();
     },
+    onError: (error) => {
+      captureException(error);
+    },
   });
 
-  if (updateQuery.isPending) {
+  if (updateMutation.isPending) {
     return (
       <SplashParents>
         <ListItem fontWeight={900} display="flex" alignItems="center">
@@ -118,7 +134,7 @@ export function Splashscreen() {
     );
   }
 
-  if (updateQuery.isError) {
+  if (updateMutation.isError) {
     return (
       <SplashParents>
         <ListItem fontWeight={900} display="flex" alignItems="center">
@@ -136,8 +152,12 @@ export function Splashscreen() {
               wordBreak="break-word"
               whiteSpace="pre-wrap"
             >
-              {JSON.stringify(updateQuery.error.message, null, 2)}
+              {JSON.stringify(updateMutation.error.message, null, 2).slice(
+                0,
+                500
+              )}
             </Code>
+            <Button onClick={() => updateMutation.mutate()}>Retry</Button>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="center">
@@ -152,7 +172,7 @@ export function Splashscreen() {
     );
   }
 
-  if (!!update && !isStartDownload) {
+  if (!!update && !downloadAndInstallQuery.isPending) {
     return (
       <SplashParents>
         <ListItem display="flex" alignItems="center">
@@ -163,7 +183,7 @@ export function Splashscreen() {
           <ListIcon as={Spinner} color="blue.500" marginTop="2px" />
           Download update (version {update.version})?
         </ListItem>
-        <Button block={true} onClick={() => setIsStartDownload(true)}>
+        <Button block={true} onClick={() => downloadAndInstallQuery.mutate()}>
           Download Now
         </Button>
         <ListItem display="flex" alignItems="center">
@@ -216,8 +236,15 @@ export function Splashscreen() {
               wordBreak="break-word"
               whiteSpace="pre-wrap"
             >
-              {JSON.stringify(downloadAndInstallQuery.error.message, null, 2)}
+              {JSON.stringify(
+                downloadAndInstallQuery.error.message,
+                null,
+                2
+              ).slice(0, 1000)}
             </Code>
+            <Button onClick={() => downloadAndInstallQuery.mutate()}>
+              Retry
+            </Button>
           </Box>
         </ListItem>
         <ListItem display="flex" alignItems="center">
