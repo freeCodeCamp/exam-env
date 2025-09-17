@@ -14,7 +14,8 @@
         "title": "Exam Environment",
         "label": "main",
         "fullscreen": false,
-        "contentProtected": true
+        "contentProtected": true,
+        "maximized": true
       }
     ],
     "macOSPrivateApi": true,
