@@ -165,7 +165,9 @@ export function Exam() {
   }
 
   async function onCloseRequested(event: CloseRequestedEvent) {
-    const confirmed = await confirm("Are you sure you want to exit?");
+    const confirmed = await confirm(
+      "Are you sure you want to exit?\n\nYou will not be able to immediately retake the exam."
+    );
     if (!confirmed) {
       event.preventDefault();
     }
