@@ -80,6 +80,25 @@ export function Landing() {
     );
   }
 
+  // Exams sorted by `canTake` first, then by name alphabetically
+  examsQuery.data.sort((a, b) => {
+    if (a.canTake === b.canTake) {
+      return a.config.name.localeCompare(b.config.name);
+    }
+    return a.canTake ? -1 : 1;
+  });
+
+  // Converts seconds to Xh Ym format
+  function examTimeInHumanReadableFormat(seconds: number) {
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    }
+
+    return `${minutes}m`;
+  }
+
   return (
     <LandingParent>
       {examsQuery.data.map((exam) => {
@@ -94,7 +113,8 @@ export function Landing() {
                 });
               }}
             >
-              {exam.config.name}
+              {exam.config.name} (
+              {examTimeInHumanReadableFormat(exam.config.totalTimeInS)})
             </Button>
             <Spacer size="s" />
           </Fragment>
