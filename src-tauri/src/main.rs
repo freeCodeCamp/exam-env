@@ -25,7 +25,6 @@ fn main() {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
                 enable_logs: true,
-                traces_sample_rate: 1.0,
                 ..Default::default()
             },
         )))

@@ -260,6 +260,99 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/encoded/modern-challenge-completed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: objectid */
+                        id: string;
+                        challengeType: number;
+                        files?: {
+                            contents: string;
+                            key: string;
+                            ext: string;
+                            name: string;
+                            history: string[];
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            completedDate: number;
+                            points: number;
+                            alreadyCompleted: boolean;
+                            savedChallenges: {
+                                id: string;
+                                files: {
+                                    contents: string;
+                                    key: string;
+                                    ext: string;
+                                    name: string;
+                                    history: string[];
+                                }[];
+                                lastSavedDate: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "That does not appear to be a valid challenge submission.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.generic-error";
+                            /** @enum {string} */
+                            type: "danger";
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/daily-coding-challenge-completed": {
         parameters: {
             query?: never;
@@ -327,6 +420,95 @@ export interface paths {
         trace?: never;
     };
     "/save-challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: objectid */
+                        id: string;
+                        files: {
+                            contents: string;
+                            key: string;
+                            ext: string;
+                            name: string;
+                            history: string[];
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            savedChallenges: {
+                                id: string;
+                                files: {
+                                    contents: string;
+                                    key: string;
+                                    ext: string;
+                                    name: string;
+                                    history: string[];
+                                }[];
+                                lastSavedDate: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "That does not appear to be a valid challenge submission.";
+                            /** @enum {string} */
+                            type: "error";
+                        } | "That challenge type is not saveable.";
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.generic-error";
+                            /** @enum {string} */
+                            type: "danger";
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/encoded/save-challenge": {
         parameters: {
             query?: never;
             header?: never;
@@ -2716,12 +2898,16 @@ export interface paths {
                             id: string;
                             examId: string;
                             startTimeInMS: number;
+                            /** Format: date-time */
+                            startTime: string;
                             questionSets: {
                                 id: string;
                                 questions: {
                                     id: string;
                                     answers: string[];
                                     submissionTimeInMS: number;
+                                    /** Format: date-time */
+                                    submissionTime: string;
                                 }[];
                             }[];
                             result: null | {
@@ -2783,12 +2969,16 @@ export interface paths {
                             id: string;
                             examId: string;
                             startTimeInMS: number;
+                            /** Format: date-time */
+                            startTime: string;
                             questionSets: {
                                 id: string;
                                 questions: {
                                     id: string;
                                     answers: string[];
                                     submissionTimeInMS: number;
+                                    /** Format: date-time */
+                                    submissionTime: string;
                                 }[];
                             }[];
                             result: null | {
@@ -2809,6 +2999,43 @@ export interface paths {
                             message: string;
                         };
                     };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/exam-environment/exams/{examId}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    "exam-environment-authorization-token"?: string;
+                };
+                path: {
+                    examId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
             };
         };
@@ -2954,7 +3181,7 @@ export interface paths {
                                         showPortfolio?: boolean;
                                         showTimeLine?: boolean;
                                     };
-                                    sendQuincyEmail: boolean;
+                                    sendQuincyEmail: null | boolean;
                                     theme: string;
                                     twitter?: string;
                                     website?: string;
@@ -3217,7 +3444,9 @@ export interface paths {
                                 name: string;
                                 note: string;
                                 totalTimeInMS: number;
+                                totalTimeInS: number;
                                 retakeTimeInMS: number;
+                                retakeTimeInS: number;
                                 passingPercent: number;
                             };
                             canTake: boolean;
@@ -3430,12 +3659,16 @@ export interface paths {
                             id: string;
                             examId: string;
                             startTimeInMS: number;
+                            /** Format: date-time */
+                            startTime: string;
                             questionSets: {
                                 id: string;
                                 questions: {
                                     id: string;
                                     answers: string[];
                                     submissionTimeInMS: number;
+                                    /** Format: date-time */
+                                    submissionTime: string;
                                 }[];
                             }[];
                             result: null | {
@@ -3497,12 +3730,16 @@ export interface paths {
                             id: string;
                             examId: string;
                             startTimeInMS: number;
+                            /** Format: date-time */
+                            startTime: string;
                             questionSets: {
                                 id: string;
                                 questions: {
                                     id: string;
                                     answers: string[];
                                     submissionTimeInMS: number;
+                                    /** Format: date-time */
+                                    submissionTime: string;
                                 }[];
                             }[];
                             result: null | {
@@ -3523,6 +3760,43 @@ export interface paths {
                             message: string;
                         };
                     };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exam-environment/exams/{examId}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    "exam-environment-authorization-token"?: string;
+                };
+                path: {
+                    examId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
             };
         };
@@ -3587,6 +3861,42 @@ export interface paths {
                             message: string;
                         };
                     };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exam-environment/exam-challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    challengeId?: string;
+                    examId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
             };
         };
@@ -3944,10 +4254,6 @@ export interface paths {
                                         linkedin?: string;
                                         location: string;
                                         name: string;
-                                        partiallyCompletedChallenges: {
-                                            id: string;
-                                            completedDate: number;
-                                        }[];
                                         picture: string;
                                         points: number | null;
                                         portfolio: {
@@ -3973,17 +4279,6 @@ export interface paths {
                                         website?: string;
                                         yearsTopContributor: string[];
                                         joinDate: string;
-                                        savedChallenges: {
-                                            id: string;
-                                            files: {
-                                                contents: string;
-                                                key: string;
-                                                ext: string;
-                                                name: string;
-                                                history: string[];
-                                            }[];
-                                            lastSavedDate: number;
-                                        }[];
                                         username: string;
                                         usernameDisplay: string;
                                         msUsername?: string;
@@ -4707,6 +5002,91 @@ export interface paths {
                             type: "error";
                             /** @enum {string} */
                             message: "Challenge not found.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Internal server error.";
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-coding-challenge/month/{month}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    month: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            /** Format: date-time */
+                            date: string;
+                            challengeNumber: number;
+                            title: string;
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Invalid date format. Please use YYYY-MM.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "No challenges found.";
                         };
                     };
                 };

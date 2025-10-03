@@ -381,11 +381,13 @@ export function Exam() {
     return <Text>Loading...</Text>;
   }
 
+  const startTimeInMS =
+    examAttempt.startTime?.getTime() ?? examAttempt.startTimeInMS;
+  const totalTimeInMS = examQuery.data?.exam?.config?.totalTimeInS
+    ? examQuery.data.exam.config.totalTimeInS * 1000
+    : examQuery.data?.exam?.config?.totalTimeInMS ?? 0;
   const secondsLeft = Math.floor(
-    (examAttempt.startTimeInMS +
-      (examQuery.data?.exam?.config?.totalTimeInMS ?? 0) -
-      Date.now()) /
-      1000
+    (startTimeInMS + totalTimeInMS - Date.now()) / 1000
   );
 
   const scrollBarWidth =
