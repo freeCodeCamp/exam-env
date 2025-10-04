@@ -5,6 +5,7 @@ import createClient from "openapi-fetch";
 import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
+import { deserializeDates } from "./serde";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
@@ -75,6 +76,13 @@ export async function getGeneratedExam(examId: string) {
       },
     },
   });
+
+  const data = res.data
+    ? deserializeDates<{ exam: UserExam; examAttempt: UserExamAttempt }>(
+        res.data
+      )
+    : undefined;
+  res.data = data;
 
   return res as {
     data?: { exam: UserExam; examAttempt: UserExamAttempt };
