@@ -1,6 +1,6 @@
 {
   "productName": "Exam Environment",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "identifier": "org.freecodecamp.exam",
   "build": {
     "beforeDevCommand": "pnpm run dev",
@@ -51,6 +51,13 @@
     }
   },
   "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "exam-environment"
+        ]
+      }
+    },
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQwMkZBRkI4MUY5QzZBQzQKUldURWFwd2Z1Szh2UU81ZmVJenNsTXpSQURMbUFqaDF1Rm1WOG9XUEJxYUxxa1RLalRtVm5DVVkK",
       "endpoints": [

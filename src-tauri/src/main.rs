@@ -1,6 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Manager;
+#[cfg(debug_assertions)]
+#[cfg(desktop)]
+use tauri_plugin_deep_link::DeepLinkExt;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use utils::valid_sentry_dsn;
@@ -71,6 +75,22 @@ fn main() {
     );
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_deep_link::init())
+        // Ensure only one window of the app may be open at a time.
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            // NOTE: `argv` is ordinarily double-checked for CSRF for runtime-registered deep links.
+            //       However, deep links are only registered during runtime for development.
+            // println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
+            // If app is already open, focus window when deep link is triggered
+            let _ = app
+                .get_webview_window("main")
+                .expect("no main window")
+                .set_focus();
+            // let callback_url = argv.get(1)
+            //     .expect("no callback URL")
+            //     .to_string();
+            // app.emit("auth0-redirect", callback_url).expect("failed to emit deep link event");
+        }))
         .plugin(tauri_plugin_log::Builder::new().skip_logger().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
@@ -86,6 +106,14 @@ fn main() {
             commands::check,
         ])
         .manage(sentry_state)
+        .setup(|app| {
+            // Deep Link for app is registered during runtime as well as install,
+            // because this is the only way to use deep links during development.
+            #[cfg(desktop)]
+            #[cfg(debug_assertions)]
+            app.deep_link().register("exam-environment")?;
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
