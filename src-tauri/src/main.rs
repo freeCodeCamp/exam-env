@@ -112,6 +112,14 @@ fn main() {
             #[cfg(desktop)]
             #[cfg(debug_assertions)]
             app.deep_link().register("exam-environment")?;
+
+            #[cfg(target_os = "macos")]
+            {
+                log::trace!("hiding Dock icon on macOS");
+                app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+                log::trace!("Dock icon should be hidden now");
+            }
+
             Ok(())
         })
         .run(tauri::generate_context!())
