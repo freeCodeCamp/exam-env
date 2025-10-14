@@ -109,8 +109,7 @@ fn main() {
         .setup(|app| {
             // Deep Link for app is registered during runtime as well as install,
             // because this is the only way to use deep links during development.
-            #[cfg(desktop)]
-            #[cfg(debug_assertions)]
+            #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
             app.deep_link().register("exam-environment")?;
 
             #[cfg(target_os = "macos")]

@@ -1,6 +1,6 @@
 {
   "productName": "Exam Environment",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "identifier": "org.freecodecamp.exam",
   "build": {
     "beforeDevCommand": "pnpm run dev",
