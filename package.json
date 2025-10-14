@@ -17,9 +17,9 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@freecodecamp/ui": "4.3.0",
-    "@sentry/react": "10.11.0",
-    "@tanstack/react-query": "5.87.4",
-    "@tanstack/react-router": "1.131.41",
+    "@sentry/react": "10.19.0",
+    "@tanstack/react-query": "5.90.3",
+    "@tanstack/react-router": "1.132.47",
     "@tauri-apps/api": "2.8.0",
     "@tauri-apps/plugin-deep-link": "~2",
     "@tauri-apps/plugin-dialog": "2.4.0",
@@ -27,41 +27,38 @@
     "@tauri-apps/plugin-log": "2.7.0",
     "@tauri-apps/plugin-opener": "2.5.0",
     "@tauri-apps/plugin-updater": "2.9.0",
-    "framer-motion": "12.23.12",
-    "marked": "16.2.1",
+    "framer-motion": "12.23.24",
+    "marked": "16.4.0",
     "marked-highlight": "2.2.2",
-    "openapi-fetch": "0.14.0",
+    "openapi-fetch": "0.14.1",
     "prismjs": "1.30.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "vite-plugin-prismjs": "0.0.11"
   },
   "devDependencies": {
-    "@prisma/client": "6.16.1",
-    "@tanstack/react-router-devtools": "1.131.42",
-    "@tanstack/router-plugin": "1.131.41",
+    "@prisma/client": "6.17.1",
+    "@tanstack/react-router-devtools": "1.133.1",
+    "@tanstack/router-plugin": "1.132.56",
     "@tauri-apps/cli": "2.8.4",
+    "@types/bun": "1.3.0",
     "@types/prismjs": "1.26.5",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
-    "@vitejs/plugin-react": "5.0.2",
+    "@vitejs/plugin-react": "5.0.4",
     "openapi-typescript": "7.9.1",
-    "prisma": "6.16.1",
-    "typescript": "5.9.2",
-    "vite": "7.1.5"
+    "prisma": "6.17.1",
+    "typescript": "5.9.3",
+    "vite": "npm:rolldown-vite@latest"
   },
   "engines": {
     "node": "22"
   },
   "license": "BSD-3-Clause",
-  "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@freecodecamp/ui",
-      "@prisma/client",
-      "@prisma/engines",
-      "esbuild",
-      "prisma"
-    ]
-  }
+  "trustedDependencies": [
+    "@prisma/client",
+    "@prisma/engines",
+    "esbuild",
+    "prisma"
+  ]
 }

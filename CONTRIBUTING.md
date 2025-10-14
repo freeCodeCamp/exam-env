@@ -9,15 +9,15 @@ https://v2.tauri.app/start/prerequisites/
 https://v2.tauri.app/reference/cli/
 
 > [!NOTE]
-> This repo uses `pnpm`. It is recommended to use `cargo` for the tauri cli commands, but pnpm may also be used.
+> This repo uses `bun`. It is recommended to use `cargo` for the tauri cli commands, but bun may also be used.
 
 ### Start
 
 ```bash
 cp sample.env .env
-pnpm i
+bun i
 # If the install did not automatically run this:
-pnpm run prisma generate
+bun run prisma generate
 ```
 
 ```bash

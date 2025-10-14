@@ -4,7 +4,6 @@ import prism from "vite-plugin-prismjs";
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
-  // @ts-expect-error
   const env = loadEnv(mode, process.cwd(), "");
 
   assertEnvVars(env);

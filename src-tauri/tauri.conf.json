@@ -3,9 +3,9 @@
   "version": "0.9.1",
   "identifier": "org.freecodecamp.exam",
   "build": {
-    "beforeDevCommand": "pnpm run dev",
+    "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm run build",
+    "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
   "app": {
