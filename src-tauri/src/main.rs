@@ -115,9 +115,7 @@ fn main() {
 
             #[cfg(target_os = "macos")]
             {
-                log::trace!("hiding Dock icon on macOS");
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-                log::trace!("Dock icon should be hidden now");
             }
 
             Ok(())
