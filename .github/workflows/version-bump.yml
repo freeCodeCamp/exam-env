@@ -1,0 +1,201 @@
+name: "version-bump"
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Release Type"
+        type: choice
+        required: true
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      environment:
+        description: "Release Environment"
+        type: choice
+        required: true
+        options:
+          - development
+          - production
+          - staging
+        default: production
+
+jobs:
+  create-version-bump-pr:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: get current version and calculate new version
+        id: version
+        uses: actions/github-script@v7
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+        with:
+          script: |
+            const { version } = require('./package.json')
+            const [major, minor, patch] = version.split('.').map(Number)
+
+            let newVersion
+            if (process.env.RELEASE_TYPE === 'major') {
+              newVersion = `${major + 1}.0.0`
+            } else if (process.env.RELEASE_TYPE === 'minor') {
+              newVersion = `${major}.${minor + 1}.0`
+            } else {
+              newVersion = `${major}.${minor}.${patch + 1}`
+            }
+
+            core.setOutput('current_version', version)
+            core.setOutput('new_version', newVersion)
+            console.log(`Bumping version from ${version} to ${newVersion}`)
+
+      - name: update package.json
+        uses: actions/github-script@v7
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
+        with:
+          script: |
+            const fs = require('fs')
+            const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+            packageJson.version = process.env.NEW_VERSION
+            fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
+
+      - name: update Cargo.toml
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new_version }}"/' src-tauri/Cargo.toml
+
+      - name: update tauri.conf.json
+        uses: actions/github-script@v7
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
+        with:
+          script: |
+            const fs = require('fs')
+            const tauriConf = JSON.parse(fs.readFileSync('./src-tauri/tauri.conf.json', 'utf8'))
+            tauriConf.version = process.env.NEW_VERSION
+            fs.writeFileSync('./src-tauri/tauri.conf.json', JSON.stringify(tauriConf, null, 2) + '\n')
+
+      - name: generate changelog since last release
+        id: changelog
+        uses: actions/github-script@v7
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+        with:
+          script: |
+            const { execSync } = require('child_process')
+            const environment = process.env.ENVIRONMENT
+
+            // Find the last release tag for this environment
+            let lastTag
+            try {
+              const tags = execSync('git tag --list --sort=-version:refname', { encoding: 'utf8' })
+                .split('\n')
+                .filter(tag => tag.includes(environment))
+              lastTag = tags[0] || null
+            } catch (error) {
+              console.log('No previous tags found for this environment')
+              lastTag = null
+            }
+
+            // Get commits since last tag (or all commits if no tag exists)
+            let gitLogCmd
+            if (lastTag) {
+              gitLogCmd = `git log ${lastTag}..HEAD --pretty=format:"%h - %s (%an)" --no-merges`
+              console.log(`Generating changelog since ${lastTag}`)
+            } else {
+              gitLogCmd = 'git log --pretty=format:"%h - %s (%an)" --no-merges'
+              console.log('Generating changelog for all commits (no previous release found)')
+            }
+
+            let changelog
+            try {
+              changelog = execSync(gitLogCmd, { encoding: 'utf8' })
+            } catch (error) {
+              changelog = 'No commits found'
+            }
+
+            // Format changelog with categories
+            const lines = changelog.split('\n').filter(line => line.trim())
+            const categorized = {
+              breaking: [],
+              features: [],
+              fixes: [],
+              chores: [],
+              other: []
+            }
+
+            lines.forEach(line => {
+              if (line.match(/breaking(\(.*?\))?:/i)) {
+                categorized.breaking.push(line)
+              } else if (line.match(/feat(\(.*?\))?:/i)) {
+                categorized.features.push(line)
+              } else if (line.match(/fix(\(.*?\))?:/i)) {
+                categorized.fixes.push(line)
+              } else if (line.match(/(chore|dev)(\(.*?\))?:/i)) {
+                categorized.chores.push(line)
+              } else {
+                categorized.other.push(line)
+              }
+            })
+
+            let formattedChangelog = ''
+            if (categorized.breaking.length > 0) {
+              formattedChangelog += '### ⚠️ Breaking Changes\n' + categorized.breaking.map(l => `- ${l}`).join('\n') + '\n\n'
+            }
+            if (categorized.features.length > 0) {
+              formattedChangelog += '### ✨ Features\n' + categorized.features.map(l => `- ${l}`).join('\n') + '\n\n'
+            }
+            if (categorized.fixes.length > 0) {
+              formattedChangelog += '### 🐛 Bug Fixes\n' + categorized.fixes.map(l => `- ${l}`).join('\n') + '\n\n'
+            }
+            if (categorized.chores.length > 0) {
+              formattedChangelog += '### 🔧 Chores\n' + categorized.chores.map(l => `- ${l}`).join('\n') + '\n\n'
+            }
+            if (categorized.other.length > 0) {
+              formattedChangelog += '### 📝 Other Changes\n' + categorized.other.map(l => `- ${l}`).join('\n') + '\n\n'
+            }
+
+            if (!formattedChangelog) {
+              formattedChangelog = 'No changes found'
+            }
+
+            core.setOutput('changelog', formattedChangelog)
+            core.setOutput('last_tag', lastTag || 'none')
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.environment }}"
+          branch: release/v${{ steps.version.outputs.new_version }}
+          delete-branch: true
+          title: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.environment }}"
+          body: |
+            ## Version Bump: ${{ inputs.release_type }}
+
+            This PR bumps the version from `${{ steps.version.outputs.current_version }}` to `${{ steps.version.outputs.new_version }}`.
+
+            ## 📋 Changelog
+
+            **Since:** ${{ steps.changelog.outputs.last_tag }}
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### Next Steps
+
+            Once this PR is merged, the release workflow will automatically trigger to create a new release.
+          labels: |
+            environment: ${{ inputs.environment }}
