@@ -381,11 +381,9 @@ export function Exam() {
     return <Text>Loading...</Text>;
   }
 
-  const startTimeInMS =
-    examAttempt.startTime?.getTime() ?? examAttempt.startTimeInMS;
-  const totalTimeInMS = examQuery.data?.exam?.config?.totalTimeInS
-    ? examQuery.data.exam.config.totalTimeInS * 1000
-    : examQuery.data?.exam?.config?.totalTimeInMS ?? 0;
+  const startTimeInMS = examAttempt.startTime.getTime();
+  const totalTimeInMS =
+    (examQuery.data?.exam?.config?.totalTimeInS ?? 0) * 1000;
   const secondsLeft = Math.floor(
     (startTimeInMS + totalTimeInMS - Date.now()) / 1000
   );
