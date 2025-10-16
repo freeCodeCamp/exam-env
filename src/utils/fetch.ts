@@ -50,7 +50,7 @@ export async function getGeneratedExam(examId: string) {
     const generatedExam = (await (
       await fetch("/mocks/generated-exam.json")
     ).json()) as { exam: UserExam; examAttempt: UserExamAttempt };
-    generatedExam.examAttempt.startTimeInMS = Date.now();
+    generatedExam.examAttempt.startTime = new Date();
 
     // return {
     //   response: new Response(null, { status: 500 }),
@@ -131,9 +131,7 @@ export async function getExams() {
           config: {
             name: exam.config.name,
             note: exam.config.note,
-            totalTimeInMS: exam.config.totalTimeInMS,
             totalTimeInS: exam.config.totalTimeInS,
-            retakeTimeInMS: exam.config.retakeTimeInMS,
             retakeTimeInS: exam.config.retakeTimeInS,
           },
         },

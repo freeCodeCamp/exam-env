@@ -8,11 +8,7 @@ export type UserExam = Omit<
   questionSets: (Omit<ExamEnvironmentQuestionSet, "questions"> & {
     questions: (Omit<
       ExamEnvironmentMultipleChoiceQuestion,
-      | "answers"
-      | "tags"
-      | "deprecated"
-      | "submissionTimeInMS"
-      | "submissionTime"
+      "answers" | "tags" | "deprecated" | "submissionTime"
     > & {
       answers: Omit<ExamEnvironmentAnswer, "isCorrect">[];
     })[];
@@ -28,12 +24,12 @@ export type Answers =
 
 export type UserExamAttempt = Omit<
   ExamEnvironmentExamAttempt,
-  "submissionTimeInMS" | "questionSets" | "submissionTime"
+  "questionSets" | "submissionTime"
 > & {
   questionSets: (Omit<ExamEnvironmentQuestionSetAttempt, "questions"> & {
     questions: Omit<
       ExamEnvironmentMultipleChoiceQuestionAttempt,
-      "submissionTimeInMS" | "submissionTime"
+      "submissionTime"
     >[];
   })[];
 };
