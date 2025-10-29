@@ -7,6 +7,11 @@ export function deserializeDates<T>(obj: unknown): T {
   }
 
   if (typeof obj === "string") {
+    // Check if the string is an ISO date
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+    if (!isoDateRegex.test(obj)) {
+      return obj as T;
+    }
     const date = new Date(obj);
     if (!isNaN(date.getTime())) {
       return date as T;

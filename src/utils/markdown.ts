@@ -16,6 +16,25 @@ marked.use(
   })
 );
 
-export function parseMarkdown(markdown: string): string {
-  return marked.parse(markdown, { async: false, gfm: true });
+export function parseMarkdown(markdown: unknown): string {
+  switch (typeof markdown) {
+    case "undefined":
+      console.error("received undefined markdown");
+      return "undefined";
+    case "object":
+      console.error("received object instead of string markdown", markdown);
+      const repr = JSON.stringify(markdown);
+      return marked.parse(repr, { async: false, gfm: true });
+    case "boolean":
+      console.warn("received boolean instead of string markdown", markdown);
+      return markdown ? "true" : "false";
+    case "number":
+      console.warn("received number instead of string markdown", markdown);
+      return markdown.toString();
+    case "string":
+      return marked.parse(markdown, { async: false, gfm: true });
+    default:
+      console.error("received unknown type of markdown", markdown);
+      return "unknown";
+  }
 }
