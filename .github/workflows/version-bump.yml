@@ -68,13 +68,11 @@ jobs:
             packageJson.version = process.env.NEW_VERSION
             fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
 
-      - name: install cargo-edit
-        run: cargo install cargo-edit
-
       - name: update Cargo.toml and Cargo.lock
-        working-directory: ./src-tauri
         run: |
-          cargo set-version ${{ steps.version.outputs.new_version }}
+          sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new_version }}"/' src-tauri/Cargo.toml
+          cd src-tauri
+          cargo update -p exam-env
 
       - name: update tauri.conf.json
         uses: actions/github-script@v7
