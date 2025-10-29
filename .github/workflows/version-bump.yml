@@ -34,11 +34,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-
       - name: get current version and calculate new version
         id: version
         uses: actions/github-script@v7
@@ -73,9 +68,11 @@ jobs:
             packageJson.version = process.env.NEW_VERSION
             fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
 
-      - name: update Cargo.toml
+      - name: update Cargo.toml and Cargo.lock
         run: |
           sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new_version }}"/' src-tauri/Cargo.toml
+          cd src-tauri
+          cargo update -p exam-env
 
       - name: update tauri.conf.json
         uses: actions/github-script@v7
