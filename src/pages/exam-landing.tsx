@@ -12,7 +12,8 @@ export function ExamLanding() {
   const [hasAgreed, setHasAgreed] = useState(false);
   const navigate = useNavigate();
 
-  const { examId, note } = ExamLandingRoute.useParams();
+  const { examId } = ExamLandingRoute.useParams();
+  const { note } = ExamLandingRoute.useSearch();
 
   return (
     <>
@@ -21,12 +22,6 @@ export function ExamLanding() {
         <Center height={"100%"}>
           <Flex direction={"column"} maxWidth={"70%"}>
             <Spacer size="m" />
-            {!!note && (
-              <>
-                <Heading size={"md"}>Exam Note</Heading>
-                <Text>{note}</Text>
-              </>
-            )}
             <Heading>Instructions</Heading>
             <Spacer size="s" />
             <Text color={"red"}>
@@ -42,6 +37,12 @@ export function ExamLanding() {
             <Text>
               If you run out of time, your attempt will be auto-submitted.
             </Text>
+            {!!note && (
+              <>
+                <Heading size={"md"}>Exam Note</Heading>
+                <Text>{note}</Text>
+              </>
+            )}
             <Checkbox onChange={(e) => setHasAgreed(e.target.checked)}>
               I agree to the terms and conditions
             </Checkbox>
