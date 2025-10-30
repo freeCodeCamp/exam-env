@@ -1,16 +1,16 @@
-import { createRoute, useNavigate } from "@tanstack/react-router";
+import { createRoute } from "@tanstack/react-router";
 import { Center, Flex, Text, Heading, Spinner } from "@chakra-ui/react";
-import { Fragment, ReactNode } from "react";
+import { ReactNode } from "react";
 import { Button, Spacer } from "@freecodecamp/ui";
 
 import { ProtectedRoute } from "../components/protected-route";
-import { ExamLandingRoute } from "./exam-landing";
 import { Header } from "../components/header";
 import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
 import { rootRoute } from "./root";
 import { useQuery } from "@tanstack/react-query";
 import { captureException } from "@sentry/react";
+import { ExamCard } from "../components/exam-card";
 
 function LandingParent({ children }: { children: ReactNode }) {
   const { flashKind, flashMessage } = LandingRoute.useSearch();
@@ -35,8 +35,6 @@ function LandingParent({ children }: { children: ReactNode }) {
 }
 
 export function Landing() {
-  const navigate = useNavigate();
-
   const examsQuery = useQuery({
     queryKey: ["exams"],
     queryFn: async () => {
@@ -88,38 +86,13 @@ export function Landing() {
     return a.canTake ? -1 : 1;
   });
 
-  // Converts seconds to Xh Ym format
-  function examTimeInHumanReadableFormat(seconds: number) {
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`;
-    }
-
-    return `${minutes}m`;
-  }
-
   return (
     <LandingParent>
-      {examsQuery.data.map((exam) => {
-        return (
-          <Fragment key={exam.id}>
-            <Button
-              disabled={!exam.canTake}
-              onClick={() => {
-                navigate({
-                  to: ExamLandingRoute.to,
-                  params: { examId: exam.id, note: exam.config.note },
-                });
-              }}
-            >
-              {exam.config.name} (
-              {examTimeInHumanReadableFormat(exam.config.totalTimeInS)})
-            </Button>
-            <Spacer size="s" />
-          </Fragment>
-        );
-      })}
+      <ul style={{ listStyleType: "none", padding: 0 }}>
+        {examsQuery.data.map((exam) => {
+          return <ExamCard key={exam.id} exam={exam} />;
+        })}
+      </ul>
     </LandingParent>
   );
 }

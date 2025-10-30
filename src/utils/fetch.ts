@@ -154,6 +154,25 @@ export async function getExams() {
   return res;
 }
 
+export async function getAttemptsByExamId(examId: string) {
+  if (VITE_MOCK_DATA) {
+    await delayForTesting(800);
+  }
+
+  const token = await invoke<string>("get_authorization_token");
+
+  const res = await client.GET(`/exam-environment/exams/{examId}/attempts`, {
+    params: {
+      path: { examId },
+      header: {
+        "exam-environment-authorization-token": token,
+      },
+    },
+  });
+
+  return res;
+}
+
 export async function delayForTesting(t: number) {
   await new Promise((res, _) => setTimeout(res, t));
 }
