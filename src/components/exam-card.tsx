@@ -52,6 +52,8 @@ export function ExamCard({ exam }: ExamCardProps) {
 
       return data;
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   function getExamStatus(): ExamStatus {

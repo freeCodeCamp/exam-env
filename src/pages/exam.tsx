@@ -343,18 +343,21 @@ export function Exam() {
   }
 
   if (examQuery.isPending) {
-    // TODO: Improve this loading
     return (
-      <Center>
-        <Spinner
-          alignSelf={"center"}
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="var(--dark-blue)"
-          size="xl"
-        />
-      </Center>
+      <Box overflowY="hidden">
+        <Box width={"full"} mt="2em">
+          <Center>
+            <Spinner
+              alignSelf={"center"}
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="var(--dark-blue)"
+              size="xl"
+            />
+          </Center>
+        </Box>
+      </Box>
     );
   }
 
@@ -377,8 +380,22 @@ export function Exam() {
   }
 
   if (!examAttempt || !fullQuestion) {
-    // TODO: Improve
-    return <Text>Loading...</Text>;
+    return (
+      <Box overflowY="hidden">
+        <Box width={"full"} mt="2em">
+          <Center>
+            <Spinner
+              alignSelf={"center"}
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="var(--dark-blue)"
+              size="xl"
+            />
+          </Center>
+        </Box>
+      </Box>
+    );
   }
 
   const startTimeInMS = examAttempt.startTime.getTime();
