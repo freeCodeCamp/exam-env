@@ -77,6 +77,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
       - name: Set FREECODECAMP_API based on environment
         run: |
           if [ "${{ inputs.environment }}" = "development" ]; then
@@ -165,13 +170,11 @@ jobs:
           security find-identity -v
 
       - name: Set verbose flag if in debug mode
-        run: |
-          if [ "$ACTIONS_STEP_DEBUG" = "true" ]; then
-            echo "TAURI_VERBOSE_FLAG=--verbose" >> $GITHUB_ENV
-          else
-            echo "TAURI_VERBOSE_FLAG=" >> $GITHUB_ENV
-          fi
-        shell: bash
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isDebug = process.env.ACTIONS_STEP_DEBUG === 'true';
+            core.exportVariable('TAURI_VERBOSE_FLAG', isDebug ? '--verbose' : '');
 
       - uses: tauri-apps/tauri-action@v0
         env:
