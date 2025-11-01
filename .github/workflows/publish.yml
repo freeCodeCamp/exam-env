@@ -130,6 +130,12 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: New-Item -Name ".env" -ItemType File
 
+      - name: install Go stable (windows)
+        if: matrix.platform == 'windows-latest'
+        uses: actions/setup-go@v4
+        with:
+          go-version: "stable"
+
       - name: install relic (windows)
         if: matrix.platform == 'windows-latest'
         run: |
