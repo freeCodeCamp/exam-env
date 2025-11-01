@@ -39,6 +39,7 @@ jobs:
           ENVIRONMENT: ${{inputs.environment}}
           PACKAGE_VERSION: ${{ steps.version.outputs.version }}
         with:
+          # TODO: see if release already exists (e.g. re-run of failed workflow), then re-use it
           script: |
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
@@ -69,7 +70,7 @@ jobs:
           # - platform: "windows-latest"
           #   args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi"
           - platform: "windows-latest"
-            args: "--bundles nsis --verbose"
+            args: "--verbose --bundles nsis"
 
     runs-on: ${{ matrix.platform }}
     env:
@@ -80,7 +81,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 22.x
 
       - name: Set FREECODECAMP_API based on environment
         run: |
