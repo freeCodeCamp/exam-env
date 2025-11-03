@@ -60,17 +60,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - platform: "macos-latest"
-          #   args: "--target aarch64-apple-darwin --bundles dmg,app"
-          # - platform: "macos-latest"
-          #   args: "--target x86_64-apple-darwin --bundles dmg,app"
-          # - platform: "ubuntu-22.04"
-          #   args: ""
+          - platform: "macos-latest"
+            args: "--target aarch64-apple-darwin --bundles dmg,app"
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin --bundles dmg,app"
+          - platform: "ubuntu-22.04"
+            args: ""
           # Disabled, until needed
           # - platform: "windows-latest"
           #   args: "--config src-tauri/tauri.microsoftstore.conf.json --bundles msi"
           - platform: "windows-latest"
-            args: "--verbose --bundles nsis"
+            args: "--bundles nsis"
 
     runs-on: ${{ matrix.platform }}
     env:
