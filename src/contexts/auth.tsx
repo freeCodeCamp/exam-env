@@ -2,6 +2,7 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 import { verifyToken } from "../utils/fetch";
+import { captureException } from "@sentry/react";
 
 export const AuthContext = createContext<{
   examEnvironmentAuthenticationToken: string | null;
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (res.data) {
       setExamEnvironmentAuthenticationToken(token);
     } else {
+      captureException(res.error);
       setExamEnvironmentAuthenticationToken(null);
       throw new Error(res.error.message);
     }
