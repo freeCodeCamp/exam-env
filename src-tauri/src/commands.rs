@@ -93,7 +93,14 @@ pub async fn check<R: Runtime>(
         .send()
         .await
         .map_err(|e| Error::Request(format!("failed to request releases: {:#?}", e)))
-        .capture()?;
+        .capture()?
+        .error_for_status()
+        .map_err(|e| {
+            Error::Request(format!(
+                "failed to request releases, non-200 status code: {:#?}",
+                e
+            ))
+        })?;
 
     let releases: Vec<GitHubRelease> = response
         .json()
