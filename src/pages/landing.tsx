@@ -9,7 +9,6 @@ import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
 import { rootRoute } from "./root";
 import { useQuery } from "@tanstack/react-query";
-import { captureException } from "@sentry/react";
 import { ExamCard } from "../components/exam-card";
 
 function LandingParent({ children }: { children: ReactNode }) {
@@ -37,14 +36,7 @@ function LandingParent({ children }: { children: ReactNode }) {
 export function Landing() {
   const examsQuery = useQuery({
     queryKey: ["exams"],
-    queryFn: async () => {
-      const { data, error } = await getExams();
-      if (error) {
-        captureException(error);
-        throw new Error(error.message);
-      }
-      return data;
-    },
+    queryFn: getExams,
   });
 
   if (examsQuery.isPending) {

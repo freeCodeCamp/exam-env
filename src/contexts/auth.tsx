@@ -2,7 +2,6 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 import { verifyToken } from "../utils/fetch";
-import { captureException } from "@sentry/react";
 
 export const AuthContext = createContext<{
   examEnvironmentAuthenticationToken: string | null;
@@ -31,16 +30,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (token: string) => {
-    const res = await verifyToken(token);
+    const _data = await verifyToken(token);
     // TODO: Add check that token will not expire soon
     //       If it will, tell user
-    if (res.data) {
-      setExamEnvironmentAuthenticationToken(token);
-    } else {
-      captureException(res.error);
-      setExamEnvironmentAuthenticationToken(null);
-      throw new Error(res.error.message);
-    }
+    setExamEnvironmentAuthenticationToken(token);
   };
 
   const logout = async () => {

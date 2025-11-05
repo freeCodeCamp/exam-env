@@ -6,6 +6,7 @@ import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
+import { captureException } from "@sentry/react";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
@@ -20,14 +21,12 @@ export async function verifyToken(token: string) {
     if (token) {
       const TWO_DAYS_IN_MS = 2 * 24 * 60 * 60 * 1000;
       const data = { expireAt: Date.now() + TWO_DAYS_IN_MS };
-      const response = new Response(JSON.stringify(data));
-      return { data, response };
+      return data;
     } else {
-      const response = new Response(null, { status: 404 });
       // TODO: There must be a better way to get this
       const error: paths["/exam-environment/token-meta"]["get"]["responses"]["404"]["content"]["application/json"] =
         { code: "FCC_TEST_ERROR_CODE", message: "Non-existant token" };
-      return { error, response };
+      return error;
     }
   }
 
@@ -41,7 +40,12 @@ export async function verifyToken(token: string) {
 
   console.debug(res);
 
-  return res;
+  if (res.error) {
+    captureException(res.error);
+    throw res.error;
+  }
+
+  return res.data;
 }
 
 export async function getGeneratedExam(examId: string) {
@@ -52,18 +56,11 @@ export async function getGeneratedExam(examId: string) {
     ).json()) as { exam: UserExam; examAttempt: UserExamAttempt };
     generatedExam.examAttempt.startTime = new Date();
 
-    // return {
-    //   response: new Response(null, { status: 500 }),
-    //   error: {
+    // throw {
     //     code: "FCC_EXAM_ERROR",
     //     message: "Example error fetching generated exam.",
-    //   },
-    // };
-    return {
-      data: generatedExam,
-      response: new Response(null, { status: 200 }),
-      error: undefined,
-    };
+    //   };
+    return generatedExam;
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -77,30 +74,25 @@ export async function getGeneratedExam(examId: string) {
     },
   });
 
-  const data = res.data
-    ? deserializeDates<{ exam: UserExam; examAttempt: UserExamAttempt }>(
-        res.data
-      )
-    : undefined;
-  res.data = data;
+  if (res.error) {
+    captureException(res.error);
+    throw res.error;
+  }
 
-  return res as {
-    data?: { exam: UserExam; examAttempt: UserExamAttempt };
-    response: typeof res.response;
-    error: typeof res.error;
-  };
+  return deserializeDates<{ exam: UserExam; examAttempt: UserExamAttempt }>(
+    res.data
+  );
 }
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
   if (VITE_MOCK_DATA) {
     await delayForTesting(800);
-    const response = new Response(null, { status: 200 });
     // const error = {
     //   code: "EXAMPLE_ERROR",
     //   message: "Example error when posting exam",
     // };
-    // return { response, data: undefined as never, error };
-    return { response, data: undefined as never, error: undefined };
+    // throw error;
+    return undefined as never;
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -114,6 +106,11 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     },
   });
 
+  if (res.error) {
+    captureException(res.error);
+    throw res.error;
+  }
+
   return res;
 }
 
@@ -123,22 +120,18 @@ export async function getExams() {
     const res = await fetch("/mocks/exams.json");
     const [exam] =
       (await res.json()) as paths["/exam-environment/exams"]["get"]["responses"]["200"]["content"]["application/json"];
-    return {
-      data: [
-        {
-          id: exam.id,
-          canTake: true,
-          config: {
-            name: exam.config.name,
-            note: exam.config.note,
-            totalTimeInS: exam.config.totalTimeInS,
-            retakeTimeInS: exam.config.retakeTimeInS,
-          },
+    return [
+      {
+        id: exam.id,
+        canTake: true,
+        config: {
+          name: exam.config.name,
+          note: exam.config.note,
+          totalTimeInS: exam.config.totalTimeInS,
+          retakeTimeInS: exam.config.retakeTimeInS,
         },
-      ],
-      response: new Response(null, { status: 200 }),
-      error: undefined,
-    };
+      },
+    ];
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -151,7 +144,12 @@ export async function getExams() {
     },
   });
 
-  return res;
+  if (res.error) {
+    captureException(res.error);
+    throw res.error;
+  }
+
+  return res.data;
 }
 
 export async function getAttemptsByExamId(examId: string) {
@@ -170,7 +168,12 @@ export async function getAttemptsByExamId(examId: string) {
     },
   });
 
-  return res;
+  if (res.error || res.response.status >= 300) {
+    captureException(res.error);
+    throw res.error;
+  }
+
+  return res.data;
 }
 
 export async function delayForTesting(t: number) {

@@ -33,13 +33,7 @@ import {
   UserExam,
   UserExamAttempt,
 } from "../utils/types";
-import { invoke } from "@tauri-apps/api/core";
-import {
-  captureAndNavigate,
-  err,
-  QueryFn,
-  QueryFnError,
-} from "../utils/errors";
+import { captureAndNavigate } from "../utils/errors";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
 import { captureException } from "@sentry/react";
@@ -47,28 +41,14 @@ import { captureException } from "@sentry/react";
 export function Exam() {
   const { examId } = ExamRoute.useParams();
   const navigate = useNavigate();
-  const examQuery = useQuery<
-    QueryFn<typeof examQueryFn>,
-    QueryFnError<typeof getGeneratedExam>
-  >({
+  const examQuery = useQuery({
     queryKey: ["exam", examId],
-    queryFn: examQueryFn,
+    queryFn: () => getGeneratedExam(examId),
     retry: false,
   });
   const submitQuestionMutation = useMutation({
     mutationFn: submitQuestion,
   });
-
-  async function examQueryFn() {
-    const res = await getGeneratedExam(examId);
-
-    if (res.error) {
-      captureException(res.error);
-      throw err(res);
-    }
-
-    return res.data;
-  }
 
   const [examAttempt, setExamAttempt] = useState<UserExamAttempt | null>(null);
   const [newSelectedAnswers, setNewSelectedAnswers] = useState<
@@ -323,13 +303,8 @@ export function Exam() {
       questionSets,
     };
 
-    const { error } = await postExamAttempt(examAttempt);
-
     // TODO: Use response to determine next action
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await postExamAttempt(examAttempt);
 
     if (currentQuestionNumber < questions.length) {
       nextQuestion();
@@ -362,21 +337,15 @@ export function Exam() {
   }
 
   if (examQuery.isError) {
-    if (examQuery.error._status === 500) {
-      invoke("emit_to_sentry", { errorStr: examQuery.error.message }).catch(
-        console.error
-      );
-    } else {
-      return (
-        <Navigate
-          to={LandingRoute.to}
-          search={{
-            flashKind: "warning",
-            flashMessage: examQuery.error.message,
-          }}
-        />
-      );
-    }
+    return (
+      <Navigate
+        to={LandingRoute.to}
+        search={{
+          flashKind: "warning",
+          flashMessage: examQuery.error.message,
+        }}
+      />
+    );
   }
 
   if (!examAttempt || !fullQuestion) {

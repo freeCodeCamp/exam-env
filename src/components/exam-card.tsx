@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { WarningIcon } from "@chakra-ui/icons";
 
-type Exams = Awaited<ReturnType<typeof getExams>>["data"];
+type Exams = Awaited<ReturnType<typeof getExams>>;
 
 interface ExamCardProps {
   exam: NonNullable<Exams>[number];
@@ -42,16 +42,7 @@ export function ExamCard({ exam }: ExamCardProps) {
 
   const attemptsQuery = useQuery({
     queryKey: ["exam-attempts", exam.id],
-    queryFn: async () => {
-      const { data, error } = await getAttemptsByExamId(exam.id);
-
-      if (error) {
-        // @ts-expect-error TODO: fix error return type upstream
-        throw new Error(error.message);
-      }
-
-      return data;
-    },
+    queryFn: async () => getAttemptsByExamId(exam.id),
     retry: false,
     refetchOnWindowFocus: false,
   });
