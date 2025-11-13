@@ -185,7 +185,7 @@ jobs:
             const isDebug = process.env.ACTIONS_STEP_DEBUG === 'true';
             core.exportVariable('TAURI_VERBOSE_FLAG', isDebug ? '--verbose' : '');
 
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -211,8 +211,7 @@ jobs:
           includeUpdaterJson: true
           # tagName is required to prevent all update URLs from pointing to `/latest/`:
           # https://github.com/freeCodeCamp/exam-env/issues/54
-          # Must be URL encoded
-          tagName: ${{ inputs.environment }}%2F${{ steps.version.outputs.version }}
+          tagName: ${{ inputs.environment }}/${{ steps.version.outputs.version }}
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
 
