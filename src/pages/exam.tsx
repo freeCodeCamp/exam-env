@@ -43,6 +43,7 @@ export function Exam() {
   const navigate = useNavigate();
   const examQuery = useQuery({
     queryKey: ["exam", examId],
+    // TODO: If page is "reloaded" once an exam has ended, this could error with "User has completed exam too recently to retake."
     queryFn: () => getGeneratedExam(examId),
     retry: false,
   });
