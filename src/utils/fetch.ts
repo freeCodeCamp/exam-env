@@ -74,6 +74,8 @@ export async function getGeneratedExam(examId: string) {
     },
   });
 
+  console.debug(res);
+
   if (res.error) {
     captureException(res.error);
     throw res.error;
@@ -105,6 +107,8 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
       },
     },
   });
+
+  console.debug(res);
 
   if (res.error) {
     captureException(res.error);
@@ -144,6 +148,8 @@ export async function getExams() {
     },
   });
 
+  console.debug(res);
+
   if (res.error) {
     captureException(res.error);
     throw res.error;
@@ -172,6 +178,8 @@ export async function getAttemptsByExamId(examId: string) {
     captureException(res.error);
     throw res.error;
   }
+
+  console.debug(res);
 
   return res.data;
 }
