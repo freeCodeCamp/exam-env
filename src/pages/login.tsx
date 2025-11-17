@@ -52,12 +52,12 @@ export function Login() {
     setAccountToken(e.target.value);
   }
 
-  async function connectAuthToken() {
+  async function connectAuthToken(token: string) {
     await setAuthToken({
-      newAuthorizationToken: accountToken,
+      newAuthorizationToken: token,
     });
     try {
-      await login(accountToken);
+      await login(token);
       navigate({ to: LandingRoute.to });
     } catch (e) {
       setError(String(e));
@@ -88,6 +88,7 @@ export function Login() {
                 placeholder="Account Token..."
                 onChange={handleTokenChange}
                 value={accountToken}
+                disabled={isPending}
               />
               {!!error && (
                 <FormErrorMessage>{JSON.stringify(error)}</FormErrorMessage>
@@ -117,8 +118,8 @@ export function Login() {
               <Spacer size="m" />
               <Button
                 type="submit"
-                onClick={() => connectAuthToken()}
-                disabled={isPending}
+                onClick={() => connectAuthToken(accountToken)}
+                disabled={isPending || accountToken.length === 0}
                 block={true}
               >
                 Connect
