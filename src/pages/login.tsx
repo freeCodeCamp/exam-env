@@ -93,6 +93,11 @@ export function Login() {
               {!!error && (
                 <FormErrorMessage>{JSON.stringify(error)}</FormErrorMessage>
               )}
+              {!!setAuthTokenError && (
+                <FormErrorMessage>
+                  {JSON.stringify(setAuthTokenError)}
+                </FormErrorMessage>
+              )}
               <FormHelperText>
                 Go to{" "}
                 <ChakraButton
