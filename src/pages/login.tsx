@@ -30,7 +30,7 @@ export function Login() {
   const [accountToken, setAccountToken] = useState(
     examEnvironmentAuthenticationToken || ""
   );
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<string | null>(null);
   const [setAuthToken, isPending, setAuthTokenError] = useInvoke<undefined>(
     "set_authorization_token"
   );
@@ -39,7 +39,7 @@ export function Login() {
     if (setAuthTokenError) {
       captureException(setAuthTokenError);
     }
-    setError(setAuthTokenError);
+    setError(JSON.stringify(setAuthTokenError));
   }, [setAuthTokenError]);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function Login() {
       await login(token);
       navigate({ to: LandingRoute.to });
     } catch (e) {
-      setError(String(e));
+      setError(JSON.stringify(e));
     }
   }
 
@@ -90,14 +90,7 @@ export function Login() {
                 value={accountToken}
                 disabled={isPending}
               />
-              {!!error && (
-                <FormErrorMessage>{JSON.stringify(error)}</FormErrorMessage>
-              )}
-              {!!setAuthTokenError && (
-                <FormErrorMessage>
-                  {JSON.stringify(setAuthTokenError)}
-                </FormErrorMessage>
-              )}
+              {!!error && <FormErrorMessage>{error}</FormErrorMessage>}
               <FormHelperText>
                 Go to{" "}
                 <ChakraButton
