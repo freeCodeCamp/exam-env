@@ -20,13 +20,13 @@ import {
 import { WarningIcon } from "@chakra-ui/icons";
 
 type Exams = Awaited<ReturnType<typeof getExams>>;
+type Attempts = NonNullable<Awaited<ReturnType<typeof getAttemptsByExamId>>>;
 
 interface ExamCardProps {
   exam: NonNullable<Exams>[number];
 }
 
 interface ExamStatus {
-  canTake: boolean;
   status:
     | "Available"
     | "InProgress"
@@ -47,68 +47,7 @@ export function ExamCard({ exam }: ExamCardProps) {
     refetchOnWindowFocus: false,
   });
 
-  function getExamStatus(): ExamStatus {
-    if (attemptsQuery.isPending) {
-      return { canTake: false, status: "Available" };
-    }
-
-    if (!attemptsQuery.data || attemptsQuery.data.length === 0) {
-      return { canTake: exam.canTake, status: "Available" };
-    }
-
-    const latestAttempt = getLatestAttempt(attemptsQuery.data);
-
-    switch (latestAttempt.status) {
-      case "InProgress":
-        return {
-          canTake: exam.canTake,
-          status: latestAttempt.status,
-          message: "You have an in-progress attempt for this exam!",
-          alertStatus: "warning",
-        };
-      case "PendingModeration":
-        return {
-          canTake: exam.canTake,
-          status: latestAttempt.status,
-          message: "You have already completed this exam.",
-          alertStatus: "info",
-        };
-      case "Expired":
-        return {
-          canTake: exam.canTake,
-          status: latestAttempt.status,
-        };
-      default:
-        const startTime = new Date(latestAttempt.startTime);
-        const retakeAvailableAt = new Date(
-          startTime.getTime() + exam.config.retakeTimeInS * 1000
-        );
-        const now = new Date();
-
-        if (now < retakeAvailableAt) {
-          return {
-            canTake: exam.canTake,
-            status: "RetakeLater",
-            message: `You can retake this exam on ${retakeAvailableAt.toLocaleString()}.`,
-            alertStatus: "info",
-          };
-        }
-
-        return { canTake: exam.canTake, status: "Available" };
-    }
-  }
-
-  function getLatestAttempt(
-    attempts: NonNullable<(typeof attemptsQuery)["data"]>
-  ) {
-    return attempts.reduce((latest, current) => {
-      return new Date(current.startTime) > new Date(latest.startTime)
-        ? current
-        : latest;
-    });
-  }
-
-  const examStatus = getExamStatus();
+  const examStatus = getExamStatus(exam, attemptsQuery.data ?? []);
 
   return (
     <li style={{ listStyle: "none", marginBottom: "1rem" }}>
@@ -200,4 +139,54 @@ function examTimeInHumanReadableFormat(seconds: number) {
   }
 
   return `${minutes}m`;
+}
+
+function getExamStatus(
+  exam: ExamCardProps["exam"],
+  attempts: Attempts
+): ExamStatus {
+  const latestAttempt = getLatestAttempt(attempts);
+
+  switch (latestAttempt.status) {
+    case "InProgress":
+      return {
+        status: latestAttempt.status,
+        message: "You have an in-progress attempt for this exam!",
+        alertStatus: "warning",
+      };
+    case "PendingModeration":
+      return {
+        status: latestAttempt.status,
+        message: "You have already completed this exam.",
+        alertStatus: "info",
+      };
+    case "Expired":
+      return {
+        status: latestAttempt.status,
+      };
+    default:
+      const startTime = new Date(latestAttempt.startTime);
+      const retakeAvailableAt = new Date(
+        startTime.getTime() + exam.config.retakeTimeInS * 1000
+      );
+      const now = new Date();
+
+      if (now < retakeAvailableAt) {
+        return {
+          status: "RetakeLater",
+          message: `You can retake this exam on ${retakeAvailableAt.toLocaleString()}.`,
+          alertStatus: "info",
+        };
+      }
+
+      return { status: "Available" };
+  }
+}
+
+function getLatestAttempt(attempts: Attempts) {
+  return attempts.reduce((latest, current) => {
+    return new Date(current.startTime) > new Date(latest.startTime)
+      ? current
+      : latest;
+  });
 }
