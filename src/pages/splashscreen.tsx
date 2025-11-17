@@ -5,7 +5,7 @@ import {
 } from "@tauri-apps/plugin-updater";
 import { restartApp } from "../utils/commands";
 import { ReactNode, useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Box,
   Center,
@@ -112,6 +112,20 @@ export function Splashscreen() {
     onError: (error) => {
       captureException(error);
     },
+  });
+
+  const compatibilityCheckQuery = useQuery({
+    queryKey: ["compatabilityCheck"],
+    enabled: downloadAndInstallQuery.isSuccess || !update,
+    queryFn: async () => {
+      const compatibilityError = await checkDeviceCompatibility();
+      if (compatibilityError) {
+        throw compatibilityError;
+      }
+      return null;
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   if (updateMutation.isPending) {
@@ -223,7 +237,7 @@ export function Splashscreen() {
         </ListItem>
         <ListItem fontWeight={900} display="flex" alignItems="center">
           <ListIcon as={CloseIcon} color="red.500" marginTop="2px" />
-          Downloading update
+          Download error
         </ListItem>
         <ListItem pl={6} maxWidth="100%" overflowX="hidden">
           <Box maxWidth="100%">
@@ -250,6 +264,63 @@ export function Splashscreen() {
         <ListItem display="flex" alignItems="center">
           <ListIcon marginTop="2px" />
           Check device compatibility
+        </ListItem>
+      </SplashParents>
+    );
+  }
+
+  if (compatibilityCheckQuery.isPending) {
+    return (
+      <SplashParents>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
+          App is up to date
+        </ListItem>
+        <ListItem fontWeight={900}>
+          <ListIcon as={Spinner} color="blue.500" marginTop="2px" />
+          Checking device compatibility
+        </ListItem>
+        <Progress isIndeterminate />
+      </SplashParents>
+    );
+  }
+
+  if (compatibilityCheckQuery.isError) {
+    return (
+      <SplashParents>
+        <ListItem>
+          <ListIcon as={CheckIcon} color="green.500" />
+          App is up to date
+        </ListItem>
+        <ListItem fontWeight={900}>
+          <ListIcon as={CloseIcon} color="red.500" />
+          Error checking device compatibility
+        </ListItem>
+        <ListItem pl={6} maxWidth="100%" overflowX="hidden">
+          <Box maxWidth="100%">
+            <Code
+              p={2}
+              display="block"
+              width="100%"
+              maxWidth="100%"
+              overflowX="auto"
+              wordBreak="break-word"
+              whiteSpace="pre-wrap"
+            >
+              {JSON.stringify(
+                compatibilityCheckQuery.error.message,
+                null,
+                2
+              ).slice(0, 1000)}
+            </Code>
+            <Button
+              onClick={() => {
+                compatibilityCheckQuery.refetch();
+              }}
+            >
+              Retry
+            </Button>
+          </Box>
         </ListItem>
       </SplashParents>
     );
@@ -365,6 +436,35 @@ async function checkForUpdate() {
     throw new Error(JSON.stringify(e));
   }
   return null;
+}
+
+// Check device compatibility
+async function checkDeviceCompatibility() {
+  if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(1000);
+  }
+  const compatError = await updateDeviceList();
+  return compatError;
+}
+
+// Check devices and permissions
+async function updateDeviceList() {
+  try {
+    const enumeratedDevices = await navigator.mediaDevices.enumerateDevices();
+    const devices = enumeratedDevices.flat();
+    console.debug(devices);
+    const atLeastOneAudioOutput = devices.some((d) => d.kind === "audiooutput");
+    if (!atLeastOneAudioOutput) {
+      return new Error(
+        "No audio output device found. Please check your device settings."
+      );
+    }
+
+    return null;
+  } catch (e) {
+    captureException(e);
+    return new Error("There is an error accessing an audio playback device.");
+  }
 }
 
 export const SplashscreenRoute = createRoute({
