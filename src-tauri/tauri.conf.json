@@ -48,6 +48,11 @@
     "targets": "all",
     "windows": {
       "signCommand": "relic sign --file %1 --key azure --config relic.conf"
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      }
     }
   },
   "plugins": {
