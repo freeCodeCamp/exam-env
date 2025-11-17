@@ -161,7 +161,7 @@ function getExamStatus(
     case "PendingModeration":
       return {
         status: latestAttempt.status,
-        message: "You have already completed this exam.",
+        message: "Your previous attempt is pending moderation.",
         alertStatus: "info",
       };
     case "Expired":
@@ -174,9 +174,14 @@ function getExamStatus(
         startTime.getTime() + exam.config.retakeTimeInS * 1000
       );
 
+      const now = new Date();
+      if (now >= retakeAvailableAt) {
+        return { status: "Available" };
+      }
+
       return {
         status: "RetakeLater",
-        message: `You can retake this exam on ${retakeAvailableAt.toLocaleString()}.`,
+        message: `Taken too recently. You may retake this exam after ${retakeAvailableAt.toLocaleString()}.`,
         alertStatus: "info",
       };
 
