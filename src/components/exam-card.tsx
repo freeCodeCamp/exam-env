@@ -147,6 +147,10 @@ function getExamStatus(
 ): ExamStatus {
   const latestAttempt = getLatestAttempt(attempts);
 
+  if (!latestAttempt) {
+    return { status: "Available" };
+  }
+
   switch (latestAttempt.status) {
     case "InProgress":
       return {
@@ -164,26 +168,28 @@ function getExamStatus(
       return {
         status: latestAttempt.status,
       };
-    default:
+    case "Approved":
       const startTime = new Date(latestAttempt.startTime);
       const retakeAvailableAt = new Date(
         startTime.getTime() + exam.config.retakeTimeInS * 1000
       );
-      const now = new Date();
 
-      if (now < retakeAvailableAt) {
-        return {
-          status: "RetakeLater",
-          message: `You can retake this exam on ${retakeAvailableAt.toLocaleString()}.`,
-          alertStatus: "info",
-        };
-      }
+      return {
+        status: "RetakeLater",
+        message: `You can retake this exam on ${retakeAvailableAt.toLocaleString()}.`,
+        alertStatus: "info",
+      };
 
+    default:
       return { status: "Available" };
   }
 }
 
 function getLatestAttempt(attempts: Attempts) {
+  if (attempts.length === 0) {
+    return null;
+  }
+
   return attempts.reduce((latest, current) => {
     return new Date(current.startTime) > new Date(latest.startTime)
       ? current
