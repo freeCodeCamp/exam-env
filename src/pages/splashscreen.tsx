@@ -445,24 +445,42 @@ async function checkDeviceCompatibility() {
   return null;
 }
 
-// Check devices and permissions
 async function updateDeviceList() {
+  let audioCtx: AudioContext | null = null;
+
   try {
-    const enumeratedDevices = await navigator.mediaDevices.enumerateDevices();
-    const devices = enumeratedDevices.flat();
-    console.debug(devices);
-    const atLeastOneAudioOutput = devices.some((d) => d.kind === "audiooutput");
-    if (!atLeastOneAudioOutput) {
-      return new Error(
-        `No audio output device found. Please check your device settings. Ensure that at least one audio output device (e.g., speakers or headphones) is connected and recognized by your system. Found media devices: ${devices.map((d) => d.label).join(", ")}`
-      );
+    // Vendor prefix safety (mostly for older Safari/WebKit, but good for safety)
+    const AudioContext =
+      window.AudioContext || (window as any).webkitAudioContext;
+
+    if (!AudioContext) {
+      throw new Error("Web Audio API is not supported by this system.");
     }
+
+    audioCtx = new AudioContext();
+
+    // Check for immediate failure states
+    // 'closed': The context has been closed or hardware is completely missing.
+    if (audioCtx.state === "closed") {
+      throw new Error("Audio system reported 'closed' state.");
+    }
+
+    // Note: No check for 'suspended' here because strict autoplay policies
+    // (especially on macOS) often start contexts in 'suspended' until the user clicks something.
+    // However, the fact that the object was successfully created proves the drivers are there.
 
     return null;
   } catch (e) {
     return new Error(
-      `There is an error accessing an audio playback device. ${String(e)}`
+      `Audio system check failed. Please ensure your device has a working sound card/drivers. ${String(e)}`
     );
+  } finally {
+    // Clean up to prevent memory leaks
+    if (audioCtx) {
+      try {
+        await audioCtx.close();
+      } catch (e) {}
+    }
   }
 }
 
