@@ -143,6 +143,7 @@ jobs:
           NEW_VERSION: ${{ needs.create-release.outputs.new_version }}
         with:
           script: |
+            const newVersion = process.env.NEW_VERSION
             // update tauri.conf.json with new RC version
             const fs = require('fs')
             const tauriConf = require('./src-tauri/tauri.conf.json')
