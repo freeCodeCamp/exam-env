@@ -68,10 +68,11 @@ fn main() {
 
     let sentry_state = SentryState { client: guard };
 
+    let sentry_release_name = sentry::release_name!().unwrap_or_default();
+
     info!(
         environment = utils::ENVIRONMENT,
-        version = ?sentry::release_name!().unwrap(),
-        "Start"
+        "Start: {sentry_release_name}"
     );
 
     tauri::Builder::default()
