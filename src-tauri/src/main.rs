@@ -117,6 +117,13 @@ fn main() {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
             }
 
+            // In debug builds, allow window content to be visible
+            #[cfg(debug_assertions)]
+            {
+                let window = app.get_window("main")?;
+                window.set_content_protected(false)?;
+            }
+
             Ok(())
         })
         .run(tauri::generate_context!())
