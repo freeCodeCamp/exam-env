@@ -12,15 +12,6 @@ on:
           - minor
           - major
         default: patch
-      environment:
-        description: "Release Environment"
-        type: choice
-        required: true
-        options:
-          - development
-          - production
-          - staging
-        default: production
 
 jobs:
   create-version-bump-pr:
@@ -36,12 +27,12 @@ jobs:
 
       - name: get current version and calculate new version
         id: version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
         with:
           script: |
-            const { version } = require('./package.json')
+            const { version } = require('./src-tauri/tauri.conf.json')
             const [major, minor, patch] = version.split('.').map(Number)
 
             let newVersion
@@ -58,7 +49,7 @@ jobs:
             console.log(`Bumping version from ${version} to ${newVersion}`)
 
       - name: update package.json
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           NEW_VERSION: ${{ steps.version.outputs.new_version }}
         with:
@@ -75,7 +66,7 @@ jobs:
           cargo update -p exam-env
 
       - name: update tauri.conf.json
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           NEW_VERSION: ${{ steps.version.outputs.new_version }}
         with:
@@ -87,23 +78,20 @@ jobs:
 
       - name: generate changelog since last release
         id: changelog
-        uses: actions/github-script@v7
-        env:
-          ENVIRONMENT: ${{ inputs.environment }}
+        uses: actions/github-script@v8
         with:
           script: |
             const { execSync } = require('child_process')
-            const environment = process.env.ENVIRONMENT
 
-            // Find the last release tag for this environment
+            // Find the last release tag for production
             let lastTag
             try {
               const tags = execSync('git tag --list --sort=-version:refname', { encoding: 'utf8' })
                 .split('\n')
-                .filter(tag => tag.includes(environment))
+                .filter(tag => tag.includes('production'))
               lastTag = tags[0] || null
             } catch (error) {
-              console.log('No previous tags found for this environment')
+              console.log('No previous tags found for production environment')
               lastTag = null
             }
 
@@ -176,10 +164,9 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.environment }}"
+          commit-message: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.release_type }}"
           branch: release/v${{ steps.version.outputs.new_version }}
-          delete-branch: true
-          title: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.environment }}"
+          title: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.release_type }}"
           body: |
             ## Version Bump: ${{ inputs.release_type }}
 
@@ -195,4 +182,4 @@ jobs:
 
             Once this PR is merged, the release workflow will automatically trigger to create a new release.
           labels: |
-            environment: ${{ inputs.environment }}
+            release_type: ${{ inputs.release_type }}

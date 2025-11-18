@@ -83,21 +83,21 @@ Manually triggered workflow to create a version bump PR:
 1. Go to Actions → version-bump → Run workflow
 2. Select:
    - **Release Type**: `patch`, `minor`, or `major`
-   - **Release Environment**: `development`, `staging`, or `production`
 3. The workflow will:
    - Calculate the new version based on the release type
    - Update `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`
-   - Create a PR with title: `Release vX.X.X (environment)`
-   - Add labels: `release`, `automated`, and `environment: <selected>`
+   - Create a PR with title: `release(X.X.X): <RELEASE_TYPE>`
+   - Add label: `release_type: <RELEASE_TYPE>`
 
 ### 2. Auto Release (`auto-release.yml`)
 
 Automatically triggered when a version bump PR is merged:
 
 1. Verifies the PR was created by the github-actions bot
-2. Extracts the environment from the PR label (e.g., `environment: production`)
-3. Triggers the publish workflow with the correct environment
-4. Defaults to `production` if no environment label is found
+2. Extracts the release type from the PR label (e.g., `release_type: patch`)
+3. Triggers the publish workflow with the following inputs:
+   - **release_type**: extracted from the PR label
+   - **environment**: production
 
 ### 3. Publish (`publish.yml`)
 
@@ -105,31 +105,18 @@ Builds and publishes the application:
 
 1. Triggered automatically by auto-release or manually via Actions
 2. Builds the application for all platforms
-3. Creates a GitHub release with the version from `package.json`
+3. Creates a GitHub release with the version from `src-tauri/tauri.conf.json`
 4. Uploads build artifacts and updater files
 
 ### Quick Release Process
 
-1. Run the `version-bump` workflow with desired release type and environment
+1. Run the `version-bump` workflow with desired release type
 2. Review and merge the generated PR
 3. The `auto-release` workflow automatically triggers `publish`
 4. Monitor the publish workflow for completion
 
-### Manual Release (Legacy)
+### Release Candidates
 
-A manual run of the `publish` action can build and cut the release of the app. The `version` field in the `package.json` and `src-tauri/tauri.conf.json` files should be updated.
-
-This is often best done in its own PR:
-
-```bash
-# Create patch, minor, major branch
-git checkout -b release_<kind>
-# Update version in package.json and src-tauri/tauri.conf.json
-# Commit with message
-git commit -m "release(<version>): <info>"
-# Tag commit
-git tag -a <version> -m "<info>"
-# Push to remote
-git push origin release_<kind>
-# Merge PR, start GH Action
-```
+1. Run the `publish` workflow directly with inputs:
+   - **release_type**: `patch`, `minor`, or `major`
+   - **environment**: `staging` or `development`

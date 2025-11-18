@@ -12,6 +12,16 @@ on:
           - production
           - staging
         default: production
+      release_type:
+        description: "Release Type"
+        type: choice
+        # Not generally needed for production releases
+        required: false
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
 
 jobs:
   create-release:
@@ -20,21 +30,69 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create-release.outputs.result }}
+      new_version: ${{ steps.handle-rc.outputs.new_version || steps.version.outputs.new_version }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      - name: handle release candidate new version
+        id: handle-rc
+        uses: actions/github-script@v8
+        if: ${{ inputs.environment != 'production' }}
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        with:
+          script: |
+            // Version of current production release
+            const { version } = require('./src-tauri/tauri.conf.json')
+            const [major, minor, patch] = version.split('.').map(Number)
+
+            let newVersion
+            if (process.env.RELEASE_TYPE === 'major') {
+              newVersion = `${major + 1}.0.0`
+            } else if (process.env.RELEASE_TYPE === 'minor') {
+              newVersion = `${major}.${minor + 1}.0`
+            } else {
+              newVersion = `${major}.${minor}.${patch + 1}`
+            }
+
+            // If previous RC for given release type already exists, increment its RC number
+            const releases = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            const rcReleases = releases.data.filter(release =>
+              release.tag_name.startsWith(`${process.env.ENVIRONMENT}/${newVersion}-rc.`)
+            )
+
+            if (rcReleases.length > 0) {
+              // Get highest RC number
+              const rcNumbers = rcReleases.map(release => {
+                const match = release.tag_name.match(/rc\.(\d+)$/)
+                return match ? parseInt(match[1], 10) : 0
+              })
+              const highestRc = Math.max(...rcNumbers)
+              newVersion += `.rc.${highestRc + 1}`
+            } else {
+              newVersion += `.rc.0`
+            }
+
+            core.setOutput('new_version', newVersion)
+            console.log(`Setting release candidate version to ${newVersion}`)
 
       - name: get version
         id: version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
-            const { version } = require('./package.json')
+            const { version } = require('./src-tauri/tauri.conf.json')
             core.setOutput('version', version)
 
       - name: create release
         id: create-release
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           ENVIRONMENT: ${{inputs.environment}}
           PACKAGE_VERSION: ${{ steps.version.outputs.version }}
@@ -76,10 +134,31 @@ jobs:
     env:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      - name: handle release candidate new version
+        uses: actions/github-script@v8
+        if: ${{ inputs.environment != 'production' }}
+        env:
+          NEW_VERSION: ${{ needs.create-release.outputs.new_version }}
+        with:
+          script: |
+            // update tauri.conf.json with new RC version
+            const fs = require('fs')
+            const tauriConf = require('./src-tauri/tauri.conf.json')
+            tauriConf.version = newVersion
+            fs.writeFileSync('./src-tauri/tauri.conf.json', JSON.stringify(tauriConf, null, 2) + '\n')
+            // update package.json version
+            const packageJson = require('./package.json')
+            packageJson.version = newVersion
+            fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
+            // update Cargo.toml version
+            const cargoToml = fs.readFileSync('./src-tauri/Cargo.toml', 'utf8')
+            const updatedCargoToml = cargoToml.replace(/^version = ".*"/m, `version = "${newVersion}"`)
+            fs.writeFileSync('./src-tauri/Cargo.toml', updatedCargoToml)
 
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22.x
 
@@ -100,10 +179,10 @@ jobs:
 
       - name: get version
         id: version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
-            const { version } = require('./package.json')
+            const { version } = require('./src-tauri/tauri.conf.json')
             core.setOutput('version', version)
 
       - name: install Rust stable
@@ -177,7 +256,7 @@ jobs:
           security find-identity -v
 
       - name: Set verbose flag if in debug mode
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
         with:
@@ -224,7 +303,7 @@ jobs:
     steps:
       - name: publish release
         id: publish-release
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
           prerelease: ${{ inputs.environment != 'production' }}

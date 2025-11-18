@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
 
       - name: verify PR was created by version-bump workflow
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
@@ -36,14 +36,11 @@ jobs:
 
       - name: get version and environment
         id: version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         with:
           script: |
-            const { version } = require('./package.json')
-            core.setOutput('version', version)
-
             // Extract environment from PR labels
             const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -51,26 +48,33 @@ jobs:
               pull_number: process.env.PR_NUMBER
             })
 
-            const environmentLabel = pr.labels.find(label => label.name.startsWith('environment:'))
-            const environment = environmentLabel ? environmentLabel.name.split(':')[1].trim() : 'production'
+            const releaseTypeLabel = pr.labels.find(label => label.name.startsWith('release_type:'))
+            const releaseType = releaseTypeLabel ? releaseTypeLabel.name.split(':')[1].trim() : 'patch'
 
-            core.setOutput('environment', environment)
-            console.log(`Triggering release for version ${version} in ${environment} environment`)
+            core.setOutput('release_type', releaseType)
+            console.log(`Triggering ${releaseType} release in production environment`)
 
       - name: trigger publish workflow
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
-          VERSION: ${{ steps.version.outputs.version }}
-          ENVIRONMENT: ${{ steps.version.outputs.environment }}
+          RELEASE_TYPE: ${{ steps.version.outputs.release_type }}
+          REF: ${{ github.event.pull_request.head.ref }}
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'publish.yml',
-              ref: 'main',
+              ref: process.env.REF,
               inputs: {
-                environment: process.env.ENVIRONMENT
+                environment: 'production',
+                release_type: process.env.RELEASE_TYPE
               }
             })
-            console.log(`Successfully triggered publish workflow for ${process.env.ENVIRONMENT} environment`)
+            // Delete the branch after triggering the workflow
+            await github.rest.git.deleteRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `heads/${process.env.REF}`
+            })
+            console.log(`Successfully triggered publish workflow for production environment`)
