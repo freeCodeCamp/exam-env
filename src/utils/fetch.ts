@@ -133,6 +133,7 @@ export async function getExams() {
           note: exam.config.note,
           totalTimeInS: exam.config.totalTimeInS,
           retakeTimeInS: exam.config.retakeTimeInS,
+          passingPercent: exam.config.passingPercent,
         },
       },
     ];

@@ -66,13 +66,23 @@ export function ExamCard({ exam }: ExamCardProps) {
               <Heading size="md" mb={2}>
                 {exam.config.name}
               </Heading>
-              <Flex alignItems="center" gap={2}>
-                <Text color="gray.600" fontSize="sm" marginBottom={0}>
-                  Duration:
-                </Text>
-                <Badge colorScheme="blue" fontSize="sm">
-                  {examTimeInHumanReadableFormat(exam.config.totalTimeInS)}
-                </Badge>
+              <Flex justifyContent={"space-between"}>
+                <Flex alignItems="center" gap={2}>
+                  <Text color="gray.600" fontSize="sm" marginBottom={0}>
+                    Duration:
+                  </Text>
+                  <Badge colorScheme="blue" fontSize="sm">
+                    {examTimeInHumanReadableFormat(exam.config.totalTimeInS)}
+                  </Badge>
+                </Flex>
+                <Flex alignItems="center" gap={2}>
+                  <Text color="gray.600" fontSize="sm" marginBottom={0}>
+                    Passing Percent:
+                  </Text>
+                  <Badge colorScheme="blue" fontSize="sm">
+                    {exam.config.passingPercent}%
+                  </Badge>
+                </Flex>
               </Flex>
             </Box>
             {examStatus.status === "InProgress" && (

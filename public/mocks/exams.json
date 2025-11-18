@@ -4,7 +4,7 @@
     "config": {
       "name": "Practice Exam",
       "note": "This exam is for learning the Exam Environment.",
-      "totalTimeInMS": 120000,
+      "totalTimeInS": 120,
       "tags": [],
       "questionSets": [
         {
@@ -22,7 +22,7 @@
           "numberOfIncorrectAnswers": 3
         }
       ],
-      "retakeTimeInMS": 0,
+      "retakeTimeInS": 0,
       "passingPercent": 80.0
     },
     "questionSets": [
