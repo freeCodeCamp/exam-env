@@ -37,9 +37,11 @@ export function Login() {
 
   useEffect(() => {
     if (setAuthTokenError) {
+      setError(JSON.stringify(setAuthTokenError));
       captureException(setAuthTokenError);
+    } else {
+      setError(null);
     }
-    setError(JSON.stringify(setAuthTokenError));
   }, [setAuthTokenError]);
 
   useEffect(() => {
