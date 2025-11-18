@@ -32,7 +32,8 @@ interface ExamStatus {
     | "InProgress"
     | "PendingModeration"
     | "RetakeLater"
-    | "Expired";
+    | "Expired"
+    | "UnmetPrerequisites";
   message?: string;
   alertStatus?: "success" | "info" | "warning" | "error";
 }
@@ -156,9 +157,18 @@ function getExamStatus(
   attempts: Attempts
 ): ExamStatus {
   const latestAttempt = getLatestAttempt(attempts);
+  const examStatus: ExamStatus = { status: "Available" };
 
   if (!latestAttempt) {
-    return { status: "Available" };
+    if (!exam.canTake && exam.prerequisites.length > 0) {
+      return {
+        status: "UnmetPrerequisites",
+        message:
+          "You must complete the prerequisite courses to take this exam.",
+        alertStatus: "info",
+      };
+    }
+    return examStatus;
   }
 
   switch (latestAttempt.status) {
@@ -186,7 +196,15 @@ function getExamStatus(
 
       const now = new Date();
       if (now >= retakeAvailableAt) {
-        return { status: "Available" };
+        if (!exam.canTake && exam.prerequisites.length > 0) {
+          return {
+            status: "UnmetPrerequisites",
+            message:
+              "You must complete the prerequisite courses to take this exam.",
+            alertStatus: "info",
+          };
+        }
+        return examStatus;
       }
 
       return {
@@ -196,7 +214,15 @@ function getExamStatus(
       };
 
     default:
-      return { status: "Available" };
+      if (!exam.canTake && exam.prerequisites.length > 0) {
+        return {
+          status: "UnmetPrerequisites",
+          message:
+            "You must complete the prerequisite courses to take this exam.",
+          alertStatus: "info",
+        };
+      }
+      return examStatus;
   }
 }
 
