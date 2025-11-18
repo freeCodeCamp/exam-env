@@ -120,7 +120,7 @@ fn main() {
             // In debug builds, allow window content to be visible
             #[cfg(debug_assertions)]
             {
-                let window = app.get_window("main")?;
+                let window = app.get_webview_window("main").unwrap();
                 window.set_content_protected(false)?;
             }
 
