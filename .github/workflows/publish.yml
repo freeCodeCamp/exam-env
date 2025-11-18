@@ -74,9 +74,9 @@ jobs:
                 return match ? parseInt(match[1], 10) : 0
               })
               const highestRc = Math.max(...rcNumbers)
-              newVersion += `.rc.${highestRc + 1}`
+              newVersion += `-rc.${highestRc + 1}`
             } else {
-              newVersion += `.rc.0`
+              newVersion += `-rc.0`
             }
 
             core.setOutput('new_version', newVersion)
