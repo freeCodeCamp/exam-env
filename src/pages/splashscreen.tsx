@@ -18,7 +18,7 @@ import {
   Progress,
   Spinner,
 } from "@chakra-ui/react";
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { CheckIcon, CloseIcon, InfoIcon } from "@chakra-ui/icons";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { createRoute, useNavigate } from "@tanstack/react-router";
 import { captureException } from "@sentry/react";
@@ -117,13 +117,7 @@ export function Splashscreen() {
   const compatibilityCheckQuery = useQuery({
     queryKey: ["compatabilityCheck"],
     enabled: downloadAndInstallQuery.isSuccess || !update,
-    queryFn: async () => {
-      const compatibilityError = await checkDeviceCompatibility();
-      if (compatibilityError) {
-        throw compatibilityError;
-      }
-      return null;
-    },
+    queryFn: checkDeviceCompatibility,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -194,7 +188,7 @@ export function Splashscreen() {
           App update found
         </ListItem>
         <ListItem fontWeight={900} display="flex" alignItems="center">
-          <ListIcon as={Spinner} color="blue.500" marginTop="2px" />
+          <ListIcon as={InfoIcon} color="blue.500" marginTop="2px" />
           Download update (version {update.version})?
         </ListItem>
         <Button block={true} onClick={() => downloadAndInstallQuery.mutate()}>
@@ -444,7 +438,11 @@ async function checkDeviceCompatibility() {
     await delayForTesting(1000);
   }
   const compatError = await updateDeviceList();
-  return compatError;
+  if (compatError) {
+    captureException(compatError);
+    throw compatError;
+  }
+  return null;
 }
 
 // Check devices and permissions
@@ -456,14 +454,15 @@ async function updateDeviceList() {
     const atLeastOneAudioOutput = devices.some((d) => d.kind === "audiooutput");
     if (!atLeastOneAudioOutput) {
       return new Error(
-        "No audio output device found. Please check your device settings."
+        `No audio output device found. Please check your device settings. Ensure that at least one audio output device (e.g., speakers or headphones) is connected and recognized by your system. Found media devices: ${devices.map((d) => d.label).join(", ")}`
       );
     }
 
     return null;
   } catch (e) {
-    captureException(e);
-    return new Error("There is an error accessing an audio playback device.");
+    return new Error(
+      `There is an error accessing an audio playback device. ${String(e)}`
+    );
   }
 }
 
