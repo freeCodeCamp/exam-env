@@ -25,6 +25,7 @@ Sentry.init({
   dsn: __SENTRY_DSN__,
   release: __APP_VERSION__,
   environment: __ENVIRONMENT__,
+  tracesSampleRate: 1.0,
 });
 
 const queryClient = new QueryClient();

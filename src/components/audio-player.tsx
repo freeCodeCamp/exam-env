@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { FullQuestion } from "../utils/types";
+import { startSpan } from "@sentry/react";
 
 interface AudioPlayerProps {
   fullQuestion: FullQuestion;
@@ -24,17 +25,20 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0);
 
   useEffect(() => {
-    if (!fullQuestion.audio) {
-      return;
-    }
-    audioRef.current = new Audio(fullQuestion.audio.url);
-    setIsPlaying(false);
-    setProgress(0);
+    startSpan({ name: "AudioPlayer: load audio" }, () => {
+      if (!fullQuestion.audio) {
+        return;
+      }
 
-    audioRef.current.onloadedmetadata = onLoadedMetadata;
-    audioRef.current.ontimeupdate = onTimeUpdate;
-    audioRef.current.onpause = onPause;
-    audioRef.current.onplay = onPlay;
+      audioRef.current = new Audio(fullQuestion.audio.url);
+      setIsPlaying(false);
+      setProgress(0);
+
+      audioRef.current.onloadedmetadata = onLoadedMetadata;
+      audioRef.current.ontimeupdate = onTimeUpdate;
+      audioRef.current.onpause = onPause;
+      audioRef.current.onplay = onPlay;
+    });
 
     return () => {
       if (!audioRef.current) {
@@ -79,7 +83,9 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
     if (isPlaying) {
       audioRef.current?.pause();
     } else {
-      audioRef.current?.play();
+      startSpan({ name: "AudioPlayer: play audio" }, async () => {
+        await audioRef.current?.play();
+      });
     }
   };
 
