@@ -1,12 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import createClient from "openapi-fetch";
+import createClient, { FetchResponse } from "openapi-fetch";
+import { captureException } from "@sentry/react";
 
 import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
-import { captureException } from "@sentry/react";
+import { ErrorResponse } from "./errors";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
@@ -38,10 +39,10 @@ export async function verifyToken(token: string) {
     },
   });
 
-  console.debug(res);
+  debugResponse(res);
 
   if (res.error) {
-    captureException(res.error);
+    captureError(res);
     throw res.error;
   }
 
@@ -74,10 +75,10 @@ export async function getGeneratedExam(examId: string) {
     },
   });
 
-  console.debug(res);
+  debugResponse(res);
 
   if (res.error) {
-    captureException(res.error);
+    captureError(res);
     throw res.error;
   }
 
@@ -108,10 +109,10 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     },
   });
 
-  console.debug(res);
+  debugResponse(res);
 
   if (res.error) {
-    captureException(res.error);
+    captureError(res);
     throw res.error;
   }
 
@@ -150,10 +151,10 @@ export async function getExams() {
     },
   });
 
-  console.debug(res);
+  debugResponse(res);
 
   if (res.error) {
-    captureException(res.error);
+    captureError(res);
     throw res.error;
   }
 
@@ -188,4 +189,18 @@ export async function getAttemptsByExamId(examId: string) {
 
 export async function delayForTesting(t: number) {
   await new Promise((res, _) => setTimeout(res, t));
+}
+
+function debugResponse(res: FetchResponse<any, any, any>) {
+  console.debug(res.response.status, res.response.url, res.data, res.error);
+}
+
+interface StandardError {
+  code: string;
+  message: string;
+}
+
+function captureError(res: ErrorResponse<StandardError>) {
+  const se = new Error(`${res.error.code}: ${res.error.message}`);
+  captureException(se);
 }
