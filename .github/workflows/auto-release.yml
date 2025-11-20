@@ -71,10 +71,5 @@ jobs:
                 release_type: process.env.RELEASE_TYPE
               }
             })
-            // Delete the branch after triggering the workflow
-            await github.rest.git.deleteRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `heads/${process.env.REF}`
-            })
+
             console.log(`Successfully triggered publish workflow for production environment`)
