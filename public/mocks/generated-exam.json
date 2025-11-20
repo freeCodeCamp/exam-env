@@ -16,7 +16,8 @@
     "config": {
       "name": "First Exam",
       "note": "This exam includes listening comprehension",
-      "totalTimeInMS": 600000
+      "totalTimeInS": 360,
+      "retakeTimeInS": 20
     },
     "questionSets": [
       {
@@ -58,7 +59,7 @@
             "id": "674818354cd5f347eb35df91",
             "deprecated": false,
             "audio": {
-              "captions": null,
+              "captions": "Maria: Hello, you're the new Graphic Designer, right? I'm Maria, the team lead.\n\nTom: Hi. That's right. I'm Tom Mackenzie. It's a pleasure to meet you.\n\nMaria: Welcome aboard, Tom. How do you like Calafornia so far?\n\nTom: I like it. It's different from Texas, but I like it here.\n\nMaria: Great! Let me show you to your desk. Do you see the desk with the drawing tablet and a computer? That's your workspace.\n\nTom: Everything looks great. Thanks for showing me around the place, Maria.",
               "url": "https://cdn.freecodecamp.org/curriculum/english/animation-assets/sounds/1.1-1.mp3"
             },
             "text": "This is an example of a multiple-choice question with audio. Listen to the audio to answer this question: When was freeCodeCamp started?",

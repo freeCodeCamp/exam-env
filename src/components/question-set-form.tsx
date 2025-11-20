@@ -49,6 +49,17 @@ export function QuestionSetForm({
           <Text>Please listen to the following audio fragment:</Text>
           {/* NOTE: `fullQuestion` is passed to cause the whole component to rerender - correctly resetting the audio */}
           <AudioPlayer fullQuestion={fullQuestion} />
+          {fullQuestion.audio.captions && (
+            <details style={{ cursor: "pointer" }}>
+              <summary>Show captions</summary>
+              <Box marginTop="1em">
+                <PrismFormatted
+                  text={parseMarkdown(fullQuestion.audio.captions)}
+                  getCodeBlockAriaLabel={(c) => `${c} code`}
+                />
+              </Box>
+            </details>
+          )}
         </Box>
       )}
       <QuizQuestion
