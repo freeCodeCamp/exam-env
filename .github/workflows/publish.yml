@@ -318,10 +318,3 @@ jobs:
               draft: false,
               prerelease: process.env.prerelease == "true"
             })
-
-            // Delete the branch after triggering the workflow
-            await github.rest.git.deleteRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `heads/${process.env.REF}`
-            })
