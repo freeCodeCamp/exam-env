@@ -34,6 +34,7 @@ export const rootRoute = createRootRoute({
       const cm = import.meta.env.PROD
         ? (e: PointerEvent) => {
             e.preventDefault();
+            return false;
           }
         : () => {};
 
