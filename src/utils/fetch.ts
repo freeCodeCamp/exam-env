@@ -201,6 +201,11 @@ interface StandardError {
 }
 
 function captureError(res: ErrorResponse<StandardError>) {
-  const se = new Error(`${res.error.code}: ${res.error.message}`);
-  captureException(se);
+  if (res.error.code && res.error.message) {
+    const se = new Error(`${res.error.code}: ${res.error.message}`);
+    captureException(se);
+  } else {
+    const se = new Error(`Unknown error: ${JSON.stringify(res)}`);
+    captureException(se);
+  }
 }
