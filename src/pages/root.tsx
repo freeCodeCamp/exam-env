@@ -30,8 +30,18 @@ export const rootRoute = createRootRoute({
         }
       );
 
+      // Disable context menu
+      const cm = import.meta.env.PROD
+        ? (e: PointerEvent) => {
+            e.preventDefault();
+          }
+        : () => {};
+
+      window.addEventListener("contextmenu", cm);
+
       return () => {
         unlisten.then((u) => u());
+        window.removeEventListener("contextmenu", cm);
       };
     }, []);
 
