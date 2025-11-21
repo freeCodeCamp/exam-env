@@ -30,14 +30,28 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
         return;
       }
 
-      audioRef.current = new Audio(fullQuestion.audio.url);
+      const audio = new Audio(fullQuestion.audio.url);
+
+      // Attach handlers BEFORE loading
+      audio.onloadedmetadata = onLoadedMetadata;
+      audio.ontimeupdate = onTimeUpdate;
+      audio.onpause = onPause;
+      audio.onplay = onPlay;
+
+      // Add canplay event for better compatibility
+      audio.oncanplay = () => {
+        if (audio.duration && !isNaN(audio.duration)) {
+          setDuration(audio.duration);
+        }
+      };
+
+      // Preload metadata
+      audio.preload = "metadata";
+      audio.load();
+
+      audioRef.current = audio;
       setIsPlaying(false);
       setProgress(0);
-
-      audioRef.current.onloadedmetadata = onLoadedMetadata;
-      audioRef.current.ontimeupdate = onTimeUpdate;
-      audioRef.current.onpause = onPause;
-      audioRef.current.onplay = onPlay;
     });
 
     return () => {
@@ -93,6 +107,13 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
     if (!audioRef.current || isNaN(value)) {
       return;
     }
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+    const HAVE_CURRENT_DATA = 2;
+    if (audioRef.current.readyState < HAVE_CURRENT_DATA) {
+      return;
+    }
+
     audioRef.current.currentTime = value;
     setProgress(value);
   }
