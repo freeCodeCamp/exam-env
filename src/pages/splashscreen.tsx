@@ -1,8 +1,3 @@
-import {
-  DownloadEvent,
-  DownloadOptions,
-  Update,
-} from "@tauri-apps/plugin-updater";
 import { restartApp } from "../utils/commands";
 import { ReactNode, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -22,13 +17,11 @@ import { CheckIcon, CloseIcon, InfoIcon } from "@chakra-ui/icons";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { createRoute, useNavigate } from "@tanstack/react-router";
 import { captureException } from "@sentry/react";
-import { invoke } from "@tauri-apps/api/core";
 
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
-import { delayForTesting } from "../utils/fetch";
-import { VITE_MOCK_DATA } from "../utils/env";
+import { checkForUpdate, delayForTesting } from "../utils/fetch";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -346,93 +339,6 @@ export function Splashscreen() {
   );
 }
 
-interface UpdateMetadata {
-  rid: number;
-  currentVersion: string;
-  version: string;
-  date?: string;
-  body?: string;
-  rawJson: Record<string, unknown>;
-}
-
-// Check for updates
-async function checkForUpdate() {
-  if (VITE_MOCK_DATA) {
-    await delayForTesting(1000);
-
-    class MockUpdate extends Update {
-      constructor(metadata: UpdateMetadata) {
-        super(metadata);
-      }
-      download(
-        _onEvent?: (progress: DownloadEvent) => void,
-        _options?: DownloadOptions
-      ): Promise<void> {
-        return new Promise((res) => res());
-      }
-      install(): Promise<void> {
-        return new Promise((res) => res());
-      }
-      async downloadAndInstall(
-        onEvent?: (progress: DownloadEvent) => void,
-        _options?: DownloadOptions
-      ): Promise<void> {
-        if (onEvent) {
-          onEvent({
-            data: {
-              contentLength: 100,
-            },
-            event: "Started",
-          });
-          for (let i = 0; i < 100; i++) {
-            await delayForTesting(30);
-            onEvent({
-              data: {
-                chunkLength: i,
-              },
-              event: "Progress",
-            });
-          }
-          onEvent({
-            event: "Finished",
-          });
-        }
-      }
-      close(): Promise<void> {
-        return new Promise((res) => res());
-      }
-    }
-    // Comment out to test update functionality
-    return null;
-    return new MockUpdate({
-      rid: 0,
-      currentVersion: "0.0.1",
-      version: "0.0.2",
-      date: new Date().toUTCString(),
-      body: "New update",
-      rawJson: {},
-    });
-  }
-
-  try {
-    const metadata = await invoke<UpdateMetadata>("check");
-    if (metadata) {
-      const update = new Update(metadata);
-      console.debug(
-        `Found update ${update.version} from ${update.date} with notes ${update.body}`
-      );
-      return update;
-    }
-  } catch (e) {
-    console.error(e);
-    // Error is already captured on the backend
-    // captureException(e);
-    throw new Error(JSON.stringify(e));
-  }
-  return null;
-}
-
-// Check device compatibility
 async function checkDeviceCompatibility() {
   if (import.meta.env.VITE_MOCK_DATA === "true") {
     await delayForTesting(1000);
