@@ -283,7 +283,8 @@ export function Exam() {
       throw error;
     }
 
-    const questionSets = examAttempt.questionSets;
+    const questionSets = structuredClone(examAttempt.questionSets);
+
     const qs = questionSets.find((q) => q.id === fullQuestion.questionSet.id);
     if (qs) {
       const q = qs.questions.find((q) => q.id === fullQuestion.id);
@@ -305,13 +306,14 @@ export function Exam() {
     };
 
     // TODO: Use response to determine next action
-    await postExamAttempt(examAttempt);
+    await postExamAttempt(updatedExamAttempt);
 
     if (currentQuestionNumber < questions.length) {
       nextQuestion();
     }
 
     setExamAttempt(updatedExamAttempt);
+    setNewSelectedAnswers([]);
   }
 
   function handleExamEnd() {

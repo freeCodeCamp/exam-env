@@ -37,6 +37,8 @@ export function Landing() {
   const examsQuery = useQuery({
     queryKey: ["exams"],
     queryFn: getExams,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   if (examsQuery.isPending) {
