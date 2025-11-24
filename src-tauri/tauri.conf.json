@@ -1,6 +1,6 @@
 {
   "productName": "Exam Environment",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "identifier": "org.freecodecamp.exam",
   "build": {
     "beforeDevCommand": "bun run dev",
