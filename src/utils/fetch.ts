@@ -26,13 +26,13 @@ export async function verifyToken(token: string) {
   if (VITE_MOCK_DATA) {
     if (token) {
       const TWO_DAYS_IN_MS = 2 * 24 * 60 * 60 * 1000;
-      const data = { expireAt: Date.now() + TWO_DAYS_IN_MS };
+      const data = { expireAt: String(Date.now() + TWO_DAYS_IN_MS) };
       return data;
     } else {
       // TODO: There must be a better way to get this
       const error: paths["/exam-environment/token-meta"]["get"]["responses"]["404"]["content"]["application/json"] =
         { code: "FCC_TEST_ERROR_CODE", message: "Non-existant token" };
-      return error;
+      throw error;
     }
   }
 
@@ -47,7 +47,10 @@ export async function verifyToken(token: string) {
   debugResponse(res);
 
   if (res.error) {
-    captureError(res);
+    // Do not capture client errors (e.g. bad tokens)
+    if (res.response.status !== 404 && res.response.status !== 418) {
+      captureError(res);
+    }
     throw res.error;
   }
 
