@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import createClient, { FetchResponse } from "openapi-fetch";
-import { captureException } from "@sentry/react";
+import { captureException, logger } from "@sentry/react";
 import {
   DownloadEvent,
   DownloadOptions,
@@ -86,7 +86,11 @@ export async function getGeneratedExam(examId: string) {
   debugResponse(res);
 
   if (res.error) {
-    captureError(res);
+    if (res.error.code === "FCC_EINVAL_EXAM_ENVIRONMENT_PREREQUISITES") {
+      logger.warn(res.error.message, res.error);
+    } else {
+      captureError(res);
+    }
     throw res.error;
   }
 
@@ -120,7 +124,11 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
   debugResponse(res);
 
   if (res.error) {
-    captureError(res);
+    if (res.error.code === "FCC_EINVAL_EXAM_ENVIRONMENT_EXAM_ATTEMPT") {
+      logger.warn(res.error.message, res.error);
+    } else {
+      captureError(res);
+    }
     throw res.error;
   }
 
