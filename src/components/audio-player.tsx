@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { FullQuestion } from "../utils/types";
-import { startSpan } from "@sentry/react";
+import { logger, startSpan } from "@sentry/react";
 
 interface AudioPlayerProps {
   fullQuestion: FullQuestion;
@@ -98,7 +98,13 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
       audioRef.current?.pause();
     } else {
       startSpan({ name: "AudioPlayer: play audio" }, async () => {
-        await audioRef.current?.play();
+        try {
+          await audioRef.current?.play();
+        } catch (e) {
+          if (e instanceof Error && e.name !== "AbortError") {
+            logger.warn(e.message);
+          }
+        }
       });
     }
   };
