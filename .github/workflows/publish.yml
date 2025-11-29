@@ -201,6 +201,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
+      - name: install 32-bit dependencies (ubuntu i686 only)
+        if: matrix.platform == 'ubuntu-22.04' && contains(matrix.args, 'i686-unknown-linux-gnu')
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib g++-multilib
+          sudo apt-get install -y libwebkit2gtk-4.1-dev:i386 libappindicator3-dev:i386 librsvg2-dev:i386
+          sudo apt-get install -y libgtk-3-dev:i386 libayatana-appindicator3-dev:i386 libssl-dev:i386
+          # Set up pkg-config for cross-compilation
+          echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+
       - name: install frontend dependencies
         run: bun install && bun run prisma generate
 
