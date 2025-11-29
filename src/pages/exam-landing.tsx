@@ -96,13 +96,13 @@ export function ExamLanding() {
   return (
     <>
       <Header />
-      <Box width={"full"}>
+      <Box width={"full"} as="main" id="main-content">
         <Center height={"100%"}>
           <Flex direction={"column"} maxWidth={"70%"}>
             <Spacer size="m" />
-            <Heading>Instructions</Heading>
+            <Heading as="h1">Instructions</Heading>
             <Spacer size="s" />
-            <Text color={"red"}>
+            <Text color={"red"} role="alert">
               Please note that any attempt to cheat will result in immediate
               disqualification from the exam and you will need to retake the
               exam to qualify for the certification.
@@ -117,11 +117,16 @@ export function ExamLanding() {
             </Text>
             {!!note && (
               <>
-                <Heading size={"md"}>Exam Note</Heading>
+                <Heading as="h2" size={"md"}>
+                  Exam Note
+                </Heading>
                 <Text>{note}</Text>
               </>
             )}
-            <Checkbox onChange={(e) => setHasAgreed(e.target.checked)}>
+            <Checkbox
+              id="terms-agreement"
+              onChange={(e) => setHasAgreed(e.target.checked)}
+            >
               I agree to the terms and conditions
             </Checkbox>
             <Spacer size="s" />
@@ -163,7 +168,7 @@ export function ExamLanding() {
             )}
             <Spacer size="m" />
             {updateMutation.isError && (
-              <Box maxWidth="100%">
+              <Box maxWidth="100%" role="alert">
                 <Text>Error checking for updates:</Text>
                 <Code
                   p={2}
@@ -183,16 +188,20 @@ export function ExamLanding() {
               </Box>
             )}
             {downloadAndInstallMutation.isPending && !!updateMutation.data && (
-              <Box>
+              <Box role="status" aria-live="polite">
                 <Text>
                   Downloading update (version {updateMutation.data.version}).
                   App will restart when finished.
                 </Text>
-                <Progress hasStripe value={progress} />
+                <Progress
+                  hasStripe
+                  value={progress}
+                  aria-label="Download progress"
+                />
               </Box>
             )}
             {downloadAndInstallMutation.isError && (
-              <Box maxWidth="100%">
+              <Box maxWidth="100%" role="alert">
                 <Text>Error downloading and installing update:</Text>
                 <Code
                   p={2}

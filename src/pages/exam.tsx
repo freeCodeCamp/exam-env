@@ -395,7 +395,7 @@ export function Exam() {
         fullQuestion={fullQuestion}
         newSelectedAnswers={newSelectedAnswers}
       />
-      <Box overflowY="hidden">
+      <Box overflowY="hidden" as="main" id="main-content">
         <Box width={"full"} mt="2em">
           <Center height={"100%"} display={"flex"} flexDirection={"column"}>
             <Center width="full" borderBottom={"2px"} borderColor={"gray.300"}>
@@ -576,7 +576,9 @@ function Timer({
   }, [secondsLeft]);
 
   return (
-    <Text fontWeight={"bold"}>Time: {secondsToHHMMSS(availableTime)}</Text>
+    <Text fontWeight={"bold"} aria-live="polite" aria-atomic="true">
+      Time: {secondsToHHMMSS(availableTime)}
+    </Text>
   );
 }
 
@@ -622,9 +624,14 @@ function NavigationBubbles({
   const bubblesArr = getCurrentBubbleIndex(wantedIndex);
 
   return (
-    <Flex width="80%" justifyContent={"center"}>
+    <Flex
+      width="80%"
+      justifyContent={"center"}
+      as="nav"
+      aria-label="Question navigation"
+    >
       <IconButton
-        aria-label="previous question"
+        aria-label="Go to previous question"
         icon={<ChevronLeftIcon />}
         m={"0.3em"}
         isDisabled={currentQuestionNumber === 1}
@@ -633,7 +640,7 @@ function NavigationBubbles({
         }}
       />
       <IconButton
-        aria-label="previous set of questions"
+        aria-label="Go to previous set of questions"
         icon={<ArrowLeftIcon />}
         m={"0.3em"}
         isDisabled={wantedIndex === 0}
@@ -655,12 +662,24 @@ function NavigationBubbles({
           className={`bottom-bubble-nav ${
             currentQuestionNumber === question_num ? "bubble-active" : ""
           } ${isAnswered(question_num) ? "bubble-answered" : ""}`}
+          role="button"
+          tabIndex={0}
+          aria-label={`Go to question ${question_num}${isAnswered(question_num) ? " (answered)" : ""}`}
+          aria-current={
+            currentQuestionNumber === question_num ? "page" : undefined
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              specificQuestion(question_num);
+            }
+          }}
         >
           <Text>{question_num.toString()}</Text>
         </Box>
       ))}
       <IconButton
-        aria-label="next"
+        aria-label="Go to next set of questions"
         icon={<ArrowRightIcon />}
         m={"0.3em"}
         isDisabled={maxIndex == wantedIndex}
@@ -669,7 +688,7 @@ function NavigationBubbles({
         }}
       />
       <IconButton
-        aria-label="next question"
+        aria-label="Go to next question"
         icon={<ChevronRightIcon />}
         m={"0.3em"}
         isDisabled={currentQuestionNumber === questions.length}

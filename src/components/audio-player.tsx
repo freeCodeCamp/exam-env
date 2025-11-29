@@ -139,19 +139,22 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
   }
 
   return (
-    <Box>
+    <Box role="region" aria-label="Audio player">
       <Flex direction="column">
         <Flex alignItems="center">
-          <Button onClick={togglePlay}>
+          <Button
+            onClick={togglePlay}
+            aria-label={isPlaying ? "Pause audio" : "Play audio"}
+          >
             {isPlaying ? "| |" : <TriangleUpIcon style={{ rotate: "90deg" }} />}
           </Button>
-          <Text ml={2}>
+          <Text ml={2} aria-live="polite">
             {formatTime(audioRef.current.currentTime)} / {formatTime(duration)}
           </Text>
         </Flex>
 
         <Slider
-          aria-label="slider-ex-1"
+          aria-label="Audio progress and seek"
           min={0}
           max={duration}
           value={progress}
@@ -160,7 +163,7 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
           <SliderTrack>
             <SliderFilledTrack />
           </SliderTrack>
-          <SliderThumb />
+          <SliderThumb aria-label="Seek position" />
         </Slider>
       </Flex>
     </Box>

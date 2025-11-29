@@ -156,6 +156,11 @@ body {
   line-height: 2;
 }
 
+.bottom-bubble-nav:focus {
+  outline: 3px solid var(--blue-mid);
+  outline-offset: 2px;
+}
+
 .bubble-active {
   border: 3px solid rgb(48, 48, 204);
   background-color: rgb(48, 48, 204);
@@ -165,6 +170,28 @@ body {
 .bubble-answered {
   background-color: rgba(153, 201, 255, 255);
   color: white;
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 1em;
+  background-color: #000;
+  color: #fff;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+  top: 0;
+}
+
+/* Ensure focus is visible across the application */
+*:focus-visible {
+  outline: 3px solid var(--blue-mid);
+  outline-offset: 2px;
 }
 
 audio {

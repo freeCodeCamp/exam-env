@@ -52,6 +52,7 @@ export function Header() {
             >
               <Img
                 src=" https://cdn.freecodecamp.org/platform/universal/fcc_puck_500.jpg"
+                alt="freeCodeCamp logo"
                 width="32px"
                 height="32px"
                 mr="12px"
@@ -62,7 +63,12 @@ export function Header() {
           </Flex>
         </Box>
         <Flex alignSelf={"center"} width={"auto"} pr={"1em"}>
-          <IconButton ref={btnRef} aria-label="Menu" onClick={onOpen}>
+          <IconButton
+            ref={btnRef}
+            aria-label="Open navigation menu"
+            aria-expanded={isOpen}
+            onClick={onOpen}
+          >
             <HamburgerIcon />
           </IconButton>
         </Flex>
@@ -74,8 +80,8 @@ export function Header() {
         finalFocusRef={btnRef}
       >
         <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
+        <DrawerContent aria-label="Navigation menu">
+          <DrawerCloseButton aria-label="Close navigation menu" />
           <DrawerHeader>Navigate</DrawerHeader>
           <DrawerBody>
             <Button

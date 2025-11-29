@@ -20,8 +20,9 @@ export function ButtonLoading({
       alignItems={"center"}
       {...rest}
       type="button"
+      aria-busy={isPending}
     >
-      {isPending && <Spinner marginInlineEnd="0.5rem" />}
+      {isPending && <Spinner marginInlineEnd="0.5rem" aria-hidden="true" />}
       {children}
     </Button>
   );

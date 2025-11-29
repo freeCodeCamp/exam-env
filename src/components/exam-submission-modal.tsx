@@ -33,8 +33,10 @@ export function ExamSubmissionModal({
   return (
     <Modal isOpen={hasFinishedExam} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{maxTimeReached ? "Time's up!" : "Exam End"}</ModalHeader>
+      <ModalContent role="dialog" aria-labelledby="exam-submission-title">
+        <ModalHeader id="exam-submission-title">
+          {maxTimeReached ? "Time's up!" : "Exam End"}
+        </ModalHeader>
         <ModalBody>
           <Text>Thank you for taking the exam.</Text>
           <Text>
@@ -53,6 +55,7 @@ export function ExamSubmissionModal({
                 textDecoration: "underline",
                 textDecorationColor: "blue.300",
               }}
+              aria-label="Open freeCodeCamp page in browser"
             >
               https://freecodecamp.org
             </Button>{" "}

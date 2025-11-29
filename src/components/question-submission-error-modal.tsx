@@ -60,11 +60,21 @@ export function QuestionSubmissionErrorModal({
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader backgroundColor={"#edb1af"} borderRadius={"md"}>
+      <ModalContent
+        role="alertdialog"
+        aria-labelledby="error-modal-title"
+        aria-describedby="error-modal-description"
+      >
+        <ModalHeader
+          id="error-modal-title"
+          backgroundColor={"#edb1af"}
+          borderRadius={"md"}
+        >
           Question Submission Error
         </ModalHeader>
-        <ModalBody>{error}</ModalBody>
+        <ModalBody id="error-modal-description" role="alert">
+          {error}
+        </ModalBody>
         <ModalFooter justifyContent={"center"}>
           <ButtonLoading
             onClick={onClick}

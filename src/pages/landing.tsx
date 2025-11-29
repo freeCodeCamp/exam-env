@@ -1,6 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
 import { Center, Flex, Text, Heading, Spinner } from "@chakra-ui/react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { Button, Spacer } from "@freecodecamp/ui";
 
 import { ProtectedRoute } from "../components/protected-route";
@@ -18,10 +18,10 @@ function LandingParent({ children }: { children: ReactNode }) {
     <>
       <Flash {...{ flashKind, flashMessage }} />
       <Header />
-      <Center>
+      <Center as="main" id="main-content">
         <Flex flexDirection={"column"}>
           <Spacer size="m" />
-          <Heading>Exam Selection</Heading>
+          <Heading as="h1">Exam Selection</Heading>
           <Spacer size="m" />
           <Text>
             Please select the exam you would like to take from the list below.
@@ -82,7 +82,10 @@ export function Landing() {
 
   return (
     <LandingParent>
-      <ul style={{ listStyleType: "none", padding: 0 }}>
+      <ul
+        style={{ listStyleType: "none", padding: 0 }}
+        aria-label="Available exams"
+      >
         {examsQuery.data.map((exam) => {
           return <ExamCard key={exam.id} exam={exam} />;
         })}

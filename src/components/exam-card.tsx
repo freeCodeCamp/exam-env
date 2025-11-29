@@ -53,6 +53,7 @@ export function ExamCard({ exam }: ExamCardProps) {
   return (
     <li style={{ listStyle: "none", marginBottom: "1rem" }}>
       <Card
+        as="article"
         borderWidth={examStatus.status === "InProgress" ? "3px" : "1px"}
         borderColor={
           examStatus.status === "InProgress" ? "orange.400" : "gray.200"
@@ -60,11 +61,12 @@ export function ExamCard({ exam }: ExamCardProps) {
         boxShadow={examStatus.status === "InProgress" ? "lg" : "sm"}
         _hover={{ boxShadow: "md" }}
         transition="all 0.2s"
+        aria-label={`${exam.config.name} exam card`}
       >
         <CardBody>
           <Flex justifyContent="space-between" alignItems="flex-start" mb={2}>
             <Box flex={1}>
-              <Heading size="md" mb={2}>
+              <Heading as="h2" size="md" mb={2}>
                 {exam.config.name}
               </Heading>
               <Flex justifyContent={"space-between"}>
@@ -92,7 +94,13 @@ export function ExamCard({ exam }: ExamCardProps) {
           </Flex>
 
           {attemptsQuery.isPending ? (
-            <Flex alignItems="center" gap={2} mt={3}>
+            <Flex
+              alignItems="center"
+              gap={2}
+              mt={3}
+              aria-live="polite"
+              aria-busy="true"
+            >
               <Spinner size="sm" />
               <Text fontSize="sm" color="gray.500">
                 Getting attempt status...

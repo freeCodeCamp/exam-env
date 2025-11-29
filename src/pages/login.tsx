@@ -80,20 +80,24 @@ export function Login() {
             <Heading color="black">Log In</Heading>
             <Spacer size="s" />
             <FormControl isInvalid={!!error}>
-              <FormLabel>
-                {" "}
+              <FormLabel htmlFor="account-token">
                 Connect your freeCodeCamp.org account by inputing your account
                 token:
               </FormLabel>
               <Input
+                id="account-token"
                 type="text"
                 placeholder="Account Token..."
                 onChange={handleTokenChange}
                 value={accountToken}
                 disabled={isPending}
+                aria-describedby="token-help"
+                aria-invalid={!!error}
               />
-              {!!error && <FormErrorMessage>{error}</FormErrorMessage>}
-              <FormHelperText>
+              {!!error && (
+                <FormErrorMessage role="alert">{error}</FormErrorMessage>
+              )}
+              <FormHelperText id="token-help">
                 Go to{" "}
                 <ChakraButton
                   onClick={() =>
@@ -110,6 +114,7 @@ export function Login() {
                     textDecoration: "underline",
                     textDecorationColor: "blue.300",
                   }}
+                  aria-label="Open freeCodeCamp settings page in browser"
                 >
                   {new URL("/settings", LEARN_BASE).href}
                 </ChakraButton>{" "}
