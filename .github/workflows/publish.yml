@@ -126,9 +126,9 @@ jobs:
             bundles: "dmg,app"
           - platform: "ubuntu-22.04"
             bundles: "appimage,updater"
-          # - platform: "ubuntu-22.04"
-          #   target: "i686-unknown-linux-gnu"
-          #   bundles: "appimage,updater"
+          - platform: "ubuntu-22.04"
+            target: "i686-unknown-linux-gnu"
+            bundles: "appimage,updater"
           # Disabled, until needed
           # - platform: "windows-latest"
           #   config: "src-tauri/tauri.microsoftstore.conf.json"
@@ -332,26 +332,26 @@ jobs:
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
 
-  # publish-release:
-  #   permissions:
-  #     contents: write
-  #   runs-on: ubuntu-latest
-  #   needs: [create-release, build-tauri]
+  publish-release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs: [create-release, build-tauri]
 
-  #   steps:
-  #     - name: publish release
-  #       id: publish-release
-  #       uses: actions/github-script@v8
-  #       env:
-  #         release_id: ${{ needs.create-release.outputs.release_id }}
-  #         prerelease: ${{ inputs.environment != 'production' }}
-  #         REF: ${{ github.ref }}
-  #       with:
-  #         script: |
-  #           github.rest.repos.updateRelease({
-  #             owner: context.repo.owner,
-  #             repo: context.repo.repo,
-  #             release_id: process.env.release_id,
-  #             draft: false,
-  #             prerelease: process.env.prerelease == "true"
-  #           })
+    steps:
+      - name: publish release
+        id: publish-release
+        uses: actions/github-script@v8
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
+          prerelease: ${{ inputs.environment != 'production' }}
+          REF: ${{ github.ref }}
+        with:
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: false,
+              prerelease: process.env.prerelease == "true"
+            })
