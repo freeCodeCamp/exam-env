@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::UpdaterExt;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::{
     error::{Error, PassToSentry},
@@ -101,6 +101,19 @@ pub async fn check<R: Runtime>(
                 e
             ))
         })?;
+
+    let status = response.status();
+
+    if !status.is_success() {
+        let data = response.text().await.map_err(|e| {
+            Error::Request(format!("failed to decode releases response body: {:#?}", e))
+        })?;
+        warn!("{status}: {data}");
+        return Err(Error::Request(format!(
+            "non-success status code when fetching releases: {}",
+            status
+        )));
+    }
 
     let releases: Vec<GitHubRelease> = response
         .json()
