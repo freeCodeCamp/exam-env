@@ -107,6 +107,11 @@ export function ExamLanding() {
               disqualification from the exam and you will need to retake the
               exam to qualify for the certification.
             </Text>
+            <Text color={"red"} role="alert">
+              The exam is closed book and designed to test both your
+              comprehension and your memory. Do not use outside assistance in
+              the form of books, notes, AI tools, or other people.
+            </Text>
 
             <Text>
               Once you have completed the attempt, within 7 days you will be
