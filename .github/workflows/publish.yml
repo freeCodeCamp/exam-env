@@ -126,7 +126,7 @@ jobs:
             bundles: "dmg,app"
           - platform: "ubuntu-22.04"
             bundles: "appimage,updater"
-          - platform: "ubuntu-18.04"
+          - platform: "ubuntu-22.04"
             target: "i686-unknown-linux-gnu"
             bundles: "appimage,updater"
           # Disabled, until needed
