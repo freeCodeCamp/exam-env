@@ -15,54 +15,35 @@ import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { useInvoke } from "../components/use-invoke";
 import { AuthContext } from "../contexts/auth";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { LEARN_BASE } from "../utils/env";
 import { captureException } from "@sentry/react";
+import { getErrorMessage } from "../utils/errors";
 
 export function Login() {
   const navigate = useNavigate();
-  const { login, examEnvironmentAuthenticationToken } =
-    useContext(AuthContext)!;
-  const [accountToken, setAccountToken] = useState(
-    examEnvironmentAuthenticationToken || ""
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [setAuthToken, isPending, setAuthTokenError] = useInvoke<undefined>(
-    "set_authorization_token"
-  );
+  const { login, token } = useContext(AuthContext)!;
+  const [accountToken, setAccountToken] = useState(token.data || "");
 
   useEffect(() => {
-    if (setAuthTokenError) {
-      setError(JSON.stringify(setAuthTokenError));
-      captureException(setAuthTokenError);
-    } else {
-      setError(null);
-    }
-  }, [setAuthTokenError]);
-
-  useEffect(() => {
-    if (examEnvironmentAuthenticationToken) {
+    if (token.data) {
       navigate({ to: LandingRoute.to });
     }
-  }, [examEnvironmentAuthenticationToken]);
+  }, [token.data]);
 
   function handleTokenChange(e: ChangeEvent<HTMLInputElement>) {
     setAccountToken(e.target.value);
   }
 
   async function connectAuthToken(token: string) {
-    await setAuthToken({
-      newAuthorizationToken: token,
-    });
     try {
-      await login(token);
+      await login.mutateAsync(token);
       navigate({ to: LandingRoute.to });
     } catch (e) {
-      setError(JSON.stringify(e));
+      console.error("Failed to connect token:", e);
     }
   }
 
@@ -79,7 +60,7 @@ export function Login() {
             <Spacer size="m" />
             <Heading color="black">Log In</Heading>
             <Spacer size="s" />
-            <FormControl isInvalid={!!error}>
+            <FormControl isInvalid={login.isError || token.isError}>
               <FormLabel htmlFor="account-token">
                 Connect your freeCodeCamp.org account by inputing your account
                 token:
@@ -90,12 +71,14 @@ export function Login() {
                 placeholder="Account Token..."
                 onChange={handleTokenChange}
                 value={accountToken}
-                disabled={isPending}
+                disabled={login.isPending}
                 aria-describedby="token-help"
-                aria-invalid={!!error}
+                aria-invalid={login.isError || token.isError}
               />
-              {!!error && (
-                <FormErrorMessage role="alert">{error}</FormErrorMessage>
+              {(login.isError || token.isError) && (
+                <FormErrorMessage role="alert">
+                  {getErrorMessage(login.error || token.error)}
+                </FormErrorMessage>
               )}
               <FormHelperText id="token-help">
                 Go to{" "}
@@ -124,7 +107,7 @@ export function Login() {
               <Button
                 type="submit"
                 onClick={() => connectAuthToken(accountToken)}
-                disabled={isPending || accountToken.length === 0}
+                disabled={login.isPending || accountToken.length === 0}
                 block={true}
               >
                 Connect

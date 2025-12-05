@@ -12,7 +12,7 @@ import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
-import { ErrorResponse } from "./errors";
+import { ErrorResponse, isFCCError } from "./errors";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
@@ -271,20 +271,13 @@ export async function checkForUpdate() {
     // });
   }
 
-  try {
-    const metadata = await invoke<UpdateMetadata>("check");
-    if (metadata) {
-      const update = new Update(metadata);
-      console.debug(
-        `Found update ${update.version} from ${update.date} with notes ${update.body}`
-      );
-      return update;
-    }
-  } catch (e) {
-    console.error(e);
-    // Error is already captured on the backend
-    // captureException(e);
-    throw new Error(JSON.stringify(e));
+  const metadata = await invoke<UpdateMetadata>("check");
+  if (metadata) {
+    const update = new Update(metadata);
+    console.debug(
+      `Found update ${update.version} from ${update.date} with notes ${update.body}`
+    );
+    return update;
   }
   return null;
 }
@@ -294,7 +287,13 @@ export async function delayForTesting(t: number) {
 }
 
 function debugResponse(res: FetchResponse<any, any, any>) {
-  console.debug(res.response.status, res.response.url, res.data, res.error);
+  console.debug(
+    res.response.status,
+    res.response.url,
+    res.data,
+    res.error,
+    res.response.statusText
+  );
 }
 
 interface StandardError {
@@ -302,9 +301,12 @@ interface StandardError {
   message: string;
 }
 
+// function captureError(res: ErrorResponse<StandardError>) {
 function captureError(res: ErrorResponse<StandardError>) {
   if (res.error.code && res.error.message) {
-    const se = new Error(`${res.error.code}: ${res.error.message}`);
+    const se = new Error(
+      `${res.error.code}: ${res.error.message}; ${res.response.statusText}`
+    );
     captureException(se);
   } else {
     const se = new Error(`Unknown error: ${JSON.stringify(res)}`);

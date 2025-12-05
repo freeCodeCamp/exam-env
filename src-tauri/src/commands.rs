@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::UpdaterExt;
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 
 use crate::{
-    error::{Error, PassToSentry},
+    error::{Error, ErrorKind, PassToSentry},
     secret,
     utils::ENVIRONMENT,
     SentryState,
@@ -35,7 +35,7 @@ pub fn restart_app(app: AppHandle) {
 /// Passes the error string to Sentry as a `Client` error, and flushes the Sentry client.
 #[tauri::command]
 pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: AppHandle) {
-    let error = Error::Client(error_str);
+    let error = Error::new(ErrorKind::Client, error_str, "Client error");
     let _ = error.capture().emit(&app);
 
     if let Some(client) = &sentry_state.client {
@@ -92,34 +92,32 @@ pub async fn check<R: Runtime>(
         .header("User-Agent", "Exam-Environment")
         .send()
         .await
-        .map_err(|e| Error::Request(format!("failed to request releases: {:#?}", e)))
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Request,
+                format!("failed to request releases: {:#?}", e),
+                "Unable to fetch releases to check for updates",
+            )
+        })
         .capture()?
         .error_for_status()
         .map_err(|e| {
-            Error::Request(format!(
-                "failed to request releases, non-200 status code: {:#?}",
-                e
-            ))
+            Error::new(
+                ErrorKind::Request,
+                format!("failed to request releases, non-200 status code: {:#?}", e),
+                "Unable to fetch releases to check for updates",
+            )
         })?;
-
-    let status = response.status();
-
-    if !status.is_success() {
-        let data = response.text().await.map_err(|e| {
-            Error::Request(format!("failed to decode releases response body: {:#?}", e))
-        })?;
-        warn!("{status}: {data}");
-        return Err(Error::Request(format!(
-            "non-success status code when fetching releases: {}",
-            status
-        )));
-    }
 
     let releases: Vec<GitHubRelease> = response
         .json()
         .await
         .map_err(|e| {
-            Error::Serialization(format!("failed to deserialize releases as json: {:#?}", e))
+            Error::new(
+                ErrorKind::Serialization,
+                format!("failed to deserialize releases as json: {:#?}", e),
+                "Unable to fetch releases to check for updates",
+            )
         })
         .capture()?;
 
@@ -141,13 +139,21 @@ pub async fn check<R: Runtime>(
     let asset = assets
         .iter()
         .find(|a| a.name == "latest.json")
-        .ok_or(Error::Request(
+        .ok_or(Error::new(
+            ErrorKind::Request,
             "failed to find latest.json asset in release".to_string(),
+            "Unable to fetch releases to check for updates",
         ))
         .capture()?;
 
     let update_url = Url::parse(&asset.browser_download_url)
-        .map_err(|e| Error::Serialization(format!("failed to parse latest.json url: {:#?}", e)))
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Serialization,
+                format!("failed to parse latest.json url: {:#?}", e),
+                "Unable to fetch release to check for updates",
+            )
+        })
         .capture()?;
 
     let mut update_builder = app.updater_builder();
@@ -165,18 +171,34 @@ pub async fn check<R: Runtime>(
     let update = update_builder
         .endpoints(vec![update_url.clone()])
         .map_err(|e| {
-            Error::Request(format!(
-                "failed to create updater builder with endpoint '{update_url:?}': {:#?}",
-                e
-            ))
+            Error::new(
+                ErrorKind::Request,
+                format!(
+                    "failed to create updater builder with endpoint '{update_url:?}': {:#?}",
+                    e
+                ),
+                "Unable to download latest update",
+            )
         })
         .capture()?
         .build()
-        .map_err(|e| Error::Request(format!("failed to build updater : {:#?}", e)))
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Request,
+                format!("failed to build updater : {:#?}", e),
+                "Unable to download latest update",
+            )
+        })
         .capture()?
         .check()
         .await
-        .map_err(|e| Error::Request(format!("failed to check for updates: {:#?}", e)))
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Request,
+                format!("failed to check for updates: {:#?}", e),
+                "Unable to download latest update",
+            )
+        })
         .capture()?;
 
     // https://github.com/tauri-apps/plugins-workspace/blob/d3d290ab8a8913981a98e2eb7f2c5d4aba3bc36c/plugins/updater/src/commands.rs#L74
@@ -184,7 +206,13 @@ pub async fn check<R: Runtime>(
         let formatted_date = if let Some(date) = update.date {
             let formatted_date = date
                 .format(&time::format_description::well_known::Rfc3339)
-                .map_err(|e| Error::Serialization(format!("failed to format date: {:#?}", e)))?;
+                .map_err(|e| {
+                    Error::new(
+                        ErrorKind::Serialization,
+                        format!("failed to format date: {:#?}", e),
+                        "Unable to download latest update",
+                    )
+                })?;
             Some(formatted_date)
         } else {
             None

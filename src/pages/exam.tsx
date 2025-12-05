@@ -33,7 +33,7 @@ import {
   UserExam,
   UserExamAttempt,
 } from "../utils/types";
-import { captureAndNavigate } from "../utils/errors";
+import { captureAndNavigate, getErrorMessage } from "../utils/errors";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
 import { captureException } from "@sentry/react";
@@ -46,6 +46,7 @@ export function Exam() {
     // TODO: If page is "reloaded" once an exam has ended, this could error with "User has completed exam too recently to retake."
     queryFn: () => getGeneratedExam(examId),
     retry: false,
+    refetchOnWindowFocus: false,
   });
   const submitQuestionMutation = useMutation({
     mutationFn: submitQuestion,
@@ -345,7 +346,7 @@ export function Exam() {
         to={LandingRoute.to}
         search={{
           flashKind: "warning",
-          flashMessage: examQuery.error.message,
+          flashMessage: getErrorMessage(examQuery.error),
         }}
       />
     );

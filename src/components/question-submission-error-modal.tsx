@@ -10,6 +10,7 @@ import { ButtonLoading } from "./button-loading";
 import { UseMutationResult } from "@tanstack/react-query";
 import { Answers, FullQuestion } from "../utils/types";
 import { useEffect, useState } from "react";
+import { getErrorMessage } from "../utils/errors";
 
 interface QuestionSubmissionErrorModalProps {
   submitQuestionMutation: UseMutationResult<
@@ -30,20 +31,11 @@ export function QuestionSubmissionErrorModal({
   fullQuestion,
   newSelectedAnswers,
 }: QuestionSubmissionErrorModalProps) {
-  const [error, setError] = useState<string | null>(null);
+  // const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    if (submitQuestionMutation.isError) {
-      setError(submitQuestionMutation.error.message);
-    }
-  }, [submitQuestionMutation.isError]);
-
-  useEffect(() => {
-    if (submitQuestionMutation.isSuccess) {
-      setError(null);
-    }
-  }, [submitQuestionMutation.isSuccess]);
-
+  // useEffect(() => {
+  //   setIsOpen(submitQuestionMutation.isError);
+  // }, [submitQuestionMutation.isError]);
   function onClick() {
     submitQuestionMutation.mutate({
       fullQuestion,
@@ -53,7 +45,7 @@ export function QuestionSubmissionErrorModal({
 
   return (
     <Modal
-      isOpen={!!error}
+      isOpen={submitQuestionMutation.isError}
       onClose={onClick}
       variant="danger"
       colorScheme="red"
@@ -73,7 +65,7 @@ export function QuestionSubmissionErrorModal({
           Question Submission Error
         </ModalHeader>
         <ModalBody id="error-modal-description" role="alert">
-          {error}
+          {getErrorMessage(submitQuestionMutation.error)}
         </ModalBody>
         <ModalFooter justifyContent={"center"}>
           <ButtonLoading

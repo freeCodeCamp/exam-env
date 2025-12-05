@@ -20,6 +20,7 @@ import { ExamRoute } from "./exam";
 import { checkForUpdate } from "../utils/fetch";
 import { restartApp } from "../utils/commands";
 import { captureException } from "@sentry/react";
+import { getErrorMessage } from "../utils/errors";
 
 export function ExamLanding() {
   const [hasAgreed, setHasAgreed] = useState(false);
@@ -175,20 +176,10 @@ export function ExamLanding() {
             {updateMutation.isError && (
               <Box maxWidth="100%" role="alert">
                 <Text>Error checking for updates:</Text>
-                <Code
-                  p={2}
-                  display="block"
-                  width="100%"
-                  maxWidth="100%"
-                  overflowX="auto"
-                  wordBreak="break-word"
-                  whiteSpace="pre-wrap"
-                >
-                  {JSON.stringify(updateMutation.error.message, null, 2).slice(
-                    0,
-                    500
-                  )}
-                </Code>
+
+                <Text color={"red"}>
+                  {getErrorMessage(updateMutation.error)}
+                </Text>
                 <Button onClick={() => updateMutation.mutate()}>Retry</Button>
               </Box>
             )}

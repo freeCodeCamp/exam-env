@@ -12,6 +12,7 @@ import {
   OrderedList,
   Progress,
   Spinner,
+  Text,
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoIcon } from "@chakra-ui/icons";
 import { Button, Spacer } from "@freecodecamp/ui";
@@ -22,6 +23,7 @@ import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { checkForUpdate, delayForTesting } from "../utils/fetch";
+import { getErrorMessage } from "../utils/errors";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -144,20 +146,7 @@ export function Splashscreen() {
         </ListItem>
         <ListItem pl={6} maxWidth="100%" overflowX="hidden">
           <Box maxWidth="100%">
-            <Code
-              p={2}
-              display="block"
-              width="100%"
-              maxWidth="100%"
-              overflowX="auto"
-              wordBreak="break-word"
-              whiteSpace="pre-wrap"
-            >
-              {JSON.stringify(updateMutation.error.message, null, 2).slice(
-                0,
-                500
-              )}
-            </Code>
+            <Text color={"red"}>{getErrorMessage(updateMutation.error)}</Text>
             <Button onClick={() => updateMutation.mutate()}>Retry</Button>
           </Box>
         </ListItem>
@@ -294,11 +283,7 @@ export function Splashscreen() {
               wordBreak="break-word"
               whiteSpace="pre-wrap"
             >
-              {JSON.stringify(
-                compatibilityCheckQuery.error.message,
-                null,
-                2
-              ).slice(0, 1000)}
+              {getErrorMessage(compatibilityCheckQuery.error)}
             </Code>
             <Button
               onClick={() => {

@@ -1,7 +1,7 @@
 use keyring::Entry;
 
 use crate::{
-    error::{Error, PassToSentry},
+    error::{Error, ErrorKind, PassToSentry},
     utils::ENVIRONMENT,
 };
 
@@ -18,7 +18,13 @@ pub fn set_authorization_token(new_token: &str) -> Result<(), Error> {
 
     entry
         .set_password(new_token)
-        .map_err(|e| Error::Credential(e.to_string()))
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Credential,
+                e.to_string(),
+                "Failed to set authorization token",
+            )
+        })
         .capture()?;
 
     Ok(())
@@ -28,7 +34,13 @@ pub fn remove_authorization_token() -> Result<(), Error> {
     let entry = get_entry();
     entry
         .delete_credential()
-        .map_err(|e| Error::Credential(e.to_string()))
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Credential,
+                e.to_string(),
+                "Failed to remove authorization token",
+            )
+        })
         .capture()?;
 
     Ok(())

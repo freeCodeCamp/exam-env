@@ -6,10 +6,47 @@ export type Result<T> =
   | { error: null; data: T }
   | { error: FCCError; data: null };
 
-export type FCCError =
-  | { ValidationError: { message: string; id?: string } }
-  | { FSError: string }
-  | { SerializationError: string };
+export type FCCError = {
+  debug: string;
+  kind: "Credential" | "FS" | "Serialization" | "Request" | "Client";
+  user: string;
+};
+
+export function isFCCError(e: unknown): e is FCCError {
+  if (typeof e !== "object" || e === null) {
+    return false;
+  }
+
+  if (!("kind" in e)) {
+    return false;
+  }
+
+  if (!("debug" in e) || !("user" in e)) {
+    return false;
+  }
+
+  if (
+    e.kind !== "Credential" &&
+    e.kind !== "FS" &&
+    e.kind !== "Serialization" &&
+    e.kind !== "Request" &&
+    e.kind !== "Client"
+  ) {
+    return false;
+  }
+  return true;
+}
+
+export function getErrorMessage(e: unknown): string {
+  console.error(e);
+  if (isFCCError(e)) {
+    return e.user;
+  }
+  if (e instanceof Error) {
+    return e.message;
+  }
+  return "An unexpected error occurred: " + JSON.stringify(e);
+}
 
 /**
  * Asserts the given value is not null or undefined.
@@ -31,7 +68,7 @@ export function assertError(value: unknown): asserts value is FCCError {
 
 export interface ErrorResponse<T> {
   error: T;
-  response: { status: number };
+  response: { status: number; statusText: string; url: string };
 }
 
 export type QueryFn<T extends (...args: any) => any> = Awaited<ReturnType<T>>;

@@ -10,6 +10,7 @@ import { getExams } from "../utils/fetch";
 import { rootRoute } from "./root";
 import { useQuery } from "@tanstack/react-query";
 import { ExamCard } from "../components/exam-card";
+import { getErrorMessage } from "../utils/errors";
 
 function LandingParent({ children }: { children: ReactNode }) {
   const { flashKind, flashMessage } = LandingRoute.useSearch();
@@ -59,7 +60,9 @@ export function Landing() {
   if (examsQuery.isError) {
     return (
       <LandingParent>
-        <Text style={{ color: "red" }}>{examsQuery.error.message}</Text>
+        <Text style={{ color: "red" }}>
+          {getErrorMessage(examsQuery.error)}
+        </Text>
         <Button
           variant={"danger"}
           onClick={() => {

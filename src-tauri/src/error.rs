@@ -7,34 +7,45 @@ use tauri::{AppHandle, Emitter};
 use crate::secret::get_authorization_token;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Error {
-    Credential(String),
-    FS(String),
-    Serialization(String),
-    Request(String),
-    Client(String),
+pub enum ErrorKind {
+    Credential,
+    FS,
+    Serialization,
+    Request,
+    Client,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Error {
+    /// Error for logs, debugging, and reporting
+    pub debug: String,
+    /// Kind of error
+    pub kind: ErrorKind,
+    /// Error message shown to user
+    pub user: String,
 }
 
 impl Error {
+    pub fn new(kind: ErrorKind, debug: String, user: &str) -> Self {
+        Self {
+            kind,
+            debug,
+            user: user.to_string(),
+        }
+    }
     fn add_context(&mut self, context: &str) {
-        match self {
-            Error::Credential(s) => s.push_str(context),
-            Error::FS(s) => s.push_str(context),
-            Error::Serialization(s) => s.push_str(context),
-            Error::Request(s) => s.push_str(context),
-            Error::Client(s) => s.push_str(context),
-        };
+        self.debug.push_str(context);
     }
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let stringed = match self {
-            Error::Credential(s) => format!("Credential: {s}"),
-            Error::FS(s) => format!("FS: {s}"),
-            Error::Serialization(s) => format!("Serialization: {s}"),
-            Error::Request(s) => format!("Request: {s}"),
-            Error::Client(s) => format!("Client: {s}"),
+        let stringed = match self.kind {
+            ErrorKind::Credential => format!("Credential: {}", self.debug),
+            ErrorKind::FS => format!("FS: {}", self.debug),
+            ErrorKind::Serialization => format!("Serialization: {}", self.debug),
+            ErrorKind::Request => format!("Request: {}", self.debug),
+            ErrorKind::Client => format!("Client: {}", self.debug),
         };
 
         write!(f, "{}", stringed)

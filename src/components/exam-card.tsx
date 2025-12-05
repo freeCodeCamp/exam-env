@@ -18,6 +18,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { WarningIcon } from "@chakra-ui/icons";
+import { getErrorMessage } from "../utils/errors";
 
 type Exams = Awaited<ReturnType<typeof getExams>>;
 type Attempts = NonNullable<Awaited<ReturnType<typeof getAttemptsByExamId>>>;
@@ -111,7 +112,7 @@ export function ExamCard({ exam }: ExamCardProps) {
               <Alert status="error" mt={3} borderRadius="md">
                 <AlertIcon />
                 <AlertDescription fontSize="sm">
-                  {attemptsQuery.error.message}
+                  {getErrorMessage(attemptsQuery.error)}
                 </AlertDescription>
               </Alert>
             )
