@@ -19,12 +19,10 @@ import { useContext, useRef } from "react";
 import { SplashscreenRoute } from "../pages/splashscreen";
 import { LandingRoute } from "../pages/landing";
 import { AuthContext } from "../contexts/auth";
-import { TestRoute } from "../pages/test";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { examEnvironmentAuthenticationToken, logout } =
-    useContext(AuthContext)!;
+  const { token, logout } = useContext(AuthContext)!;
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
 
@@ -94,16 +92,6 @@ export function Header() {
             </Button>
             {import.meta.env.DEV && (
               <Button
-                onClick={() => navigate({ to: TestRoute.to })}
-                variant="ghost"
-                w={"100%"}
-                rightIcon={<ArrowForwardIcon />}
-              >
-                Test (Dev Only)
-              </Button>
-            )}
-            {import.meta.env.DEV && (
-              <Button
                 onClick={() => navigate({ to: SplashscreenRoute.to })}
                 variant="ghost"
                 w={"100%"}
@@ -112,9 +100,9 @@ export function Header() {
                 Splashscreen (Dev Only)
               </Button>
             )}
-            {examEnvironmentAuthenticationToken && (
+            {!!token.data && (
               <Button
-                onClick={() => logout()}
+                onClick={() => logout.mutate()}
                 variant="ghost"
                 w={"100%"}
                 rightIcon={<ArrowForwardIcon />}

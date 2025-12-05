@@ -12,7 +12,6 @@ import { ErrorRoute } from "./pages/error";
 import { LandingRoute } from "./pages/landing";
 import { ExamRoute } from "./pages/exam";
 import { LoginRoute } from "./pages/login";
-import { TestRoute } from "./pages/test";
 import { SplashscreenRoute } from "./pages/splashscreen";
 import { ExamLandingRoute } from "./pages/exam-landing";
 import { rootRoute } from "./pages/root";
@@ -38,7 +37,6 @@ const routes = [
   ExamRoute,
   LandingRoute,
   ExamLandingRoute,
-  TestRoute,
 ];
 
 const routeTree = rootRoute.addChildren(routes);
