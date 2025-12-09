@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { FullQuestion } from "../utils/types";
-import { logger, startSpan } from "@sentry/react";
+import { logger } from "@sentry/react";
 
 interface AudioPlayerProps {
   fullQuestion: FullQuestion;
@@ -25,34 +25,32 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0);
 
   useEffect(() => {
-    startSpan({ name: "AudioPlayer: load audio" }, () => {
-      if (!fullQuestion.audio) {
-        return;
+    if (!fullQuestion.audio) {
+      return;
+    }
+
+    const audio = new Audio(fullQuestion.audio.url);
+
+    // Attach handlers BEFORE loading
+    audio.onloadedmetadata = onLoadedMetadata;
+    audio.ontimeupdate = onTimeUpdate;
+    audio.onpause = onPause;
+    audio.onplay = onPlay;
+
+    // Add canplay event for better compatibility
+    audio.oncanplay = () => {
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(audio.duration);
       }
+    };
 
-      const audio = new Audio(fullQuestion.audio.url);
+    // Preload metadata
+    audio.preload = "metadata";
+    audio.load();
 
-      // Attach handlers BEFORE loading
-      audio.onloadedmetadata = onLoadedMetadata;
-      audio.ontimeupdate = onTimeUpdate;
-      audio.onpause = onPause;
-      audio.onplay = onPlay;
-
-      // Add canplay event for better compatibility
-      audio.oncanplay = () => {
-        if (audio.duration && !isNaN(audio.duration)) {
-          setDuration(audio.duration);
-        }
-      };
-
-      // Preload metadata
-      audio.preload = "metadata";
-      audio.load();
-
-      audioRef.current = audio;
-      setIsPlaying(false);
-      setProgress(0);
-    });
+    audioRef.current = audio;
+    setIsPlaying(false);
+    setProgress(0);
 
     return () => {
       if (!audioRef.current) {
@@ -93,19 +91,17 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
     setIsPlaying(true);
   }
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (isPlaying) {
       audioRef.current?.pause();
     } else {
-      startSpan({ name: "AudioPlayer: play audio" }, async () => {
-        try {
-          await audioRef.current?.play();
-        } catch (e) {
-          if (e instanceof Error && e.name !== "AbortError") {
-            logger.warn(e.message);
-          }
+      try {
+        await audioRef.current?.play();
+      } catch (e) {
+        if (e instanceof Error && e.name !== "AbortError") {
+          logger.warn(e.message);
         }
-      });
+      }
     }
   };
 
