@@ -118,26 +118,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "macos-latest"
-            target: "aarch64-apple-darwin"
-            bundles: "dmg,app"
+          # - platform: "macos-latest"
+          #   target: "aarch64-apple-darwin"
+          #   bundles: "dmg,app"
           - platform: "macos-latest"
             target: "x86_64-apple-darwin"
             bundles: "dmg,app"
           - platform: "ubuntu-22.04"
             bundles: "appimage,updater"
-          - platform: "ubuntu-22.04"
-            target: "i686-unknown-linux-gnu"
-            bundles: "appimage,updater"
+          # - platform: "ubuntu-22.04"
+          #   target: "i686-unknown-linux-gnu"
+          #   bundles: "appimage,updater"
           # Disabled, until needed
           # - platform: "windows-latest"
           #   config: "src-tauri/tauri.microsoftstore.conf.json"
           #   bundles: "msi"
           - platform: "windows-latest"
             bundles: "nsis"
-          - platform: "windows-latest"
-            target: "i686-pc-windows-msvc"
-            bundles: "nsis"
+          # - platform: "windows-latest"
+          #   target: "i686-pc-windows-msvc"
+          #   bundles: "nsis"
 
     runs-on: ${{ matrix.platform }}
     env:
@@ -331,6 +331,37 @@ jobs:
           tagName: ${{ inputs.environment }}/${{ steps.version.outputs.version }}
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
+
+  push-to-r2:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    needs: [create-release, build-tauri]
+
+    steps:
+      - name: download release artifacts
+        uses: robinraju/release-downloader@v1
+        with:
+          releaseId: ${{ needs.create-release.outputs.release_id }}
+          fileName: "*"
+
+      - name: install rclone
+        run: sudo apt-get install -y rclone
+
+      - name: upload to r2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET_NAME }}
+          RCLONE_CONFIG_TARGET_TYPE: s3
+          RCLONE_CONFIG_TARGET_PROVIDER: Cloudflare
+          RCLONE_CONFIG_TARGET_ENV_AUTH: true
+          RCLONE_CONFIG_TARGET_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          RCLONE_CONFIG_TARGET_NO_CHECK_BUCKET: true
+        run: |
+          rclone copy \
+            ./artifacts \
+            r2:${{ env.R2_BUCKET }}/${{ needs.create-release.outputs.new_version }}/
 
   publish-release:
     permissions:
