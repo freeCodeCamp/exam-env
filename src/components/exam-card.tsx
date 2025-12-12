@@ -51,6 +51,9 @@ export function ExamCard({ exam }: ExamCardProps) {
 
   const examStatus = getExamStatus(exam, attemptsQuery.data ?? []);
 
+  const alertId = `alert-${exam.id}`;
+  const headingId = `heading-${exam.id}`;
+
   return (
     <li style={{ listStyle: "none", marginBottom: "1rem" }}>
       <Card
@@ -62,12 +65,12 @@ export function ExamCard({ exam }: ExamCardProps) {
         boxShadow={examStatus.status === "InProgress" ? "lg" : "sm"}
         _hover={{ boxShadow: "md" }}
         transition="all 0.2s"
-        aria-label={`${exam.config.name} exam card`}
+        aria-labelledby={headingId}
       >
         <CardBody>
           <Flex justifyContent="space-between" alignItems="flex-start" mb={2}>
             <Box flex={1}>
-              <Heading as="h2" size="md" mb={2}>
+              <Heading as="h2" size="md" mb={2} id={headingId}>
                 {exam.config.name}
               </Heading>
               <Flex justifyContent={"space-between"}>
@@ -75,7 +78,11 @@ export function ExamCard({ exam }: ExamCardProps) {
                   <Text color="gray.600" fontSize="sm" marginBottom={0}>
                     Duration:
                   </Text>
-                  <Badge colorScheme="blue" fontSize="sm">
+                  <Badge
+                    colorScheme="blue"
+                    fontSize="sm"
+                    aria-label={examTimeVerbose(exam.config.totalTimeInS)}
+                  >
                     {examTimeInHumanReadableFormat(exam.config.totalTimeInS)}
                   </Badge>
                 </Flex>
@@ -90,7 +97,7 @@ export function ExamCard({ exam }: ExamCardProps) {
               </Flex>
             </Box>
             {examStatus.status === "InProgress" && (
-              <WarningIcon color="orange.400" boxSize={6} />
+              <WarningIcon color="orange.400" boxSize={6} aria-hidden={true} />
             )}
           </Flex>
 
@@ -109,7 +116,7 @@ export function ExamCard({ exam }: ExamCardProps) {
             </Flex>
           ) : (
             attemptsQuery.isError && (
-              <Alert status="error" mt={3} borderRadius="md">
+              <Alert role="status" status="error" mt={3} borderRadius="md">
                 <AlertIcon />
                 <AlertDescription fontSize="sm">
                   {getErrorMessage(attemptsQuery.error)}
@@ -119,7 +126,13 @@ export function ExamCard({ exam }: ExamCardProps) {
           )}
 
           {examStatus.message && (
-            <Alert status={examStatus.alertStatus} mt={3} borderRadius="md">
+            <Alert
+              role="status"
+              status={examStatus.alertStatus}
+              mt={3}
+              borderRadius="md"
+              id={alertId}
+            >
               <AlertIcon />
               <AlertDescription fontSize="sm">
                 {examStatus.message}
@@ -131,6 +144,7 @@ export function ExamCard({ exam }: ExamCardProps) {
         <CardFooter pt={0}>
           <Button
             disabled={!exam.canTake || attemptsQuery.isPending}
+            aria-describedby={!exam.canTake ? alertId : undefined}
             onClick={() => {
               navigate({
                 to: ExamLandingRoute.to,
@@ -139,6 +153,11 @@ export function ExamCard({ exam }: ExamCardProps) {
               });
             }}
             style={{ width: "100%" }}
+            aria-label={
+              examStatus.status === "InProgress"
+                ? `Continue ${exam.config.name}`
+                : `Start ${exam.config.name}`
+            }
           >
             {examStatus.status === "InProgress"
               ? "Continue Exam"
@@ -159,6 +178,16 @@ function examTimeInHumanReadableFormat(seconds: number) {
   }
 
   return `${minutes}m`;
+}
+
+/**
+ * Used for screen-reader improvements
+ */
+function examTimeVerbose(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  if (hours > 0) return `${hours} hours ${minutes % 60} minutes`;
+  return `${minutes} minutes`;
 }
 
 function getExamStatus(
