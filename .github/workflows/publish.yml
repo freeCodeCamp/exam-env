@@ -294,15 +294,17 @@ jobs:
             const target = '${{ matrix.target }}';
             const bundles = '${{ matrix.bundles }}';
             const config = '${{ matrix.config }}';
+            const environment = '${{ inputs.environment }}';
 
             let args = [];
             if (target) args.push(`--target ${target}`);
             if (bundles) args.push(`--bundles ${bundles}`);
             if (config) args.push(`--config ${config}`);
+            if (environment != 'production') args.push('--debug');
 
             core.setOutput('args', args.join(' '));
 
-      - uses: tauri-apps/tauri-action@v0.6
+      - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -323,9 +325,7 @@ jobs:
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}
-          includeDebug: ${{ inputs.environment != 'production' }}
-          includeRelease: ${{inputs.environment == 'production' }}
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
           # tagName is required to prevent all update URLs from pointing to `/latest/`:
           # https://github.com/freeCodeCamp/exam-env/issues/54
           tagName: ${{ inputs.environment }}/${{ steps.version.outputs.version }}
