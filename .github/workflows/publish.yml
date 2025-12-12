@@ -344,6 +344,7 @@ jobs:
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           fileName: "*"
+          preRelease: true
 
       - name: install rclone
         run: sudo apt-get install -y rclone
@@ -361,7 +362,7 @@ jobs:
         run: |
           rclone copy \
             ./artifacts \
-            target:${{ env.R2_BUCKET }}/${{ needs.create-release.outputs.new_version }}/
+            target:${{ env.R2_BUCKET }}/${{ needs.create-release.outputs.new_version }}/ --verbose
 
   publish-release:
     permissions:
