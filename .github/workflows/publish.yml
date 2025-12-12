@@ -330,6 +330,7 @@ jobs:
           # https://github.com/freeCodeCamp/exam-env/issues/54
           tagName: ${{ inputs.environment }}/${{ steps.version.outputs.version }}
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
+          uploadWorkflowArtifacts: true
           releaseDraft: true
 
   push-to-r2:
@@ -340,11 +341,11 @@ jobs:
 
     steps:
       - name: download release artifacts
-        uses: robinraju/release-downloader@v1
+        uses: actions/download-artifact@v4
         with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
-          fileName: "*"
-          preRelease: true
+          path: artifacts
+          # Flattens all artifacts into the 'path' directory, removing artifact-name folders
+          merge-multiple: true
 
       - name: install rclone
         run: sudo apt-get install -y rclone
