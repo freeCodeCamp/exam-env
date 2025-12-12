@@ -9,7 +9,7 @@ import {
   Button,
   Tooltip,
 } from "@chakra-ui/react";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
 // import { Modal } from "@freecodecamp/ui";
@@ -539,6 +539,7 @@ function Timer({
   setHasFinishedExam,
   setMaxTimeReached,
 }: TimerProps) {
+  const [announcement, setAnnouncement] = useState("");
   const [availableTime, setAvailableTime] = useState(secondsLeft);
   const startTimeRef = useRef<Date | null>(null);
   const requestRef = useRef<number | null>(null);
@@ -576,10 +577,52 @@ function Timer({
     };
   }, [secondsLeft]);
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.altKey && event.key.toLowerCase() === "t") {
+        event.preventDefault();
+
+        const timeString = secondsToHHMMSS(availableTime);
+        setAnnouncement(`Time left: ${timeString}`);
+
+        // Clear the announcement after a short delay so the screen reader
+        // can announce it again the next time the shortcut is pressed.
+        setTimeout(() => setAnnouncement(""), 100);
+      }
+    },
+    [availableTime]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
   return (
-    <Text fontWeight={"bold"} aria-live="polite" aria-atomic="true">
-      Time: {secondsToHHMMSS(availableTime)}
-    </Text>
+    <>
+      <Text
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: "absolute",
+          clip: "rect(0 0 0 0)",
+          width: 1,
+          height: 1,
+          margin: -1,
+          padding: 0,
+          border: 0,
+          overflow: "hidden",
+        }}
+      >
+        {announcement}
+      </Text>
+      <Text fontWeight={"bold"} aria-live="off" aria-atomic="true">
+        Time: {secondsToHHMMSS(availableTime)}
+      </Text>
+    </>
   );
 }
 
