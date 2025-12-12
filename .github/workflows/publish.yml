@@ -361,7 +361,7 @@ jobs:
         run: |
           rclone copy \
             ./artifacts \
-            r2:${{ env.R2_BUCKET }}/${{ needs.create-release.outputs.new_version }}/
+            target:${{ env.R2_BUCKET }}/${{ needs.create-release.outputs.new_version }}/
 
   publish-release:
     permissions:
