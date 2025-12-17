@@ -36,7 +36,7 @@ import {
 import { captureAndNavigate, getErrorMessage } from "../utils/errors";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
-import { captureException } from "@sentry/react";
+import { captureException, logger } from "@sentry/react";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -71,6 +71,7 @@ export function Exam() {
     }
     const exam = examQuery.data.exam;
     const examAttempt = examQuery.data.examAttempt;
+    logger.info("Exam started", { examId });
 
     const fullQuestion = fullQuestionFromExamAttempt(exam, examAttempt);
     setFullQuestion(fullQuestion);
