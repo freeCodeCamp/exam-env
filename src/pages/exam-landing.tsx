@@ -161,7 +161,7 @@ export function ExamLanding() {
               id="terms-agreement"
               onChange={(e) => setHasAgreed(e.target.checked)}
             >
-              I agree to the terms and conditions
+              I understand and am ready to proceed
             </Checkbox>
             <Spacer size="s" />
             <Button
