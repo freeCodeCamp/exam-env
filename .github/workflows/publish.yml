@@ -118,26 +118,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - platform: "macos-latest"
-          #   target: "aarch64-apple-darwin"
-          #   bundles: "dmg,app"
+          - platform: "macos-latest"
+            target: "aarch64-apple-darwin"
+            bundles: "dmg,app"
           - platform: "macos-latest"
             target: "x86_64-apple-darwin"
             bundles: "dmg,app"
           - platform: "ubuntu-22.04"
             bundles: "appimage,updater"
-          # - platform: "ubuntu-22.04"
-          #   target: "i686-unknown-linux-gnu"
-          #   bundles: "appimage,updater"
+          - platform: "ubuntu-22.04"
+            target: "i686-unknown-linux-gnu"
+            bundles: "appimage,updater"
           # Disabled, until needed
           # - platform: "windows-latest"
           #   config: "src-tauri/tauri.microsoftstore.conf.json"
           #   bundles: "msi"
           - platform: "windows-latest"
             bundles: "nsis"
-          # - platform: "windows-latest"
-          #   target: "i686-pc-windows-msvc"
-          #   bundles: "nsis"
+          - platform: "windows-latest"
+            target: "i686-pc-windows-msvc"
+            bundles: "nsis"
 
     runs-on: ${{ matrix.platform }}
     env:
