@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 
 import { verifyToken } from "../utils/fetch";
+import { setUser } from "@sentry/react";
 
 export const AuthContext = createContext<{
   token: UseQueryResult<null | string, unknown>;
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.debug("Fetched authorization token:", token);
       if (token) {
         await checkTokenMutation.mutateAsync(token);
+        setUser({ id: token });
       }
       return token ?? null;
     },
