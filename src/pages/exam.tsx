@@ -1,4 +1,4 @@
-import { createRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createRoute, Navigate } from "@tanstack/react-router";
 import {
   Box,
   Center,

@@ -149,7 +149,6 @@ export function ExamCard({ exam }: ExamCardProps) {
               navigate({
                 to: ExamLandingRoute.to,
                 params: { examId: exam.id },
-                search: { note: exam.config.note },
               });
             }}
             style={{ width: "100%" }}

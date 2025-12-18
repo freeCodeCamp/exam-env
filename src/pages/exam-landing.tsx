@@ -7,20 +7,23 @@ import {
   Checkbox,
   Code,
   Progress,
+  Spinner,
 } from "@chakra-ui/react";
 import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { ProtectedRoute } from "../components/protected-route";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { ExamRoute } from "./exam";
-import { checkForUpdate } from "../utils/fetch";
+import { checkForUpdate, getExams } from "../utils/fetch";
 import { restartApp } from "../utils/commands";
 import { captureException } from "@sentry/react";
-import { getErrorMessage } from "../utils/errors";
+import { captureAndNavigate, getErrorMessage } from "../utils/errors";
+import { PrismFormatted } from "../components/prism-formatted";
+import { parseMarkdown } from "../utils/markdown";
 
 export function ExamLanding() {
   const [hasAgreed, setHasAgreed] = useState(false);
@@ -28,7 +31,21 @@ export function ExamLanding() {
   const navigate = useNavigate();
 
   const { examId } = ExamLandingRoute.useParams();
-  const { note } = ExamLandingRoute.useSearch();
+
+  const noteQuery = useQuery({
+    queryKey: ["exams"],
+    queryFn: getExams,
+    retry: false,
+    refetchOnWindowFocus: false,
+    select: (data) => {
+      const exam = data.find((e) => e.id === examId);
+      if (!exam) {
+        throw new Error(`Invalid exam id ${examId}.`);
+      }
+
+      return exam.config.note;
+    },
+  });
 
   const updateMutation = useMutation({
     mutationKey: ["checkForUpdate"],
@@ -94,6 +111,10 @@ export function ExamLanding() {
     }
   }, []);
 
+  if (noteQuery.isError) {
+    captureAndNavigate(noteQuery.error.message, navigate);
+  }
+
   return (
     <>
       <Header />
@@ -121,13 +142,20 @@ export function ExamLanding() {
             <Text>
               If you run out of time, your attempt will be auto-submitted.
             </Text>
-            {!!note && (
-              <>
-                <Heading as="h2" size={"md"}>
-                  Exam Note
-                </Heading>
-                <Text>{note}</Text>
-              </>
+            {noteQuery.isFetching ? (
+              <Spinner />
+            ) : (
+              !!noteQuery.data && (
+                <>
+                  <Heading as="h2" size={"md"}>
+                    Exam Note
+                  </Heading>
+                  <PrismFormatted
+                    text={parseMarkdown(noteQuery.data)}
+                    getCodeBlockAriaLabel={(c) => `${c} code`}
+                  />
+                </>
+              )
             )}
             <Checkbox
               id="terms-agreement"
@@ -141,6 +169,8 @@ export function ExamLanding() {
               variant="primary"
               disabled={
                 !hasAgreed ||
+                noteQuery.isFetching ||
+                noteQuery.isError ||
                 updateMutation.isPending ||
                 updateMutation.isError ||
                 startExamMutation.isPending ||
