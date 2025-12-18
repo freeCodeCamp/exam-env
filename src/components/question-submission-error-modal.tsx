@@ -8,13 +8,12 @@ import {
 } from "@chakra-ui/react";
 import { ButtonLoading } from "./button-loading";
 import { UseMutationResult } from "@tanstack/react-query";
-import { Answers, FullQuestion } from "../utils/types";
-import { useEffect, useState } from "react";
+import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { getErrorMessage } from "../utils/errors";
 
 interface QuestionSubmissionErrorModalProps {
   submitQuestionMutation: UseMutationResult<
-    void,
+    UserExamAttempt,
     Error,
     {
       fullQuestion: FullQuestion;
@@ -24,18 +23,17 @@ interface QuestionSubmissionErrorModalProps {
   >;
   fullQuestion: FullQuestion;
   newSelectedAnswers: string[];
+  questionSubmissionErrorModalIsOpen: boolean;
+  questionSubmissionErrorModalOnClose: () => void;
 }
 
 export function QuestionSubmissionErrorModal({
   submitQuestionMutation,
   fullQuestion,
   newSelectedAnswers,
+  questionSubmissionErrorModalIsOpen,
+  questionSubmissionErrorModalOnClose,
 }: QuestionSubmissionErrorModalProps) {
-  // const [isOpen, setIsOpen] = useState(false);
-
-  // useEffect(() => {
-  //   setIsOpen(submitQuestionMutation.isError);
-  // }, [submitQuestionMutation.isError]);
   function onClick() {
     submitQuestionMutation.mutate({
       fullQuestion,
@@ -45,8 +43,8 @@ export function QuestionSubmissionErrorModal({
 
   return (
     <Modal
-      isOpen={submitQuestionMutation.isError}
-      onClose={onClick}
+      isOpen={questionSubmissionErrorModalIsOpen}
+      onClose={questionSubmissionErrorModalOnClose}
       variant="danger"
       colorScheme="red"
       closeOnOverlayClick={false}
@@ -65,7 +63,8 @@ export function QuestionSubmissionErrorModal({
           Question Submission Error
         </ModalHeader>
         <ModalBody id="error-modal-description" role="alert">
-          {getErrorMessage(submitQuestionMutation.error)}
+          {submitQuestionMutation.isError &&
+            getErrorMessage(submitQuestionMutation.error)}
         </ModalBody>
         <ModalFooter justifyContent={"center"}>
           <ButtonLoading

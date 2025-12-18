@@ -8,11 +8,11 @@ import {
   Text,
   Button,
   Tooltip,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
-// import { Modal } from "@freecodecamp/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
@@ -27,20 +27,14 @@ import { QuestionSetForm } from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
 import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
-import {
-  Answers,
-  FullQuestion,
-  UserExam,
-  UserExamAttempt,
-} from "../utils/types";
-import { captureAndNavigate, getErrorMessage } from "../utils/errors";
+import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
+import { getErrorMessage } from "../utils/errors";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
-import { captureException, logger } from "@sentry/react";
+import { produce } from "immer";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
-  const navigate = useNavigate();
   const examQuery = useQuery({
     queryKey: ["exam", examId],
     // TODO: If page is "reloaded" once an exam has ended, this could error with "User has completed exam too recently to retake."
@@ -48,8 +42,66 @@ export function Exam() {
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  const {
+    isOpen: questionSubmissionErrorModalIsOpen,
+    onOpen: questionSubmissionErrorModalOnOpen,
+    onClose: questionSubmissionErrorModalOnClose,
+  } = useDisclosure();
   const submitQuestionMutation = useMutation({
-    mutationFn: submitQuestion,
+    mutationFn: async ({
+      fullQuestion,
+      selectedAnswers,
+    }: {
+      fullQuestion: FullQuestion;
+      selectedAnswers: Answers[number]["id"][];
+    }) => {
+      const updatedAttempt = produce(examAttempt, (draft) => {
+        if (!draft) return;
+        let qs = draft.questionSets.find(
+          (q) => q.id === fullQuestion.questionSet.id
+        );
+
+        if (!qs) {
+          draft.questionSets.push({
+            id: fullQuestion.questionSet.id,
+            questions: [{ id: fullQuestion.id, answers: selectedAnswers }],
+          });
+        } else {
+          const q = qs.questions.find((q) => q.id === fullQuestion.id);
+          if (q) q.answers = selectedAnswers;
+          else
+            qs.questions.push({
+              id: fullQuestion.id,
+              answers: selectedAnswers,
+            });
+        }
+      });
+
+      if (!updatedAttempt) throw new Error("Attempt not found");
+
+      await postExamAttempt(updatedAttempt);
+
+      return updatedAttempt;
+    },
+    onError(error) {
+      console.log(error);
+      questionSubmissionErrorModalOnOpen();
+    },
+    onSuccess(updatedAttempt) {
+      setExamAttempt(updatedAttempt);
+      setNewSelectedAnswers([]);
+
+      if (currentQuestionNumber < questions.length) {
+        const nextId = questions[currentQuestionNumber].id;
+        setActiveQuestionId(nextId);
+      }
+
+      if (questionSubmissionErrorModalIsOpen) {
+        questionSubmissionErrorModalOnClose();
+      }
+      // nextQuestion();
+    },
   });
 
   const [examAttempt, setExamAttempt] = useState<UserExamAttempt | null>(null);
@@ -57,8 +109,7 @@ export function Exam() {
     Answers[number]["id"][]
   >([]);
 
-  const [fullQuestion, setFullQuestion] = useState<FullQuestion | null>(null);
-  const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 
   const [maxTimeReached, setMaxTimeReached] = useState(false);
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
@@ -66,86 +117,22 @@ export function Exam() {
   const scrollableElementRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!examQuery.data) {
+    if (!examQuery.data || activeQuestionId) {
       return;
     }
-    const exam = examQuery.data.exam;
-    const examAttempt = examQuery.data.examAttempt;
-    logger.info("Exam started", { examId });
+    const attempt = examQuery.data.examAttempt;
+    setExamAttempt(attempt);
 
-    const fullQuestion = fullQuestionFromExamAttempt(exam, examAttempt);
-    setFullQuestion(fullQuestion);
-    setExamAttempt(examAttempt);
+    // Determine the starting question (last answered or first)
+    const lastQs = attempt.questionSets.at(-1);
+    const lastQ = lastQs?.questions.at(-1);
+
+    if (lastQ) {
+      setActiveQuestionId(lastQ.id);
+    } else {
+      setActiveQuestionId(examQuery.data.exam.questionSets[0].questions[0].id);
+    }
   }, [examQuery.data]);
-
-  function fullQuestionFromExamAttempt(
-    exam: UserExam,
-    examAttempt: UserExamAttempt
-  ): FullQuestion {
-    const questionSets = examAttempt.questionSets;
-
-    if (!questionSets.length) {
-      const questionSet = exam.questionSets.at(0);
-
-      if (!questionSet) {
-        throw captureAndNavigate(
-          `Unreachable. Exam ID: ${exam.examId}; No question sets found.`,
-          navigate
-        );
-      }
-
-      const question = questionSet.questions.at(0);
-
-      if (!question) {
-        throw captureAndNavigate(
-          `Unreachable. Exam ID: ${exam.examId}; No question found in question set.`,
-          navigate
-        );
-      }
-
-      return {
-        questionSet,
-        ...question,
-      };
-    }
-    const latestQuestionSet = questionSets.at(-1);
-
-    if (!latestQuestionSet) {
-      throw captureAndNavigate(
-        `Unreachable. Exam ID: ${exam.examId}; No question set found.`,
-        navigate
-      );
-    }
-
-    const questionSet = exam.questionSets.find(
-      (qs) => qs.id === latestQuestionSet.id
-    );
-    if (!questionSet) {
-      throw captureAndNavigate(
-        `Unreachable. Exam ID: ${exam.examId}; No question set found.`,
-        navigate
-      );
-    }
-
-    const latestQuestionSetQuestion = latestQuestionSet.questions.at(-1);
-
-    if (!latestQuestionSetQuestion) {
-      throw captureAndNavigate(
-        `Unreachable. Exam ID: ${exam.examId}; No question found in set.`,
-        navigate
-      );
-    }
-
-    const latestQuestion = questionSet.questions.find(
-      (q) => q.id === latestQuestionSetQuestion.id
-    )!;
-    const fullQuestion = {
-      questionSet,
-      ...latestQuestion,
-    };
-
-    return fullQuestion;
-  }
 
   async function onCloseRequested(event: CloseRequestedEvent) {
     const confirmed = await confirm(
@@ -166,17 +153,12 @@ export function Exam() {
     [examQuery.data?.exam]
   );
 
-  useEffect(() => {
-    const cqn = questions.findIndex((q) => q.id === fullQuestion?.id) + 1;
-    setCurrentQuestionNumber(cqn);
-  }, [fullQuestion]);
-
   function nextQuestion() {
-    if (!fullQuestion) {
+    const nextQ = questions[currentQuestionNumber];
+
+    if (!nextQ) {
       return;
     }
-
-    const nextQ = questions[currentQuestionNumber];
 
     const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
       qt.questions.some((q) => q.id === nextQ.id)
@@ -189,15 +171,16 @@ export function Exam() {
       ...nextQ,
       questionSet,
     };
-    setFullQuestion(next);
+
+    setActiveQuestionId(next.id);
   }
 
-  function specificQuestion(question_num: number) {
-    if (!fullQuestion) {
+  function specificQuestion(questionId: string) {
+    const specificQ = questions.find((q) => q.id === questionId);
+
+    if (!specificQ) {
       return;
     }
-
-    const specificQ = questions[question_num - 1];
 
     const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
       qt.questions.some((q) => q.id === specificQ.id)
@@ -211,15 +194,16 @@ export function Exam() {
       ...specificQ,
       questionSet,
     };
-    setFullQuestion(specific);
+    setActiveQuestionId(specific.id);
   }
 
   function previousQuestion() {
-    if (!fullQuestion) {
+    const prevQ = questions[currentQuestionNumber - 2];
+
+    if (!prevQ) {
       return;
     }
 
-    const prevQ = questions[currentQuestionNumber - 2];
     const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
       qt.questions.some((q) => q.id === prevQ.id)
     );
@@ -231,27 +215,7 @@ export function Exam() {
       ...prevQ,
       questionSet,
     };
-    setFullQuestion(prev);
-  }
-
-  function isAnswered(question_num: number) {
-    if (!fullQuestion || !examAttempt) {
-      return false;
-    }
-
-    const question = questions[question_num - 1];
-
-    const questionSet = examAttempt.questionSets.find((qt) =>
-      qt.questions.some((q) => q.id === question.id)
-    );
-
-    if (!questionSet) {
-      return false;
-    }
-
-    const q = questionSet.questions.find((q) => q.id === question.id);
-
-    return q !== undefined;
+    setActiveQuestionId(prev.id);
   }
 
   function answeredAll() {
@@ -272,55 +236,37 @@ export function Exam() {
     return true;
   }
 
-  async function submitQuestion({
-    fullQuestion,
-    selectedAnswers,
-  }: {
-    fullQuestion: FullQuestion;
-    selectedAnswers: Answers[number]["id"][];
-  }) {
-    if (!examAttempt) {
-      const error = new Error("Unreachable. Exam attempt should exist");
-      captureException(error);
-      throw error;
-    }
-
-    const questionSets = structuredClone(examAttempt.questionSets);
-
-    const qs = questionSets.find((q) => q.id === fullQuestion.questionSet.id);
-    if (qs) {
-      const q = qs.questions.find((q) => q.id === fullQuestion.id);
-      if (q) {
-        q.answers = selectedAnswers;
-      } else {
-        qs.questions.push({ id: fullQuestion.id, answers: selectedAnswers });
-      }
-    } else {
-      questionSets.push({
-        id: fullQuestion.questionSet.id,
-        questions: [{ id: fullQuestion.id, answers: selectedAnswers }],
-      });
-    }
-
-    const updatedExamAttempt = {
-      ...examAttempt,
-      questionSets,
-    };
-
-    // TODO: Use response to determine next action
-    await postExamAttempt(updatedExamAttempt);
-
-    if (currentQuestionNumber < questions.length) {
-      nextQuestion();
-    }
-
-    setExamAttempt(updatedExamAttempt);
-    setNewSelectedAnswers([]);
-  }
-
   function handleExamEnd() {
     setHasFinishedExam(true);
   }
+
+  const answeredQuestionIds = useMemo(() => {
+    if (!examAttempt) return new Set<string>();
+    return new Set(
+      examAttempt.questionSets.flatMap((qs) => qs.questions.map((q) => q.id))
+    );
+  }, [examAttempt]);
+
+  const isAnswered = useCallback(
+    (questionId: string) => {
+      return answeredQuestionIds.has(questionId);
+    },
+    [answeredQuestionIds]
+  );
+
+  const fullQuestion = useMemo(() => {
+    if (!activeQuestionId || !examQuery.data) return null;
+    const question = questions.find((q) => q.id === activeQuestionId);
+    const questionSet = examQuery.data.exam.questionSets.find((qs) =>
+      qs.questions.some((q) => q.id === activeQuestionId)
+    );
+    return question && questionSet ? { ...question, questionSet } : null;
+  }, [activeQuestionId, questions, examQuery.data]);
+
+  const currentQuestionNumber = useMemo(
+    () => questions.findIndex((q) => q.id === activeQuestionId) + 1,
+    [questions, activeQuestionId]
+  );
 
   if (examQuery.isPending) {
     return (
@@ -393,9 +339,13 @@ export function Exam() {
         setHasFinishedExam={setHasFinishedExam}
       />
       <QuestionSubmissionErrorModal
-        submitQuestionMutation={submitQuestionMutation}
-        fullQuestion={fullQuestion}
-        newSelectedAnswers={newSelectedAnswers}
+        {...{
+          submitQuestionMutation,
+          fullQuestion,
+          newSelectedAnswers,
+          questionSubmissionErrorModalIsOpen,
+          questionSubmissionErrorModalOnClose,
+        }}
       />
       <Box overflowY="hidden" as="main" id="main-content">
         <Box width={"full"} mt="2em">
@@ -473,19 +423,16 @@ export function Exam() {
             <Button
               width={"50%"}
               onClick={() => {
-                if (!newSelectedAnswers) {
-                  return;
+                if (fullQuestion && newSelectedAnswers.length > 0) {
+                  submitQuestionMutation.mutate({
+                    fullQuestion,
+                    selectedAnswers: newSelectedAnswers,
+                  });
                 }
-
-                submitQuestionMutation.mutate({
-                  fullQuestion,
-                  selectedAnswers: newSelectedAnswers,
-                });
               }}
               isDisabled={
-                !newSelectedAnswers.length ||
-                maxTimeReached ||
-                submitQuestionMutation.isPending
+                !newSelectedAnswers.length || maxTimeReached
+                // submitQuestionMutation.isPending
               }
               backgroundColor={
                 !allQuestionsAnswered ? "rgb(48, 48, 204)" : undefined
@@ -529,8 +476,8 @@ type TimerProps = {
 type NavigationBubblesProps = {
   questions: any[];
   currentQuestionNumber: number;
-  specificQuestion: (question_num: number) => void;
-  isAnswered: (question_num: number) => boolean;
+  specificQuestion: (id: string) => void;
+  isAnswered: (questionId: string) => boolean;
   nextQuestion: () => void;
   previousQuestion: () => void;
 };
@@ -694,35 +641,37 @@ function NavigationBubbles({
         }}
       />
 
-      {bubblesArr.map((question_num) => (
-        <Box
-          key={question_num}
-          onClick={() => {
-            specificQuestion(question_num);
-          }}
-          _hover={{
-            backgroundColor: "gray.200",
-            color: "black",
-          }}
-          className={`bottom-bubble-nav ${
-            currentQuestionNumber === question_num ? "bubble-active" : ""
-          } ${isAnswered(question_num) ? "bubble-answered" : ""}`}
-          role="button"
-          tabIndex={0}
-          aria-label={`Go to question ${question_num}${isAnswered(question_num) ? " (answered)" : ""}`}
-          aria-current={
-            currentQuestionNumber === question_num ? "page" : undefined
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              specificQuestion(question_num);
-            }
-          }}
-        >
-          <Text>{question_num.toString()}</Text>
-        </Box>
-      ))}
+      {bubblesArr.map((index) => {
+        const question = questions[index - 1];
+        const questionId = question.id;
+        return (
+          <Box
+            key={questionId}
+            onClick={() => {
+              specificQuestion(questionId);
+            }}
+            _hover={{
+              backgroundColor: "gray.200",
+              color: "black",
+            }}
+            className={`bottom-bubble-nav ${
+              currentQuestionNumber === index ? "bubble-active" : ""
+            } ${isAnswered(questionId) ? "bubble-answered" : ""}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`Go to question ${index}${isAnswered(questionId) ? " (answered)" : ""}`}
+            aria-current={currentQuestionNumber === index ? "page" : undefined}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                specificQuestion(questionId);
+              }
+            }}
+          >
+            <Text>{index.toString()}</Text>
+          </Box>
+        );
+      })}
       <IconButton
         aria-label="Go to next set of questions"
         icon={<ArrowRightIcon />}

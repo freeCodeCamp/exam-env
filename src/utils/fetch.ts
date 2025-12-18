@@ -12,7 +12,7 @@ import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
-import { ErrorResponse, isFCCError } from "./errors";
+import { ErrorResponse } from "./errors";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
@@ -102,12 +102,12 @@ export async function getGeneratedExam(examId: string) {
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
   if (VITE_MOCK_DATA) {
     await delayForTesting(800);
-    // const error = {
-    //   code: "EXAMPLE_ERROR",
-    //   message: "Example error when posting exam",
-    // };
-    // throw error;
-    return undefined as never;
+    const error = {
+      code: "EXAMPLE_ERROR",
+      message: "Example error when posting exam",
+    };
+    throw error;
+    // return undefined as never;
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -132,7 +132,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     throw res.error;
   }
 
-  return res;
+  return res.response;
 }
 
 export async function getExams() {
