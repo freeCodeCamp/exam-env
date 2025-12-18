@@ -1,11 +1,12 @@
 import { Box, Divider, Text } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { AudioPlayer } from "./audio-player";
 import { parseMarkdown } from "../utils/markdown";
 import { PrismFormatted } from "./prism-formatted";
+import { logger } from "@sentry/react";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
@@ -20,6 +21,17 @@ export function QuestionSetForm({
   setNewSelectedAnswers,
   examAttempt,
 }: QuestionTypeFormProps) {
+  const captionsRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    if (captionsRef.current?.open) {
+      logger.info("captions opened", {
+        exam: examAttempt.examId,
+        question: fullQuestion.id,
+      });
+    }
+  }, [captionsRef.current?.open]);
+
   useEffect(() => {
     setNewSelectedAnswers(
       fullQuestion.answers
@@ -50,7 +62,7 @@ export function QuestionSetForm({
           {/* NOTE: `fullQuestion` is passed to cause the whole component to rerender - correctly resetting the audio */}
           <AudioPlayer fullQuestion={fullQuestion} />
           {fullQuestion.audio.captions && (
-            <details style={{ cursor: "pointer" }}>
+            <details style={{ cursor: "pointer" }} ref={captionsRef}>
               <summary>Show captions</summary>
               <Box marginTop="1em">
                 <PrismFormatted
