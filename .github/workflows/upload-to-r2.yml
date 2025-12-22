@@ -24,12 +24,12 @@ jobs:
           # Get the tag_name using the release_id
           TAG_NAME=$(gh api repos/${{ github.repository }}/releases/${{ inputs.release_id }} --jq '.tag_name')
 
-          # Logic: Split on / and take the second part
-          # If tag is 'prod/v1.2.3', VERSION becomes 'v1.2.3'
-          VERSION=$(echo $TAG_NAME | cut -d'/' -f2-)
+          # Logic: Split on / and take the first part
+          # If tag is 'production/v1.2.3', ENVIRONMENT becomes 'production'
+          ENVIRONMENT=$(echo $TAG_NAME | cut -d'/' -f1-)
 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Processing version: $VERSION"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "Processing environment: $ENVIRONMENT"
 
       - name: download latest.json asset
         run: |
@@ -49,7 +49,7 @@ jobs:
           RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
         run: |
-          rclone copyto latest.json R2:${{ steps.meta.outputs.version }}/latest.json
+          rclone copyto latest.json R2:${{ steps.meta.outputs.environment }}/latest.json
 
 # TODO: Once binaries are stored on R2
 # jobs:

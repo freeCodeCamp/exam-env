@@ -194,7 +194,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
 
 fn get_r2_latest_json() -> Result<Url, Error> {
     let update_url = Url::parse(&format!(
-        "https://exam-environment-downloads.freecodecamp.org/{{{{current_version}}}}/latest.json"
+        "https://exam-environment-downloads.freecodecamp.org/{ENVIRONMENT}/latest.json"
     ))
     .map_err(|e| {
         Error::new(
@@ -209,8 +209,26 @@ fn get_r2_latest_json() -> Result<Url, Error> {
 }
 
 async fn get_update<R: Runtime>(app: AppHandle<R>) -> Result<Option<Update>, Error> {
-    let mut update_builder = app.updater_builder();
+    let r2_update_url = get_r2_latest_json()?;
 
+    if let Ok(Some(update)) = try_update_url(&app, r2_update_url).await {
+        return Ok(Some(update));
+    }
+
+    let gh_update_url = if let Some(url) = get_gh_latest_json().await? {
+        url
+    } else {
+        return Ok(None);
+    };
+
+    try_update_url(&app, gh_update_url).await
+}
+
+async fn try_update_url<R: Runtime>(
+    app: &AppHandle<R>,
+    update_url: Url,
+) -> Result<Option<Update>, Error> {
+    let mut update_builder = app.updater_builder();
     match tauri_plugin_updater::target() {
         Some(t) => {
             debug!("detected target: {t}");
@@ -220,16 +238,8 @@ async fn get_update<R: Runtime>(app: AppHandle<R>) -> Result<Option<Update>, Err
         }
         _ => {}
     }
-
-    let r2_update_url = get_r2_latest_json()?;
-    let gh_update_url = if let Some(url) = get_gh_latest_json().await? {
-        url
-    } else {
-        return Ok(None);
-    };
-
-    let update = update_builder
-        .endpoints(vec![r2_update_url, gh_update_url])
+    update_builder
+        .endpoints(vec![update_url])
         .map_err(|e| {
             Error::new(
                 ErrorKind::Request,
@@ -256,7 +266,5 @@ async fn get_update<R: Runtime>(app: AppHandle<R>) -> Result<Option<Update>, Err
                 "Unable to download latest update",
             )
         })
-        .capture()?;
-
-    Ok(update)
+        .capture()
 }
