@@ -10,22 +10,66 @@ on:
 
 jobs:
   push-to-r2:
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
 
     steps:
-      - name: download sync script
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: get release meta
+        id: meta
         run: |
-          mkdir bin
-          curl -sSL https://github.com/ShaunSHamilton/gh-release-to-r2/releases/latest/download/gh-release-to-r2 -o bin/gh-release-to-r2
-          chmod +x bin/gh-release-to-r2
-          echo "$PWD/bin" >> $GITHUB_PATH
-      - name: run sync bin
+          # Get the tag_name using the release_id
+          TAG_NAME=$(gh api repos/${{ github.repository }}/releases/${{ inputs.release_id }} --jq '.tag_name')
+
+          # Logic: Split on / and take the second part
+          # If tag is 'prod/v1.2.3', VERSION becomes 'v1.2.3'
+          VERSION=$(echo $TAG_NAME | cut -d'/' -f2-)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Processing version: $VERSION"
+
+      - name: download latest.json asset
+        run: |
+          gh release download ${{ inputs.release_id }} \
+            --repo ${{ github.repository }} \
+            --pattern 'latest.json'
+
+      - name: install rclone
+        run: sudo apt-get install -y rclone
+
+      - name: upload to r2
         env:
-          R2_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
-          RELEASE_ID: ${{ inputs.release_id }}
-        run: gh-release-to-r2
+          # Mapping secrets to rclone environment variables
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          rclone copyto latest.json R2:${{ steps.meta.outputs.version }}/latest.json
+
+# TODO: Once binaries are stored on R2
+# jobs:
+#   push-to-r2:
+#     permissions:
+#       contents: read
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: download sync script
+#         run: |
+#           mkdir bin
+#           curl -sSL https://github.com/ShaunSHamilton/gh-release-to-r2/releases/latest/download/gh-release-to-r2 -o bin/gh-release-to-r2
+#           chmod +x bin/gh-release-to-r2
+#           echo "$PWD/bin" >> $GITHUB_PATH
+#       - name: run sync bin
+#         env:
+#           R2_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+#           R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
+#           RELEASE_ID: ${{ inputs.release_id }}
+#         run: gh-release-to-r2
