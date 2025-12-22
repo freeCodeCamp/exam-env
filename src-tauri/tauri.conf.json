@@ -66,6 +66,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQwMkZBRkI4MUY5QzZBQzQKUldURWFwd2Z1Szh2UU81ZmVJenNsTXpSQURMbUFqaDF1Rm1WOG9XUEJxYUxxa1RLalRtVm5DVVkK",
       "endpoints": [
+        "https://exam-environment-downloads.freecodecamp.org/{{current_version}}/latest.json",
         "https://github.com/freeCodeCamp/exam-env/releases/latest/download/latest.json"
       ]
     }

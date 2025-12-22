@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
-use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_updater::{Update, UpdaterExt};
 use tracing::{debug, info};
 
 use crate::{
@@ -86,6 +86,39 @@ pub async fn check<R: Runtime>(
     app: AppHandle<R>,
     webview: WebviewWindow<R>,
 ) -> Result<Option<Metadata>, Error> {
+    let update = get_update(app).await?;
+
+    // https://github.com/tauri-apps/plugins-workspace/blob/d3d290ab8a8913981a98e2eb7f2c5d4aba3bc36c/plugins/updater/src/commands.rs#L74
+    if let Some(update) = update {
+        let formatted_date = if let Some(date) = update.date {
+            let formatted_date = date
+                .format(&time::format_description::well_known::Rfc3339)
+                .map_err(|e| {
+                    Error::new(
+                        ErrorKind::Serialization,
+                        format!("failed to format date: {:#?}", e),
+                        "Unable to download latest update",
+                    )
+                })?;
+            Some(formatted_date)
+        } else {
+            None
+        };
+        let metadata = Metadata {
+            current_version: update.current_version.clone(),
+            version: update.version.clone(),
+            date: formatted_date,
+            body: update.body.clone(),
+            raw_json: update.raw_json.clone(),
+            rid: webview.resources_table().add(update),
+        };
+        Ok(Some(metadata))
+    } else {
+        Ok(None)
+    }
+}
+
+async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
     let client = reqwest::Client::new();
     let response = client
         .get("https://api.github.com/repos/freeCodeCamp/exam-env/releases")
@@ -156,6 +189,26 @@ pub async fn check<R: Runtime>(
         })
         .capture()?;
 
+    Ok(Some(update_url))
+}
+
+fn get_r2_latest_json() -> Result<Url, Error> {
+    let update_url = Url::parse(&format!(
+        "https://exam-environment-downloads.freecodecamp.org/{{{{current_version}}}}/latest.json"
+    ))
+    .map_err(|e| {
+        Error::new(
+            ErrorKind::Serialization,
+            format!("failed to parse latest.json url: {:#?}", e),
+            "Unable to fetch release to check for updates",
+        )
+    })
+    .capture()?;
+
+    Ok(update_url)
+}
+
+async fn get_update<R: Runtime>(app: AppHandle<R>) -> Result<Option<Update>, Error> {
     let mut update_builder = app.updater_builder();
 
     match tauri_plugin_updater::target() {
@@ -168,15 +221,19 @@ pub async fn check<R: Runtime>(
         _ => {}
     }
 
+    let r2_update_url = get_r2_latest_json()?;
+    let gh_update_url = if let Some(url) = get_gh_latest_json().await? {
+        url
+    } else {
+        return Ok(None);
+    };
+
     let update = update_builder
-        .endpoints(vec![update_url.clone()])
+        .endpoints(vec![r2_update_url, gh_update_url])
         .map_err(|e| {
             Error::new(
                 ErrorKind::Request,
-                format!(
-                    "failed to create updater builder with endpoint '{update_url:?}': {:#?}",
-                    e
-                ),
+                format!("failed to create updater builder: {:#?}", e),
                 "Unable to download latest update",
             )
         })
@@ -201,32 +258,5 @@ pub async fn check<R: Runtime>(
         })
         .capture()?;
 
-    // https://github.com/tauri-apps/plugins-workspace/blob/d3d290ab8a8913981a98e2eb7f2c5d4aba3bc36c/plugins/updater/src/commands.rs#L74
-    if let Some(update) = update {
-        let formatted_date = if let Some(date) = update.date {
-            let formatted_date = date
-                .format(&time::format_description::well_known::Rfc3339)
-                .map_err(|e| {
-                    Error::new(
-                        ErrorKind::Serialization,
-                        format!("failed to format date: {:#?}", e),
-                        "Unable to download latest update",
-                    )
-                })?;
-            Some(formatted_date)
-        } else {
-            None
-        };
-        let metadata = Metadata {
-            current_version: update.current_version.clone(),
-            version: update.version.clone(),
-            date: formatted_date,
-            body: update.body.clone(),
-            raw_json: update.raw_json.clone(),
-            rid: webview.resources_table().add(update),
-        };
-        Ok(Some(metadata))
-    } else {
-        Ok(None)
-    }
+    Ok(update)
 }
