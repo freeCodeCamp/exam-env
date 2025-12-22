@@ -332,30 +332,10 @@ jobs:
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
 
-  # push-to-r2:
-  #   permissions:
-  #     contents: read
-  #   runs-on: ubuntu-latest
-  #   needs: [create-release, build-tauri]
-
-  #   steps:
-  #     - name: download sync script
-  #       run: |
-  #         mkdir bin
-  #         curl -sSL https://github.com/ShaunSHamilton/gh-release-to-r2/releases/latest/download/x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
-  #         echo "$PWD/bin" >> $GITHUB_PATH
-  #     - name: run sync bin
-  #       env:
-  #         R2_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-  #         R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
-  #         RELEASE_ID: ${{ needs.create-release.outputs.release_id }}
-  #       run: gh-release-to-r2
-
   publish-release:
     permissions:
       contents: write
+      actions: write
     runs-on: ubuntu-latest
     needs: [create-release, build-tauri]
 
@@ -376,3 +356,20 @@ jobs:
               draft: false,
               prerelease: process.env.prerelease == "true"
             })
+
+      - name: trigger r2 upload
+        uses: actions/github-script@v8
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'upload-to-r2.yml',
+              inputs: {
+                release_id: process.env.release_id,
+              }
+            })
+
+            console.log(`Successfully triggered publish workflow for production environment`)

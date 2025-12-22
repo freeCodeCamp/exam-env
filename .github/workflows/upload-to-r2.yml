@@ -1,0 +1,30 @@
+name: upload to r2
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: "Release ID"
+        type: number
+        required: true
+
+jobs:
+  push-to-r2:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: download sync script
+        run: |
+          mkdir bin
+          curl -sSL https://github.com/ShaunSHamilton/gh-release-to-r2/releases/latest/download/x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+          echo "$PWD/bin" >> $GITHUB_PATH
+      - name: run sync bin
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: gh-release-to-r2
