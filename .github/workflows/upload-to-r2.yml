@@ -19,6 +19,7 @@ jobs:
         run: |
           mkdir bin
           curl -sSL https://github.com/ShaunSHamilton/gh-release-to-r2/releases/latest/download/gh-release-to-r2 -o bin/gh-release-to-r2
+          chmod +x bin/gh-release-to-r2
           echo "$PWD/bin" >> $GITHUB_PATH
       - name: run sync bin
         env:
