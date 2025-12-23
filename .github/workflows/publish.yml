@@ -346,7 +346,6 @@ jobs:
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
           prerelease: ${{ inputs.environment != 'production' }}
-          REF: ${{ github.ref }}
         with:
           script: |
             github.rest.repos.updateRelease({
@@ -367,6 +366,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'upload-to-r2.yml',
+              ref: ${{ github.ref }},
               inputs: {
                 release_id: process.env.release_id,
               }
