@@ -58,13 +58,14 @@ jobs:
         uses: actions/github-script@v8
         env:
           RELEASE_TYPE: ${{ steps.version.outputs.release_type }}
+          REF: ${{ github.event.pull_request.head.ref }}
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'publish.yml',
-              ref: ${{ github.ref }},
+              ref: process.env.REF,
               inputs: {
                 environment: 'production',
                 release_type: process.env.RELEASE_TYPE

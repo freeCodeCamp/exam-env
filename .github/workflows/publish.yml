@@ -348,7 +348,7 @@ jobs:
           prerelease: ${{ inputs.environment != 'production' }}
         with:
           script: |
-            github.rest.repos.updateRelease({
+            await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
@@ -360,13 +360,14 @@ jobs:
         uses: actions/github-script@v8
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
+          REF: ${{ github.event.pull_request.head.ref }}
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'upload-to-r2.yml',
-              ref: ${{ github.ref }},
+              ref: process.env.REF,
               inputs: {
                 release_id: process.env.release_id,
               }
