@@ -1,6 +1,6 @@
 [package]
 name = "exam-env"
-version = "1.5.0"
+version = "1.6.0"
 description = "Exam environment for freeCodeCamp"
 authors = ["freeCodeCamp"]
 edition = "2021"
