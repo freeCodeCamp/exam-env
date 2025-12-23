@@ -20,16 +20,18 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const release = await github.rest.repos.getRelease({
+            const res = await github.rest.repos.getRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: ${{ inputs.release_id }}
             });
 
-            if (!release) {
+            if (!res || res.status !== 200) {
               console.error("no release found by id:", ${{inputs.release_id}});
               return process.exit(1);
             }
+
+            const release = res.data;
 
             console.log("found release: ", release);
 
