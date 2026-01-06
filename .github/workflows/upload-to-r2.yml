@@ -11,7 +11,7 @@ on:
 jobs:
   push-to-r2:
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
