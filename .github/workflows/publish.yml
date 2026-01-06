@@ -108,6 +108,7 @@ jobs:
               draft: true,
               prerelease: process.env.ENVIRONMENT != "production"
             })
+            console.log("Created release with id:", data.id);
             return data.id
 
   build-tauri:
