@@ -340,22 +340,6 @@ jobs:
     needs: [create-release, build-tauri]
 
     steps:
-      - name: publish release
-        id: publish-release
-        uses: actions/github-script@v8
-        env:
-          release_id: ${{ needs.create-release.outputs.release_id }}
-          prerelease: ${{ inputs.environment != 'production' }}
-        with:
-          script: |
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: process.env.release_id,
-              draft: false,
-              prerelease: process.env.prerelease == "true"
-            })
-
       - name: trigger r2 upload
         uses: actions/github-script@v8
         env:

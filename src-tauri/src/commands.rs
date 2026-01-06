@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::{Update, UpdaterExt};
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 
 use crate::{
     error::{Error, ErrorKind, PassToSentry},
@@ -208,20 +208,23 @@ fn get_r2_latest_json() -> Result<Url, Error> {
     Ok(update_url)
 }
 
+/// Default to R2 update url. If that fails, fallback to GitHub Releases url
 async fn get_update<R: Runtime>(app: AppHandle<R>) -> Result<Option<Update>, Error> {
     let r2_update_url = get_r2_latest_json()?;
 
-    if let Ok(Some(update)) = try_update_url(&app, r2_update_url).await {
-        return Ok(Some(update));
+    match try_update_url(&app, r2_update_url).await {
+        Ok(update) => Ok(update),
+        Err(e) => {
+            error!(error = ?e, "error checking update from r2");
+            let gh_update_url = if let Some(url) = get_gh_latest_json().await? {
+                url
+            } else {
+                return Ok(None);
+            };
+
+            try_update_url(&app, gh_update_url).await
+        }
     }
-
-    let gh_update_url = if let Some(url) = get_gh_latest_json().await? {
-        url
-    } else {
-        return Ok(None);
-    };
-
-    try_update_url(&app, gh_update_url).await
 }
 
 async fn try_update_url<R: Runtime>(
@@ -229,15 +232,14 @@ async fn try_update_url<R: Runtime>(
     update_url: Url,
 ) -> Result<Option<Update>, Error> {
     let mut update_builder = app.updater_builder();
-    match tauri_plugin_updater::target() {
-        Some(t) => {
-            debug!("detected target: {t}");
-            if t == "windows-aarch64" {
-                update_builder = update_builder.target("windows-x86_64");
-            }
+
+    if let Some(t) = tauri_plugin_updater::target() {
+        debug!("detected target: {t}");
+        if t == "windows-aarch64" {
+            update_builder = update_builder.target("windows-x86_64");
         }
-        _ => {}
     }
+
     update_builder
         .endpoints(vec![update_url])
         .map_err(|e| {

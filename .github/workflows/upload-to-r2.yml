@@ -61,3 +61,17 @@ jobs:
           R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
           RELEASE_ID: ${{ inputs.release_id }}
         run: gh-release-to-r2 --dest ${{ steps.meta.outputs.environment }} --pattern "latest\.json$"
+
+      - name: publish release
+        id: publish-release
+        uses: actions/github-script@v8
+        env:
+          release_id: ${{ inputs.release_id }}
+        with:
+          script: |
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: false,
+            })
