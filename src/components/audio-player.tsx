@@ -64,6 +64,7 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
         fragmentRef.current = { start, end, duration: validDuration };
 
         setDuration(validDuration);
+        setIsPlaying(false);
         setProgress(0);
         pausedAtRef.current = 0;
       } catch (e) {
@@ -83,11 +84,13 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
         audioCtxRef.current.close();
         audioCtxRef.current = null;
       }
+      startTimeRef.current = 0;
+      pausedAtRef.current = 0;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [fullQuestion.audio]);
+  }, [fullQuestion]);
 
   const stopAudio = () => {
     if (sourceRef.current) {
