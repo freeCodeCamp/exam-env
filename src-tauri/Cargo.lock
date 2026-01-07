@@ -1399,7 +1399,7 @@ dependencies = [
 
 [[package]]
 name = "exam-env"
-version = "1.7.1"
+version = "1.7.2"
 dependencies = [
  "dotenvy_macro",
  "keyring",
