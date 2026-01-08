@@ -32,6 +32,8 @@ import { getErrorMessage } from "../utils/errors";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
 import { produce } from "immer";
+import { useAppFocus } from "../components/use-app-focus";
+import { captureEvent, createEvent, EventKind } from "../utils/superbase";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
@@ -267,6 +269,24 @@ export function Exam() {
     () => questions.findIndex((q) => q.id === activeQuestionId) + 1,
     [questions, activeQuestionId]
   );
+
+  const onFocusChanged = useCallback(
+    (focused: boolean) => {
+      if (!examAttempt || !fullQuestion) return;
+
+      const eventKind = focused ? EventKind.FOCUS : EventKind.BLUR;
+
+      captureEvent(
+        createEvent(eventKind, {
+          attempt: examAttempt.id,
+          question: fullQuestion.id,
+        })
+      );
+    },
+    [examAttempt, fullQuestion]
+  );
+
+  useAppFocus({ onFocusChanged });
 
   if (examQuery.isPending) {
     return (
