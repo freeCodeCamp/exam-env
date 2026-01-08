@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import prism from "vite-plugin-prismjs";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
@@ -9,6 +10,10 @@ export default defineConfig(async ({ mode }) => {
   assertEnvVars(env);
 
   return {
+    build: {
+      sourcemap: true,
+    },
+
     envDir: "./",
     plugins: [
       react(),
@@ -17,6 +22,11 @@ export default defineConfig(async ({ mode }) => {
         plugins: ["line-numbers"],
         theme: "default",
         css: true,
+      }),
+      sentryVitePlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: "freecodecamp",
+        project: "exam-env",
       }),
     ],
 

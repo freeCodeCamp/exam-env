@@ -28,3 +28,5 @@ dist-ssr
 .env
 
 embedded.provisionprofile
+# Sentry Config File
+.env.sentry-build-plugin
