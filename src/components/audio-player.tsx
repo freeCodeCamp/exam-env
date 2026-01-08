@@ -69,7 +69,10 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
         pausedAtRef.current = 0;
       } catch (e) {
         if (e instanceof Error) {
-          logger.warn(e.message);
+          logger.warn(e.message, {
+            questionSetId: fullQuestion.questionSet.id,
+            questionId: fullQuestion.id,
+          });
         }
       } finally {
         setIsLoading(false);
