@@ -48,6 +48,8 @@ export default defineConfig(async ({ mode }) => {
       __SENTRY_DSN__: JSON.stringify(env.SENTRY_DSN),
       __FREECODECAMP_API__: JSON.stringify(env.FREECODECAMP_API),
       __ENVIRONMENT__: JSON.stringify(env.ENVIRONMENT),
+      __SUPABASE_URL__: JSON.stringify(env.SUPABASE_URL),
+      __SUPABASE_PUBLISHABLE__: JSON.stringify(env.SUPABASE_PUBLISHABLE),
     },
   };
 });
@@ -87,6 +89,16 @@ function assertEnvVars(env: ReturnType<typeof loadEnv>) {
     if (!env.SENTRY_DSN) {
       throw new Error(
         `ENVIRONMENT=${env.ENVIRONMENT}; SENTRY_DSN must be set.`
+      );
+    }
+    if (!env.SUPABASE_URL) {
+      throw new Error(
+        `SUPABASE_URL=${env.SUPABASE_URL}; SUPABASE_URL must be set.`
+      );
+    }
+    if (!env.SUPABASE_PUBLISHABLE) {
+      throw new Error(
+        `SUPABASE_PUBLISHABLE=${env.SUPABASE_PUBLISHABLE}; SUPABASE_PUBLISHABLE must be set.`
       );
     }
 
