@@ -9,7 +9,7 @@ export const supabase = createClient(
       // @ts-expect-error Unknown error
       fetch: fetch.bind(globalThis),
     },
-  }
+  },
 );
 
 export const EventKind = {
@@ -26,6 +26,8 @@ interface Event {
   kind: keyof typeof EventKind;
   // timestamp: Date;
   meta: Meta | null;
+  // ObjectId
+  attempt_id: string;
 }
 
 export async function captureEvent(event: Event) {
@@ -37,7 +39,7 @@ export async function captureEvent(event: Event) {
       res.data,
       res.error,
       res.status,
-      res.statusText
+      res.statusText,
     );
   } catch (e) {
     console.log(e);
@@ -46,7 +48,8 @@ export async function captureEvent(event: Event) {
 
 export function createEvent(
   kind: Event["kind"],
-  meta: Event["meta"] = null
+  attempt_id: Event["attempt_id"],
+  meta: Event["meta"] = null,
 ): Event {
-  return { kind, meta };
+  return { kind, meta, attempt_id };
 }

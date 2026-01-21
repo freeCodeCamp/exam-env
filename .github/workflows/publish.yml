@@ -323,6 +323,8 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           FREECODECAMP_API: ${{ env.FREECODECAMP_API }}
           ENVIRONMENT: ${{inputs.environment}}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE: ${{ secrets.SUPABASE_PUBLISHABLE }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}

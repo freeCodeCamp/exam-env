@@ -277,8 +277,7 @@ export function Exam() {
       const eventKind = focused ? EventKind.FOCUS : EventKind.BLUR;
 
       captureEvent(
-        createEvent(eventKind, {
-          attempt: examAttempt.id,
+        createEvent(eventKind, examAttempt.id, {
           question: fullQuestion.id,
         })
       );

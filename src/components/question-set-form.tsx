@@ -26,8 +26,7 @@ export function QuestionSetForm({
   function captionsToggled(e: SyntheticEvent<HTMLDetailsElement, Event>) {
     if (e.currentTarget.open) {
       captureEvent(
-        createEvent(EventKind.CAPTIONS_OPENED, {
-          attempt: examAttempt.id,
+        createEvent(EventKind.CAPTIONS_OPENED, examAttempt.id, {
           question: fullQuestion.id,
         })
       );
@@ -47,8 +46,7 @@ export function QuestionSetForm({
 
     if (lastTrackedId.current !== fullQuestion.id) {
       captureEvent(
-        createEvent(EventKind.QUESTION_VISIT, {
-          attempt: examAttempt.id,
+        createEvent(EventKind.QUESTION_VISIT, examAttempt.id, {
           question: fullQuestion.id,
         })
       );
