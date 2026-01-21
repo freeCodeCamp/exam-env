@@ -1,12 +1,12 @@
 import { Box, Divider, Text } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
-import { useEffect, useRef } from "react";
+import { SyntheticEvent, useEffect, useRef } from "react";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { AudioPlayer } from "./audio-player";
 import { parseMarkdown } from "../utils/markdown";
 import { PrismFormatted } from "./prism-formatted";
-import { logger } from "@sentry/react";
+import { captureEvent, createEvent, EventKind } from "../utils/superbase";
 
 type QuestionTypeFormProps = {
   fullQuestion: FullQuestion;
@@ -21,16 +21,17 @@ export function QuestionSetForm({
   setNewSelectedAnswers,
   examAttempt,
 }: QuestionTypeFormProps) {
-  const captionsRef = useRef<HTMLDetailsElement>(null);
+  const lastTrackedId = useRef<string | null>(null);
 
-  useEffect(() => {
-    if (captionsRef.current?.open) {
-      logger.info("captions opened", {
-        exam: examAttempt.examId,
-        question: fullQuestion.id,
-      });
+  function captionsToggled(e: SyntheticEvent<HTMLDetailsElement, Event>) {
+    if (e.currentTarget.open) {
+      captureEvent(
+        createEvent(EventKind.CAPTIONS_OPENED, examAttempt.id, {
+          question: fullQuestion.id,
+        })
+      );
     }
-  }, [captionsRef.current?.open]);
+  }
 
   useEffect(() => {
     setNewSelectedAnswers(
@@ -42,6 +43,15 @@ export function QuestionSetForm({
         )
         .map((a) => a.id)
     );
+
+    if (lastTrackedId.current !== fullQuestion.id) {
+      captureEvent(
+        createEvent(EventKind.QUESTION_VISIT, examAttempt.id, {
+          question: fullQuestion.id,
+        })
+      );
+      lastTrackedId.current = fullQuestion.id;
+    }
   }, [fullQuestion]);
 
   return (
@@ -56,13 +66,13 @@ export function QuestionSetForm({
           <Divider />
         </>
       )}
-      {fullQuestion.audio && (
+      {!!fullQuestion.audio?.url && (
         <Box mb={"2em"} mt={"2em"}>
           <Text>Please listen to the following audio fragment:</Text>
           {/* NOTE: `fullQuestion` is passed to cause the whole component to rerender - correctly resetting the audio */}
           <AudioPlayer fullQuestion={fullQuestion} />
           {fullQuestion.audio.captions && (
-            <details style={{ cursor: "pointer" }} ref={captionsRef}>
+            <details style={{ cursor: "pointer" }} onToggle={captionsToggled}>
               <summary>Show captions</summary>
               <Box marginTop="1em">
                 <PrismFormatted
