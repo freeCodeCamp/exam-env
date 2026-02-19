@@ -191,7 +191,7 @@ function examTimeVerbose(seconds: number) {
 
 function getExamStatus(
   exam: ExamCardProps["exam"],
-  attempts: Attempts
+  attempts: Attempts,
 ): ExamStatus {
   const latestAttempt = getLatestAttempt(attempts);
   const examStatus: ExamStatus = { status: "Available" };
@@ -211,7 +211,7 @@ function getExamStatus(
   const startTime = new Date(latestAttempt.startTime);
   const retakeAvailableAt = new Date(
     startTime.getTime() +
-      (exam.config.totalTimeInS + exam.config.retakeTimeInS) * 1000
+      (exam.config.totalTimeInS + exam.config.retakeTimeInS) * 1000,
   );
   const now = new Date();
 
@@ -229,6 +229,7 @@ function getExamStatus(
         alertStatus: "info",
       };
     case "Expired":
+    case "Denied":
     case "Approved":
       if (now >= retakeAvailableAt) {
         if (!exam.canTake && exam.prerequisites.length > 0) {

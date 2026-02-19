@@ -95,7 +95,7 @@ export async function getGeneratedExam(examId: string) {
   }
 
   return deserializeDates<{ exam: UserExam; examAttempt: UserExamAttempt }>(
-    res.data
+    res.data,
   );
 }
 
@@ -222,7 +222,7 @@ export async function checkForUpdate() {
       }
       download(
         _onEvent?: (progress: DownloadEvent) => void,
-        _options?: DownloadOptions
+        _options?: DownloadOptions,
       ): Promise<void> {
         return new Promise((res) => res());
       }
@@ -231,7 +231,7 @@ export async function checkForUpdate() {
       }
       async downloadAndInstall(
         onEvent?: (progress: DownloadEvent) => void,
-        _options?: DownloadOptions
+        _options?: DownloadOptions,
       ): Promise<void> {
         if (onEvent) {
           onEvent({
@@ -275,7 +275,7 @@ export async function checkForUpdate() {
   if (metadata) {
     const update = new Update(metadata);
     console.debug(
-      `Found update ${update.version} from ${update.date} with notes ${update.body}`
+      `Found update ${update.version} from ${update.date} with notes ${update.body}`,
     );
     return update;
   }
@@ -292,7 +292,7 @@ function debugResponse(res: FetchResponse<any, any, any>) {
     res.response.url,
     res.data,
     res.error,
-    res.response.statusText
+    res.response.statusText,
   );
 }
 
@@ -305,7 +305,7 @@ interface StandardError {
 function captureError(res: ErrorResponse<StandardError>) {
   if (res.error.code && res.error.message) {
     const se = new Error(
-      `${res.error.code}: ${res.error.message}; ${res.response.statusText}`
+      `${res.error.code}: ${res.error.message}; ${res.response.statusText}`,
     );
     captureException(se);
   } else {
