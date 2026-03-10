@@ -87,10 +87,9 @@ fn main() {
             //       However, deep links are only registered during runtime for development.
             // println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
             // If app is already open, focus window when deep link is triggered
-            let _ = app
-                .get_webview_window("main")
-                .expect("no main window")
-                .set_focus();
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+            }
             // let callback_url = argv.get(1)
             //     .expect("no callback URL")
             //     .to_string();
