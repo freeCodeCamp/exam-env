@@ -45,7 +45,7 @@ jobs:
         with:
           script: |
             // Version of current production release
-            const { version } = require('./src-tauri/tauri.conf.json')
+            const { version } = require('./backend/tauri.conf.json')
             const [major, minor, patch] = version.split('.').map(Number)
 
             let newVersion
@@ -87,7 +87,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const { version } = require('./src-tauri/tauri.conf.json')
+            const { version } = require('./backend/tauri.conf.json')
             core.setOutput('version', version)
 
       - name: create release
@@ -132,7 +132,7 @@ jobs:
             bundles: "appimage,updater"
           # Disabled, until needed
           # - platform: "windows-latest"
-          #   config: "src-tauri/tauri.microsoftstore.conf.json"
+          #   config: "backend/tauri.microsoftstore.conf.json"
           #   bundles: "msi"
           - platform: "windows-latest"
             bundles: "nsis"
@@ -156,17 +156,17 @@ jobs:
             const newVersion = process.env.NEW_VERSION
             // update tauri.conf.json with new RC version
             const fs = require('fs')
-            const tauriConf = require('./src-tauri/tauri.conf.json')
+            const tauriConf = require('./backend/tauri.conf.json')
             tauriConf.version = newVersion
-            fs.writeFileSync('./src-tauri/tauri.conf.json', JSON.stringify(tauriConf, null, 2) + '\n')
+            fs.writeFileSync('./backend/tauri.conf.json', JSON.stringify(tauriConf, null, 2) + '\n')
             // update package.json version
             const packageJson = require('./package.json')
             packageJson.version = newVersion
             fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
             // update Cargo.toml version
-            const cargoToml = fs.readFileSync('./src-tauri/Cargo.toml', 'utf8')
+            const cargoToml = fs.readFileSync('./backend/Cargo.toml', 'utf8')
             const updatedCargoToml = cargoToml.replace(/^version = ".*"/m, `version = "${newVersion}"`)
-            fs.writeFileSync('./src-tauri/Cargo.toml', updatedCargoToml)
+            fs.writeFileSync('./backend/Cargo.toml', updatedCargoToml)
 
       - name: setup node
         uses: actions/setup-node@v6
@@ -193,7 +193,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const { version } = require('./src-tauri/tauri.conf.json')
+            const { version } = require('./backend/tauri.conf.json')
             core.setOutput('version', version)
 
       - name: install Rust stable
@@ -261,7 +261,7 @@ jobs:
           CERT_BASE_PATH=/Users/runner/Library/MobileDevice/Certificates
           mkdir -p $CERT_BASE_PATH
           DEVELOPER_ID_CERT_PATH=$CERT_BASE_PATH/developer_id_certificate.p12
-          PP_PATH=./src-tauri/embedded.provisionprofile
+          PP_PATH=./backend/embedded.provisionprofile
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           APPLE_API_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY_ID.p8
 

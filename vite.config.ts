@@ -10,6 +10,7 @@ export default defineConfig(async ({ mode }) => {
   assertEnvVars(env);
 
   return {
+    srcDir: "frontend",
     build: {
       sourcemap: true,
     },
@@ -39,8 +40,8 @@ export default defineConfig(async ({ mode }) => {
       port: 1420,
       strictPort: true,
       watch: {
-        // 3. tell vite to ignore watching `src-tauri`
-        ignored: ["**/src-tauri/**"],
+        // 3. tell vite to ignore watching `backend`
+        ignored: ["**/backend/**"],
       },
     },
     define: {
@@ -63,8 +64,8 @@ function assertEnvVars(env: ReturnType<typeof loadEnv>) {
   if (!allowedEnvironments.includes(env.ENVIRONMENT)) {
     throw new Error(
       `ENVIRONMENT env var must be one of [${allowedEnvironments.join(
-        ","
-      )}], found ${env.ENVIRONMENT}.`
+        ",",
+      )}], found ${env.ENVIRONMENT}.`,
     );
   }
 
@@ -80,7 +81,7 @@ function assertEnvVars(env: ReturnType<typeof loadEnv>) {
           env.VITE_MOCK_DATA
         }; FREECODECAMP_API must be one of [${allowedAPIs.join(",")}], found ${
           env.FREECODECAMP_API
-        }`
+        }`,
       );
     }
   }
@@ -88,23 +89,23 @@ function assertEnvVars(env: ReturnType<typeof loadEnv>) {
   if (env.ENVIRONMENT !== "development") {
     if (!env.SENTRY_DSN) {
       throw new Error(
-        `ENVIRONMENT=${env.ENVIRONMENT}; SENTRY_DSN must be set.`
+        `ENVIRONMENT=${env.ENVIRONMENT}; SENTRY_DSN must be set.`,
       );
     }
     if (!env.SUPABASE_URL) {
       throw new Error(
-        `SUPABASE_URL=${env.SUPABASE_URL}; SUPABASE_URL must be set.`
+        `SUPABASE_URL=${env.SUPABASE_URL}; SUPABASE_URL must be set.`,
       );
     }
     if (!env.SUPABASE_PUBLISHABLE) {
       throw new Error(
-        `SUPABASE_PUBLISHABLE=${env.SUPABASE_PUBLISHABLE}; SUPABASE_PUBLISHABLE must be set.`
+        `SUPABASE_PUBLISHABLE=${env.SUPABASE_PUBLISHABLE}; SUPABASE_PUBLISHABLE must be set.`,
       );
     }
 
     if (env.VITE_MOCK_DATA === "true") {
       throw new Error(
-        `ENVIRONMENT=${env.ENVIRONMENT}; VITE_MOCK_DATA may not be ${env.VITE_MOCK_DATA}.`
+        `ENVIRONMENT=${env.ENVIRONMENT}; VITE_MOCK_DATA may not be ${env.VITE_MOCK_DATA}.`,
       );
     }
   }
