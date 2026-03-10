@@ -46,7 +46,7 @@ jobs:
           mkdir -p $CERT_BASE_PATH
           DISTRIBUTION_CERT_PATH=$CERT_BASE_PATH/distribution_certificate.p12
           MAC_INSTALLER_DISTRIBUTION_CERT_PATH=$CERT_BASE_PATH/mac_installer_distribution_certificate.p12
-          PP_PATH=./src-tauri/embedded.provisionprofile
+          PP_PATH=./backend/embedded.provisionprofile
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           APPLE_API_KEY_PATH=./private_keys/AuthKey_$APPLE_API_KEY_ID.p8
 
@@ -88,7 +88,7 @@ jobs:
 
       - name: generate installer package
         run: |
-          xcrun productbuild --sign "3rd Party Mac Developer Installer: Free Code Camp, Inc. (L33K9LWVP9)" --component "./src-tauri/target/universal-apple-darwin/release/bundle/macos/Exam Environment.app" /Applications "Exam Environment.pkg"
+          xcrun productbuild --sign "3rd Party Mac Developer Installer: Free Code Camp, Inc. (L33K9LWVP9)" --component "./backend/target/universal-apple-darwin/release/bundle/macos/Exam Environment.app" /Applications "Exam Environment.pkg"
 
       - name: upload installer package
         env:

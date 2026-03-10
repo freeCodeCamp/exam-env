@@ -21,7 +21,7 @@ bun run prisma generate
 ```
 
 ```bash
-cargo tauri dev --config src-tauri/tauri.dev.conf.json
+cargo tauri dev --config backend/tauri.dev.conf.json
 ```
 
 ## Pull Request
@@ -35,7 +35,7 @@ Ensure your commit messages and PR titles follow the following convention:
 Where:
 
 - **type**: The type of change - `feat`, `fix`, `chore`, `breaking`, `dev`
-- **scope**: Optional scope of the change (e.g. `client`, `src-tauri`, `prisma`, `.github`)
+- **scope**: Optional scope of the change (e.g. `client`, `backend`, `prisma`, `.github`)
 - **description**: A brief description of the change
 
 ## Build
@@ -59,7 +59,7 @@ cargo tauri signer generate -w ./.tauri/exam-env.key
 ### Local
 
 ```bash
-cargo tauri build --config src-tauri/tauri.dev.conf.json
+cargo tauri build --config backend/tauri.dev.conf.json
 # OR, build a debug build
 cargo tauri build --debug
 ```
@@ -69,7 +69,7 @@ The `tauri.conf.dev.json` config does not sign the bundle, and does not create u
 ### Windows
 
 ```bash
-.\scripts\WindowsEnv.ps1 -Command "cargo tauri build --config src-tauri/tauri.microsoftstore.conf.json --bundles msi,updater --target x86_64-pc-windows-msvc"
+.\scripts\WindowsEnv.ps1 -Command "cargo tauri build --config backend/tauri.microsoftstore.conf.json --bundles msi,updater --target x86_64-pc-windows-msvc"
 ```
 
 ## Deployment Workflow
@@ -85,7 +85,7 @@ Manually triggered workflow to create a version bump PR:
    - **Release Type**: `patch`, `minor`, or `major`
 3. The workflow will:
    - Calculate the new version based on the release type
-   - Update `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`
+   - Update `package.json`, `backend/Cargo.toml`, and `backend/tauri.conf.json`
    - Create a PR with title: `release(X.X.X): <RELEASE_TYPE>`
    - Add label: `release_type: <RELEASE_TYPE>`
 
@@ -105,7 +105,7 @@ Builds and publishes the application:
 
 1. Triggered automatically by auto-release or manually via Actions
 2. Builds the application for all platforms
-3. Creates a GitHub release with the version from `src-tauri/tauri.conf.json`
+3. Creates a GitHub release with the version from `backend/tauri.conf.json`
 4. Uploads build artifacts and updater files
 
 ### Quick Release Process
