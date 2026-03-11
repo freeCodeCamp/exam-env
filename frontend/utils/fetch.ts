@@ -36,6 +36,7 @@ export async function verifyToken(token: string) {
     }
   }
 
+  console.debug("in verify");
   const res = await client.GET("/exam-environment/token-meta", {
     params: {
       header: {
@@ -43,6 +44,7 @@ export async function verifyToken(token: string) {
       },
     },
   });
+  console.debug("done");
 
   debugResponse(res);
 
@@ -52,6 +54,10 @@ export async function verifyToken(token: string) {
       captureError(res);
     }
     throw res.error;
+  }
+
+  if (res.response.status >= 400) {
+    throw new Error(res.response.statusText);
   }
 
   return res.data;

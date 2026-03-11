@@ -32,7 +32,7 @@ jobs:
           RELEASE_TYPE: ${{ inputs.release_type }}
         with:
           script: |
-            const { version } = require('./backend/tauri.conf.json')
+            const { version } = require('./package.json')
             const [major, minor, patch] = version.split('.').map(Number)
 
             let newVersion
@@ -64,17 +64,6 @@ jobs:
           sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new_version }}"/' backend/Cargo.toml
           cd backend
           cargo update -p exam-env
-
-      - name: update tauri.conf.json
-        uses: actions/github-script@v8
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new_version }}
-        with:
-          script: |
-            const fs = require('fs')
-            const tauriConf = JSON.parse(fs.readFileSync('./backend/tauri.conf.json', 'utf8'))
-            tauriConf.version = process.env.NEW_VERSION
-            fs.writeFileSync('./backend/tauri.conf.json', JSON.stringify(tauriConf, null, 2) + '\n')
 
       - name: generate changelog since last release
         id: changelog

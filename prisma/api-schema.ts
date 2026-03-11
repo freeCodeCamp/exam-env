@@ -62,7 +62,7 @@ export interface paths {
                         "application/json": {
                             /** @enum {string} */
                             type: "error";
-                            message: "You have to complete the project before you can submit a URL." | "That does not appear to be a valid challenge submission.";
+                            message: "You have to complete the project before you can submit a URL." | "That does not appear to be a valid challenge submission." | "Exam submissions are not allowed on this endpoint.";
                         } | {
                             /** @enum {string} */
                             message: "flash.generic-error";
@@ -142,6 +142,20 @@ export interface paths {
                             type: "error";
                             /** @enum {string} */
                             message: "That does not appear to be a valid challenge submission.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Exam submissions are not allowed on this endpoint.";
                         };
                     };
                 };
@@ -239,6 +253,20 @@ export interface paths {
                     };
                 };
                 /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Exam submissions are not allowed on this endpoint.";
+                        };
+                    };
+                };
+                /** @description Default Response */
                 default: {
                     headers: {
                         [name: string]: unknown;
@@ -332,6 +360,20 @@ export interface paths {
                     };
                 };
                 /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Exam submissions are not allowed on this endpoint.";
+                        };
+                    };
+                };
+                /** @description Default Response */
                 default: {
                     headers: {
                         [name: string]: unknown;
@@ -408,6 +450,20 @@ export interface paths {
                             type: "error";
                             /** @enum {string} */
                             message: "That does not appear to be a valid challenge submission.";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "error";
+                            /** @enum {string} */
+                            message: "Exam submissions are not allowed on this endpoint.";
                         };
                     };
                 };
@@ -985,7 +1041,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     "application/json": Record<string, never>;
                 };
@@ -1041,7 +1097,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     "application/json": Record<string, never>;
                 };
@@ -1255,6 +1311,7 @@ export interface paths {
                                 is2018DataVisCert: boolean;
                                 isApisMicroservicesCert: boolean;
                                 isInfosecQaCert: boolean;
+                                isPythonCertV9: boolean;
                                 isQaCertV7: boolean;
                                 isInfosecCertV7: boolean;
                                 isFrontEndCert: boolean;
@@ -1265,8 +1322,17 @@ export interface paths {
                                 isDataAnalysisPyCertV7: boolean;
                                 isMachineLearningPyCertV7: boolean;
                                 isRelationalDatabaseCertV8: boolean;
+                                isRelationalDatabaseCertV9: boolean;
                                 isCollegeAlgebraPyCertV8: boolean;
                                 isFoundationalCSharpCertV8: boolean;
+                                isJsAlgoDataStructCertV8: boolean;
+                                isA1ChineseCert: boolean;
+                                isA2ChineseCert: boolean;
+                                isA2SpanishCert: boolean;
+                                isB1EnglishCert: boolean;
+                                isBackEndDevApisCertV9: boolean;
+                                isFullStackDeveloperCertV9: boolean;
+                                isFrontEndLibsCertV9: boolean;
                             };
                             completedChallenges: {
                                 id: string;
@@ -1311,6 +1377,7 @@ export interface paths {
                                 is2018DataVisCert: boolean;
                                 isApisMicroservicesCert: boolean;
                                 isInfosecQaCert: boolean;
+                                isPythonCertV9: boolean;
                                 isQaCertV7: boolean;
                                 isInfosecCertV7: boolean;
                                 isFrontEndCert: boolean;
@@ -1321,8 +1388,17 @@ export interface paths {
                                 isDataAnalysisPyCertV7: boolean;
                                 isMachineLearningPyCertV7: boolean;
                                 isRelationalDatabaseCertV8: boolean;
+                                isRelationalDatabaseCertV9: boolean;
                                 isCollegeAlgebraPyCertV8: boolean;
                                 isFoundationalCSharpCertV8: boolean;
+                                isJsAlgoDataStructCertV8: boolean;
+                                isA1ChineseCert: boolean;
+                                isA2ChineseCert: boolean;
+                                isA2SpanishCert: boolean;
+                                isB1EnglishCert: boolean;
+                                isBackEndDevApisCertV9: boolean;
+                                isFullStackDeveloperCertV9: boolean;
+                                isFrontEndLibsCertV9: boolean;
                             };
                             completedChallenges: {
                                 id: string;
@@ -1364,6 +1440,7 @@ export interface paths {
                                 is2018DataVisCert: boolean;
                                 isApisMicroservicesCert: boolean;
                                 isInfosecQaCert: boolean;
+                                isPythonCertV9: boolean;
                                 isQaCertV7: boolean;
                                 isInfosecCertV7: boolean;
                                 isFrontEndCert: boolean;
@@ -1374,8 +1451,17 @@ export interface paths {
                                 isDataAnalysisPyCertV7: boolean;
                                 isMachineLearningPyCertV7: boolean;
                                 isRelationalDatabaseCertV8: boolean;
+                                isRelationalDatabaseCertV9: boolean;
                                 isCollegeAlgebraPyCertV8: boolean;
                                 isFoundationalCSharpCertV8: boolean;
+                                isJsAlgoDataStructCertV8: boolean;
+                                isA1ChineseCert: boolean;
+                                isA2ChineseCert: boolean;
+                                isA2SpanishCert: boolean;
+                                isB1EnglishCert: boolean;
+                                isBackEndDevApisCertV9: boolean;
+                                isFullStackDeveloperCertV9: boolean;
+                                isFrontEndLibsCertV9: boolean;
                             };
                             completedChallenges: {
                                 id: string;
@@ -1466,6 +1552,7 @@ export interface paths {
                             showPoints: boolean;
                             showPortfolio: boolean;
                             showTimeLine: boolean;
+                            showExperience: boolean;
                         };
                     };
                 };
@@ -1849,7 +1936,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     "application/json": {
                         about?: string;
@@ -1871,6 +1958,20 @@ export interface paths {
                             message: "flash.updated-about-me";
                             /** @enum {string} */
                             type: "success";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.wrong-updating";
+                            /** @enum {string} */
+                            type: "danger";
                         };
                     };
                 };
@@ -2274,6 +2375,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/update-my-experience": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        experience: {
+                            id: string;
+                            title: string;
+                            company: string;
+                            location?: string;
+                            startDate: string;
+                            endDate?: string;
+                            description: string;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.experience-updated";
+                            /** @enum {string} */
+                            type: "success";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.wrong-updating";
+                            /** @enum {string} */
+                            type: "danger";
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.wrong-updating";
+                            /** @enum {string} */
+                            type: "danger";
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/update-my-classroom-mode": {
         parameters: {
             query?: never;
@@ -2605,6 +2788,20 @@ export interface paths {
                             variables: {
                                 email: string;
                             };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            type: "danger";
+                            /** @enum {string} */
+                            message: "flash.report-error";
                         };
                     };
                 };
@@ -3217,202 +3414,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user/get-session-user": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            user: {
-                                [key: string]: {
-                                    about: string;
-                                    acceptedPrivacyTerms: boolean;
-                                    calendar: {
-                                        [key: string]: 1;
-                                    };
-                                    completedChallenges: {
-                                        id: string;
-                                        completedDate: number;
-                                        solution?: string;
-                                        githubLink?: string;
-                                        challengeType?: number;
-                                        files: {
-                                            contents: string;
-                                            key: string;
-                                            ext: string;
-                                            name: string;
-                                            path?: string;
-                                        }[];
-                                        isManuallyApproved?: boolean;
-                                        examResults?: {
-                                            numberOfCorrectAnswers: number;
-                                            numberOfQuestionsInExam: number;
-                                            percentCorrect: number;
-                                            passingPercent: number;
-                                            passed: boolean;
-                                            examTimeInSeconds: number;
-                                        };
-                                    }[];
-                                    completedExams: {
-                                        id: string;
-                                        completedDate: number;
-                                        challengeType?: number;
-                                        examResults: {
-                                            numberOfCorrectAnswers: number;
-                                            numberOfQuestionsInExam: number;
-                                            percentCorrect: number;
-                                            passingPercent: number;
-                                            passed: boolean;
-                                            examTimeInSeconds: number;
-                                        };
-                                    }[];
-                                    quizAttempts: {
-                                        challengeId: string;
-                                        quizId: string;
-                                        timestamp: number;
-                                    }[];
-                                    completedChallengeCount: number;
-                                    completedDailyCodingChallenges: {
-                                        id: string;
-                                        completedDate: number;
-                                        languages: ("javascript" | "python")[];
-                                    }[];
-                                    currentChallengeId: string;
-                                    email: string;
-                                    emailVerified: boolean;
-                                    githubProfile?: string;
-                                    id: string;
-                                    is2018DataVisCert: boolean;
-                                    is2018FullStackCert: boolean;
-                                    isA2EnglishCert: boolean;
-                                    isApisMicroservicesCert: boolean;
-                                    isBackEndCert: boolean;
-                                    isCheater: boolean;
-                                    isCollegeAlgebraPyCertV8: boolean;
-                                    isDataAnalysisPyCertV7: boolean;
-                                    isDataVisCert: boolean;
-                                    isDonating: boolean;
-                                    isFoundationalCSharpCertV8: boolean;
-                                    isFrontEndCert: boolean;
-                                    isFrontEndLibsCert: boolean;
-                                    isFullStackCert: boolean;
-                                    isJavascriptCertV9: boolean;
-                                    isHonest: boolean;
-                                    isInfosecCertV7: boolean;
-                                    isInfosecQaCert: boolean;
-                                    isJsAlgoDataStructCert: boolean;
-                                    isJsAlgoDataStructCertV8: boolean;
-                                    isMachineLearningPyCertV7: boolean;
-                                    isQaCertV7: boolean;
-                                    isRelationalDatabaseCertV8: boolean;
-                                    isRespWebDesignCert: boolean;
-                                    isRespWebDesignCertV9: boolean;
-                                    isSciCompPyCertV7: boolean;
-                                    keyboardShortcuts: boolean;
-                                    linkedin?: string;
-                                    location: string;
-                                    name: string;
-                                    partiallyCompletedChallenges: {
-                                        id: string;
-                                        completedDate: number;
-                                    }[];
-                                    picture: string;
-                                    points: number;
-                                    portfolio: {
-                                        description: string;
-                                        id: string;
-                                        image: string;
-                                        title: string;
-                                        url: string;
-                                    }[];
-                                    profileUI?: {
-                                        isLocked?: boolean;
-                                        showAbout?: boolean;
-                                        showCerts?: boolean;
-                                        showDonation?: boolean;
-                                        showHeatMap?: boolean;
-                                        showLocation?: boolean;
-                                        showName?: boolean;
-                                        showPoints?: boolean;
-                                        showPortfolio?: boolean;
-                                        showTimeLine?: boolean;
-                                    };
-                                    sendQuincyEmail: null | boolean;
-                                    theme: string;
-                                    twitter?: string;
-                                    bluesky?: string;
-                                    website?: string;
-                                    yearsTopContributor: string[];
-                                    isEmailVerified: boolean;
-                                    joinDate: string;
-                                    savedChallenges?: {
-                                        id: string;
-                                        files: {
-                                            contents: string;
-                                            key: string;
-                                            ext: string;
-                                            name: string;
-                                            history: string[];
-                                        }[];
-                                        lastSavedDate: number;
-                                    }[];
-                                    username: string;
-                                    usernameDisplay: string;
-                                    userToken?: string;
-                                    completedSurveys: {
-                                        title: string;
-                                        responses: {
-                                            question: string;
-                                            response: string;
-                                        }[];
-                                    }[];
-                                    msUsername?: string;
-                                };
-                            };
-                            result: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            user: Record<string, never>;
-                            /** @enum {string} */
-                            result: "";
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/confirm-email": {
         parameters: {
             query?: never;
@@ -3516,6 +3517,221 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/get-session-user": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            user: {
+                                [key: string]: {
+                                    about: string;
+                                    acceptedPrivacyTerms: boolean;
+                                    calendar: {
+                                        [key: string]: 1;
+                                    };
+                                    completedChallenges: {
+                                        id: string;
+                                        completedDate: number;
+                                        solution?: string;
+                                        githubLink?: string;
+                                        challengeType?: number;
+                                        files: {
+                                            contents: string;
+                                            key: string;
+                                            ext: string;
+                                            name: string;
+                                            path?: string;
+                                        }[];
+                                        isManuallyApproved?: boolean;
+                                        examResults?: {
+                                            numberOfCorrectAnswers: number;
+                                            numberOfQuestionsInExam: number;
+                                            percentCorrect: number;
+                                            passingPercent: number;
+                                            passed: boolean;
+                                            examTimeInSeconds: number;
+                                        };
+                                    }[];
+                                    completedExams: {
+                                        id: string;
+                                        completedDate: number;
+                                        challengeType?: number;
+                                        examResults: {
+                                            numberOfCorrectAnswers: number;
+                                            numberOfQuestionsInExam: number;
+                                            percentCorrect: number;
+                                            passingPercent: number;
+                                            passed: boolean;
+                                            examTimeInSeconds: number;
+                                        };
+                                    }[];
+                                    quizAttempts: {
+                                        challengeId: string;
+                                        quizId: string;
+                                        timestamp: number;
+                                    }[];
+                                    completedChallengeCount: number;
+                                    completedDailyCodingChallenges: {
+                                        id: string;
+                                        completedDate: number;
+                                        languages: ("javascript" | "python")[];
+                                    }[];
+                                    currentChallengeId: string;
+                                    email: string;
+                                    emailVerified: boolean;
+                                    githubProfile?: string;
+                                    id: string;
+                                    is2018DataVisCert: boolean;
+                                    is2018FullStackCert: boolean;
+                                    isA2EnglishCert: boolean;
+                                    isApisMicroservicesCert: boolean;
+                                    isBackEndCert: boolean;
+                                    isCheater: boolean;
+                                    isCollegeAlgebraPyCertV8: boolean;
+                                    isDataAnalysisPyCertV7: boolean;
+                                    isDataVisCert: boolean;
+                                    isDonating: boolean;
+                                    isFoundationalCSharpCertV8: boolean;
+                                    isFrontEndCert: boolean;
+                                    isFrontEndLibsCert: boolean;
+                                    isFullStackCert: boolean;
+                                    isJavascriptCertV9: boolean;
+                                    isHonest: boolean;
+                                    isInfosecCertV7: boolean;
+                                    isInfosecQaCert: boolean;
+                                    isJsAlgoDataStructCert: boolean;
+                                    isJsAlgoDataStructCertV8: boolean;
+                                    isMachineLearningPyCertV7: boolean;
+                                    isPythonCertV9: boolean;
+                                    isQaCertV7: boolean;
+                                    isRelationalDatabaseCertV8: boolean;
+                                    isRelationalDatabaseCertV9: boolean;
+                                    isRespWebDesignCert: boolean;
+                                    isRespWebDesignCertV9: boolean;
+                                    isSciCompPyCertV7: boolean;
+                                    isFrontEndLibsCertV9: boolean;
+                                    isBackEndDevApisCertV9: boolean;
+                                    isFullStackDeveloperCertV9: boolean;
+                                    isB1EnglishCert: boolean;
+                                    isA2SpanishCert: boolean;
+                                    isA2ChineseCert: boolean;
+                                    isA1ChineseCert: boolean;
+                                    keyboardShortcuts: boolean;
+                                    linkedin?: string;
+                                    location: string;
+                                    name: string;
+                                    partiallyCompletedChallenges: {
+                                        id: string;
+                                        completedDate: number;
+                                    }[];
+                                    picture: string;
+                                    points: number;
+                                    portfolio: {
+                                        description: string;
+                                        id: string;
+                                        image: string;
+                                        title: string;
+                                        url: string;
+                                    }[];
+                                    experience?: {
+                                        id: string;
+                                        title: string;
+                                        company: string;
+                                        location?: string;
+                                        startDate: string;
+                                        endDate?: string;
+                                        description: string;
+                                    }[];
+                                    profileUI: {
+                                        isLocked: boolean;
+                                        showAbout: boolean;
+                                        showCerts: boolean;
+                                        showDonation: boolean;
+                                        showHeatMap: boolean;
+                                        showLocation: boolean;
+                                        showName: boolean;
+                                        showPoints: boolean;
+                                        showPortfolio: boolean;
+                                        showTimeLine: boolean;
+                                        showExperience: boolean;
+                                    };
+                                    sendQuincyEmail: null | boolean;
+                                    theme: string;
+                                    twitter?: string;
+                                    bluesky?: string;
+                                    website?: string;
+                                    yearsTopContributor: string[];
+                                    isEmailVerified: boolean;
+                                    joinDate: string;
+                                    savedChallenges?: {
+                                        id: string;
+                                        files: {
+                                            contents: string;
+                                            key: string;
+                                            ext: string;
+                                            name: string;
+                                            history: string[];
+                                        }[];
+                                        lastSavedDate: number;
+                                    }[];
+                                    username: string;
+                                    usernameDisplay: string;
+                                    userToken?: string;
+                                    completedSurveys: {
+                                        title: string;
+                                        responses: {
+                                            question: string;
+                                            response: string;
+                                        }[];
+                                    }[];
+                                    msUsername?: string;
+                                };
+                            };
+                            result: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            user: Record<string, never>;
+                            /** @enum {string} */
+                            result: "";
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4260,7 +4476,23 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": Record<string, never>;
+                    };
+                };
+                /** @description Default Response */
+                default: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            message: "flash.generic-error";
+                            /** @enum {string} */
+                            type: "danger";
+                        };
+                    };
                 };
             };
         };
@@ -4372,16 +4604,17 @@ export interface paths {
                                     [key: string]: {
                                         isLocked: boolean;
                                         profileUI: {
-                                            isLocked?: boolean;
-                                            showAbout?: boolean;
-                                            showCerts?: boolean;
-                                            showDonation?: boolean;
-                                            showHeatMap?: boolean;
-                                            showLocation?: boolean;
-                                            showName?: boolean;
-                                            showPoints?: boolean;
-                                            showPortfolio?: boolean;
-                                            showTimeLine?: boolean;
+                                            isLocked: boolean;
+                                            showAbout: boolean;
+                                            showCerts: boolean;
+                                            showDonation: boolean;
+                                            showHeatMap: boolean;
+                                            showLocation: boolean;
+                                            showName: boolean;
+                                            showPoints: boolean;
+                                            showPortfolio: boolean;
+                                            showTimeLine: boolean;
+                                            showExperience: boolean;
                                         };
                                         username: string;
                                     } | {
@@ -4425,10 +4658,20 @@ export interface paths {
                                                 examTimeInSeconds: number;
                                             };
                                         }[];
+                                        experience: {
+                                            id: string;
+                                            title: string;
+                                            company: string;
+                                            location?: string;
+                                            startDate: string;
+                                            endDate?: string;
+                                            description: string;
+                                        }[];
                                         githubProfile?: string;
                                         is2018DataVisCert: boolean;
                                         is2018FullStackCert: boolean;
                                         isA2EnglishCert: boolean;
+                                        isB1EnglishCert: boolean;
                                         isApisMicroservicesCert: boolean;
                                         isBackEndCert: boolean;
                                         isCheater: boolean;
@@ -4447,8 +4690,10 @@ export interface paths {
                                         isJsAlgoDataStructCert: boolean;
                                         isJsAlgoDataStructCertV8: boolean;
                                         isMachineLearningPyCertV7: boolean;
+                                        isPythonCertV9: boolean;
                                         isQaCertV7: boolean;
                                         isRelationalDatabaseCertV8: boolean;
+                                        isRelationalDatabaseCertV9: boolean;
                                         isRespWebDesignCert: boolean;
                                         isRespWebDesignCertV9: boolean;
                                         isSciCompPyCertV7: boolean;
@@ -4465,16 +4710,17 @@ export interface paths {
                                             url: string;
                                         }[];
                                         profileUI: {
-                                            isLocked?: boolean;
-                                            showAbout?: boolean;
-                                            showCerts?: boolean;
-                                            showDonation?: boolean;
-                                            showHeatMap?: boolean;
-                                            showLocation?: boolean;
-                                            showName?: boolean;
-                                            showPoints?: boolean;
-                                            showPortfolio?: boolean;
-                                            showTimeLine?: boolean;
+                                            isLocked: boolean;
+                                            showAbout: boolean;
+                                            showCerts: boolean;
+                                            showDonation: boolean;
+                                            showHeatMap: boolean;
+                                            showLocation: boolean;
+                                            showName: boolean;
+                                            showPoints: boolean;
+                                            showPortfolio: boolean;
+                                            showTimeLine: boolean;
+                                            showExperience: boolean;
                                         };
                                         twitter?: string;
                                         bluesky?: string;
@@ -4667,7 +4913,7 @@ export interface paths {
                             }[];
                         } | {
                             /** @enum {unknown} */
-                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "responsive-web-design-v9" | "javascript-v9" | "front-end-development-libraries-v9" | "python-v9" | "relational-databases-v9" | "back-end-development-and-apis-v9" | "full-stack-developer-v9" | "a2-english-for-developers-v8" | "b1-english-for-developers-v8" | "a2-professional-spanish-v8" | "a2-professional-chinese-v8" | "a1-professional-chinese-v8" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
+                            certSlug: "responsive-web-design" | "javascript-algorithms-and-data-structures-v8" | "front-end-development-libraries" | "data-visualization" | "relational-database-v8" | "back-end-development-and-apis" | "quality-assurance-v7" | "scientific-computing-with-python-v7" | "data-analysis-with-python-v7" | "information-security-v7" | "machine-learning-with-python-v7" | "college-algebra-with-python-v8" | "foundational-c-sharp-with-microsoft" | "python-v9" | "relational-databases-v9" | "responsive-web-design-v9" | "javascript-v9" | "front-end-development-libraries-v9" | "back-end-development-and-apis-v9" | "a2-english-for-developers" | "full-stack-developer-v9" | "b1-english-for-developers" | "a2-professional-spanish" | "a2-professional-chinese" | "a1-professional-chinese" | "legacy-front-end" | "javascript-algorithms-and-data-structures" | "legacy-back-end" | "legacy-data-visualization" | "information-security-and-quality-assurance" | "full-stack";
                             certTitle: string;
                             username: string;
                             name?: string;

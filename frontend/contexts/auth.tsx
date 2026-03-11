@@ -17,12 +17,6 @@ export const AuthContext = createContext<{
 } | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const checkTokenMutation = useMutation({
-    mutationFn: async (token: string) => {
-      await verifyToken(token);
-    },
-    retry: false,
-  });
   // Query to read token from the platform key storage (IPC)
   const token = useQuery({
     queryKey: ["authorizationToken"],
@@ -31,12 +25,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const token = await invoke<null | string>("get_authorization_token");
       console.debug("Fetched authorization token:", token);
       if (token) {
-        await checkTokenMutation.mutateAsync(token);
+        console.debug("verifying token");
+        await verifyToken(token);
+        console.debug("token verified");
         setUser({ id: token });
       }
       return token ?? null;
     },
-    staleTime: Infinity,
+    // staleTime: Infinity,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -82,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       login,
       logout,
     }),
-    [token]
+    [token],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

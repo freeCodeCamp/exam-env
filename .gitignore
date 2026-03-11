@@ -30,3 +30,7 @@ dist-ssr
 embedded.provisionprofile
 # Sentry Config File
 .env.sentry-build-plugin
+.claude
+
+target/
+backend/gen/schemas

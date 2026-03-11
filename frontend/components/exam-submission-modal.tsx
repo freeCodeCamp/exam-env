@@ -61,10 +61,12 @@ export function ExamSubmissionModal({
             </Button>{" "}
             profile.
           </Text>
-          <Text>
-            You will still be able to make changes to this exam, whilst you have
-            time left.
-          </Text>
+          {!maxTimeReached && (
+            <Text>
+              You will still be able to make changes to this exam, whilst you
+              have time left.
+            </Text>
+          )}
         </ModalBody>
         <ModalFooter justifyContent={"center"}>
           <Button onClick={onClose}>Close Exam</Button>

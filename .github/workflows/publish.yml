@@ -45,7 +45,7 @@ jobs:
         with:
           script: |
             // Version of current production release
-            const { version } = require('./backend/tauri.conf.json')
+            const { version } = require('./package.json')
             const [major, minor, patch] = version.split('.').map(Number)
 
             let newVersion
@@ -87,7 +87,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const { version } = require('./backend/tauri.conf.json')
+            const { version } = require('./package.json')
             core.setOutput('version', version)
 
       - name: create release
@@ -156,9 +156,6 @@ jobs:
             const newVersion = process.env.NEW_VERSION
             // update tauri.conf.json with new RC version
             const fs = require('fs')
-            const tauriConf = require('./backend/tauri.conf.json')
-            tauriConf.version = newVersion
-            fs.writeFileSync('./backend/tauri.conf.json', JSON.stringify(tauriConf, null, 2) + '\n')
             // update package.json version
             const packageJson = require('./package.json')
             packageJson.version = newVersion
@@ -193,7 +190,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const { version } = require('./backend/tauri.conf.json')
+            const { version } = require('./package.json')
             core.setOutput('version', version)
 
       - name: install Rust stable

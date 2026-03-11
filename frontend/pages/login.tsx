@@ -29,6 +29,7 @@ export function Login() {
   const [accountToken, setAccountToken] = useState(token.data || "");
 
   useEffect(() => {
+    console.log(token);
     if (token.data) {
       navigate({ to: LandingRoute.to });
     }
@@ -125,8 +126,8 @@ export function Login() {
                       openPage(
                         new URL(
                           "/settings#exam-environment-authorization-token",
-                          LEARN_BASE
-                        ).href
+                          LEARN_BASE,
+                        ).href,
                       )
                     }
                     variant="link"

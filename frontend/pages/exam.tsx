@@ -61,7 +61,7 @@ export function Exam() {
       const updatedAttempt = produce(examAttempt, (draft) => {
         if (!draft) return;
         let qs = draft.questionSets.find(
-          (q) => q.id === fullQuestion.questionSet.id
+          (q) => q.id === fullQuestion.questionSet.id,
         );
 
         if (!qs) {
@@ -88,7 +88,16 @@ export function Exam() {
     },
     onError(error) {
       console.log(error);
-      questionSubmissionErrorModalOnOpen();
+      if (
+        "code" in error &&
+        error.code === "FCC_EINVAL_EXAM_ENVIRONMENT_EXAM_ATTEMPT" &&
+        error.message === "Attempt has exceeded submission time."
+      ) {
+        setMaxTimeReached(true);
+        setHasFinishedExam(true);
+      } else {
+        questionSubmissionErrorModalOnOpen();
+      }
     },
     onSuccess(updatedAttempt) {
       setExamAttempt(updatedAttempt);
@@ -138,7 +147,7 @@ export function Exam() {
 
   async function onCloseRequested(event: CloseRequestedEvent) {
     const confirmed = await confirm(
-      "Are you sure you want to exit?\n\nYou will not be able to immediately retake the exam."
+      "Are you sure you want to exit?\n\nYou will not be able to immediately retake the exam.",
     );
     if (!confirmed) {
       event.preventDefault();
@@ -152,7 +161,7 @@ export function Exam() {
   const questions = useMemo(
     () =>
       examQuery.data?.exam?.questionSets?.flatMap((qt) => qt.questions) || [],
-    [examQuery.data?.exam]
+    [examQuery.data?.exam],
   );
 
   function nextQuestion() {
@@ -163,7 +172,7 @@ export function Exam() {
     }
 
     const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
-      qt.questions.some((q) => q.id === nextQ.id)
+      qt.questions.some((q) => q.id === nextQ.id),
     );
     if (!questionSet) {
       return;
@@ -185,7 +194,7 @@ export function Exam() {
     }
 
     const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
-      qt.questions.some((q) => q.id === specificQ.id)
+      qt.questions.some((q) => q.id === specificQ.id),
     );
 
     if (!questionSet) {
@@ -207,7 +216,7 @@ export function Exam() {
     }
 
     const questionSet = examQuery.data?.exam.questionSets.find((qt) =>
-      qt.questions.some((q) => q.id === prevQ.id)
+      qt.questions.some((q) => q.id === prevQ.id),
     );
     if (!questionSet) {
       return;
@@ -245,7 +254,7 @@ export function Exam() {
   const answeredQuestionIds = useMemo(() => {
     if (!examAttempt) return new Set<string>();
     return new Set(
-      examAttempt.questionSets.flatMap((qs) => qs.questions.map((q) => q.id))
+      examAttempt.questionSets.flatMap((qs) => qs.questions.map((q) => q.id)),
     );
   }, [examAttempt]);
 
@@ -253,21 +262,21 @@ export function Exam() {
     (questionId: string) => {
       return answeredQuestionIds.has(questionId);
     },
-    [answeredQuestionIds]
+    [answeredQuestionIds],
   );
 
   const fullQuestion = useMemo(() => {
     if (!activeQuestionId || !examQuery.data) return null;
     const question = questions.find((q) => q.id === activeQuestionId);
     const questionSet = examQuery.data.exam.questionSets.find((qs) =>
-      qs.questions.some((q) => q.id === activeQuestionId)
+      qs.questions.some((q) => q.id === activeQuestionId),
     );
     return question && questionSet ? { ...question, questionSet } : null;
   }, [activeQuestionId, questions, examQuery.data]);
 
   const currentQuestionNumber = useMemo(
     () => questions.findIndex((q) => q.id === activeQuestionId) + 1,
-    [questions, activeQuestionId]
+    [questions, activeQuestionId],
   );
 
   const onFocusChanged = useCallback(
@@ -279,10 +288,10 @@ export function Exam() {
       captureEvent(
         createEvent(eventKind, examAttempt.id, {
           question: fullQuestion.id,
-        })
+        }),
       );
     },
-    [examAttempt, fullQuestion]
+    [examAttempt, fullQuestion],
   );
 
   useAppFocus({ onFocusChanged });
@@ -340,9 +349,11 @@ export function Exam() {
   const startTimeInMS = examAttempt.startTime.getTime();
   const totalTimeInMS =
     (examQuery.data?.exam?.config?.totalTimeInS ?? 0) * 1000;
-  const secondsLeft = Math.floor(
-    (startTimeInMS + totalTimeInMS - Date.now()) / 1000
+  const rawSecondsLeft = Math.floor(
+    (startTimeInMS + totalTimeInMS - Date.now()) / 1000,
   );
+  const clockError = rawSecondsLeft < 0;
+  const secondsLeft = Math.max(rawSecondsLeft, 0);
 
   const scrollBarWidth =
     (scrollableElementRef.current?.offsetWidth ?? 0) -
@@ -374,11 +385,7 @@ export function Exam() {
                 <Text
                   fontWeight={"bold"}
                 >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
-                <Timer
-                  secondsLeft={secondsLeft}
-                  setHasFinishedExam={setHasFinishedExam}
-                  setMaxTimeReached={setMaxTimeReached}
-                />
+                <Timer secondsLeft={secondsLeft} clockError={clockError} />
               </Flex>
             </Center>
             <Box
@@ -449,10 +456,7 @@ export function Exam() {
                   });
                 }
               }}
-              isDisabled={
-                !newSelectedAnswers.length || maxTimeReached
-                // submitQuestionMutation.isPending
-              }
+              isDisabled={!newSelectedAnswers.length}
               backgroundColor={
                 !allQuestionsAnswered ? "rgb(48, 48, 204)" : undefined
               }
@@ -488,8 +492,7 @@ export function Exam() {
 
 type TimerProps = {
   secondsLeft: number;
-  setHasFinishedExam: (b: boolean) => void;
-  setMaxTimeReached: (b: boolean) => void;
+  clockError: boolean;
 };
 
 type NavigationBubblesProps = {
@@ -501,11 +504,7 @@ type NavigationBubblesProps = {
   previousQuestion: () => void;
 };
 
-function Timer({
-  secondsLeft,
-  setHasFinishedExam,
-  setMaxTimeReached,
-}: TimerProps) {
+function Timer({ secondsLeft, clockError }: TimerProps) {
   const [announcement, setAnnouncement] = useState("");
   const [availableTime, setAvailableTime] = useState(secondsLeft);
   const startTimeRef = useRef<Date | null>(null);
@@ -518,14 +517,9 @@ function Timer({
       let timeLeft = 0;
       if (startTimeRef.current) {
         const elapsed = Math.floor(
-          (new Date().getTime() - startTimeRef.current.getTime()) / 1000
+          (new Date().getTime() - startTimeRef.current.getTime()) / 1000,
         );
         timeLeft = Math.max(secondsLeft - elapsed, 0);
-
-        if (timeLeft === 0) {
-          setHasFinishedExam(true);
-          setMaxTimeReached(true);
-        }
 
         setAvailableTime(timeLeft);
       }
@@ -557,7 +551,7 @@ function Timer({
         setTimeout(() => setAnnouncement(""), 100);
       }
     },
-    [availableTime]
+    [availableTime],
   );
 
   useEffect(() => {
@@ -586,9 +580,25 @@ function Timer({
       >
         {announcement}
       </Text>
-      <Text fontWeight={"bold"} aria-live="off" aria-atomic="true">
-        Time: {secondsToHHMMSS(availableTime)}
-      </Text>
+      {clockError ? (
+        <Text
+          fontWeight={"bold"}
+          color="orange.500"
+          aria-live="off"
+          aria-atomic="true"
+        >
+          ⚠ Clock sync error
+        </Text>
+      ) : (
+        <Text
+          fontWeight={"bold"}
+          color={availableTime === 0 ? "red.500" : undefined}
+          aria-live="off"
+          aria-atomic="true"
+        >
+          Time: {secondsToHHMMSS(availableTime)}
+        </Text>
+      )}
     </>
   );
 }
