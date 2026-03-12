@@ -2,7 +2,7 @@
   "productName": "Exam Environment",
   "identifier": "org.freecodecamp.exam",
   "build": {
-    "beforeDevCommand": "bun run dev",
+    "beforeDevCommand": "bun --bun run dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
