@@ -43,7 +43,7 @@
       }
     },
     "publisher": "Free Code Camp, Inc.",
-    "resources": [],
+    "resources": ["../LICENSE.md"],
     "targets": "all",
     "windows": {
       "signCommand": "relic sign --file %1 --key azure --config relic.conf"
