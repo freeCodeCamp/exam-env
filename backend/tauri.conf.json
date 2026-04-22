@@ -52,7 +52,8 @@
       "appimage": {
         "bundleMediaFramework": true
       }
-    }
+    },
+    "licenseFile": "../LICENSE.md"
   },
   "plugins": {
     "deep-link": {
