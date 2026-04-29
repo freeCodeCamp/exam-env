@@ -12,17 +12,19 @@ import {
   DrawerBody,
   Button,
 } from "@chakra-ui/react";
-import { ArrowForwardIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, HamburgerIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useNavigate } from "@tanstack/react-router";
 import { useContext, useRef } from "react";
 
 import { SplashscreenRoute } from "../pages/splashscreen";
 import { LandingRoute } from "../pages/landing";
 import { AuthContext } from "../contexts/auth";
+import { useTheme } from "../contexts/theme";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { token, logout } = useContext(AuthContext)!;
+  const { isDark, toggleTheme } = useTheme();
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
 
@@ -60,7 +62,12 @@ export function Header() {
             </Box>
           </Flex>
         </Box>
-        <Flex alignSelf={"center"} width={"auto"} pr={"1em"}>
+        <Flex alignSelf={"center"} width={"auto"} pr={"1em"} gap="2">
+          <IconButton
+            aria-label="Toggle dark mode"
+            onClick={toggleTheme}
+            icon={isDark ? <SunIcon /> : <MoonIcon />}
+          />
           <IconButton
             ref={btnRef}
             aria-label="Open navigation menu"
