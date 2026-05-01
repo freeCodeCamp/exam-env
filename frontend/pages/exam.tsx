@@ -352,8 +352,23 @@ export function Exam() {
   const rawSecondsLeft = Math.floor(
     (startTimeInMS + totalTimeInMS - Date.now()) / 1000,
   );
-  const clockError = rawSecondsLeft < 0;
+  const serverDate = examQuery.data?.serverDate;
+  const clockBehind =
+    serverDate instanceof Date &&
+    !isNaN(serverDate.getTime()) &&
+    Date.now() < serverDate.getTime();
+  const clockError = rawSecondsLeft < 0 || clockBehind;
   const secondsLeft = Math.max(rawSecondsLeft, 0);
+  const serverCorrectSecondsLeft =
+    serverDate instanceof Date && !isNaN(serverDate.getTime())
+      ? Math.max(
+          Math.floor(
+            (startTimeInMS + totalTimeInMS - serverDate.getTime()) / 1000,
+          ),
+          0,
+        )
+      : undefined;
+  const effectiveSecondsLeft = serverCorrectSecondsLeft ?? secondsLeft;
 
   const scrollBarWidth =
     (scrollableElementRef.current?.offsetWidth ?? 0) -
@@ -385,7 +400,7 @@ export function Exam() {
                 <Text
                   fontWeight={"bold"}
                 >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
-                <Timer secondsLeft={secondsLeft} clockError={clockError} />
+                <Timer secondsLeft={effectiveSecondsLeft} clockError={clockError} />
               </Flex>
             </Center>
             <Box
@@ -587,7 +602,7 @@ function Timer({ secondsLeft, clockError }: TimerProps) {
           aria-live="off"
           aria-atomic="true"
         >
-          ⚠ Clock sync error
+          ⚠ Clock sync error · ~{secondsToHHMMSS(availableTime)}
         </Text>
       ) : (
         <Text

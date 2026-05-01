@@ -75,7 +75,7 @@ export async function getGeneratedExam(examId: string) {
     //     code: "FCC_EXAM_ERROR",
     //     message: "Example error fetching generated exam.",
     //   };
-    return generatedExam;
+    return { ...generatedExam, serverDate: undefined };
   }
 
   const token = await invoke<string>("get_authorization_token");
@@ -100,9 +100,15 @@ export async function getGeneratedExam(examId: string) {
     throw res.error;
   }
 
-  return deserializeDates<{ exam: UserExam; examAttempt: UserExamAttempt }>(
-    res.data,
-  );
+  const serverDateHeader = res.response.headers.get("Date");
+  const serverDate = serverDateHeader ? new Date(serverDateHeader) : undefined;
+
+  return {
+    ...deserializeDates<{ exam: UserExam; examAttempt: UserExamAttempt }>(
+      res.data,
+    ),
+    serverDate,
+  };
 }
 
 export async function postExamAttempt(examAttempt: UserExamAttempt) {
