@@ -52,7 +52,7 @@
     "openapi-typescript": "7.13.0",
     "prisma": "6.18.0",
     "typescript": "6.0.3",
-    "vite": "npm:rolldown-vite@7.3.1"
+    "vite": "8"
   },
   "engines": {
     "node": "22"

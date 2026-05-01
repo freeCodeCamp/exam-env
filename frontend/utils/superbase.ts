@@ -6,7 +6,6 @@ export const supabase = createClient(
   __SUPABASE_PUBLISHABLE__,
   {
     global: {
-      // @ts-expect-error Unknown error
       fetch: fetch.bind(globalThis),
     },
   },
