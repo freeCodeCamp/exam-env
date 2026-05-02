@@ -57,7 +57,8 @@ export function QuestionSubmissionErrorModal({
       >
         <ModalHeader
           id="error-modal-title"
-          backgroundColor={"#edb1af"}
+          backgroundColor="fcc.dangerBg"
+          color="fcc.danger"
           borderRadius={"md"}
         >
           Question Submission Error

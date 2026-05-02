@@ -1,5 +1,6 @@
 import {
   useDisclosure,
+  useColorMode,
   Box,
   Flex,
   Img,
@@ -12,7 +13,12 @@ import {
   DrawerBody,
   Button,
 } from "@chakra-ui/react";
-import { ArrowForwardIcon, HamburgerIcon } from "@chakra-ui/icons";
+import {
+  ArrowForwardIcon,
+  HamburgerIcon,
+  MoonIcon,
+  SunIcon,
+} from "@chakra-ui/icons";
 import { useNavigate } from "@tanstack/react-router";
 import { useContext, useRef } from "react";
 
@@ -22,9 +28,11 @@ import { AuthContext } from "../contexts/auth";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { colorMode, toggleColorMode } = useColorMode();
   const { token, logout } = useContext(AuthContext)!;
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
+  const isDark = colorMode === "dark";
 
   return (
     <>
@@ -34,7 +42,7 @@ export function Header() {
         alignItems={"start"}
         justifyContent={"space-between"}
         borderBottom="1px"
-        borderBottomColor={"gray.300"}
+        borderBottomColor="fcc.border"
         display="flex"
       >
         <Box>
@@ -60,12 +68,20 @@ export function Header() {
             </Box>
           </Flex>
         </Box>
-        <Flex alignSelf={"center"} width={"auto"} pr={"1em"}>
+        <Flex alignSelf={"center"} width={"auto"} pr={"1em"} gap="2">
+          <IconButton
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            aria-pressed={isDark}
+            onClick={toggleColorMode}
+            icon={isDark ? <SunIcon /> : <MoonIcon />}
+            variant="ghost"
+          />
           <IconButton
             ref={btnRef}
             aria-label="Open navigation menu"
             aria-expanded={isOpen}
             onClick={onOpen}
+            variant="ghost"
           >
             <HamburgerIcon />
           </IconButton>

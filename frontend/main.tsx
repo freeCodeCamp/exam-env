@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
 import "prismjs/themes/prism-okaidia.min.css";
@@ -16,6 +16,7 @@ import { SplashscreenRoute } from "./pages/splashscreen";
 import { ExamLandingRoute } from "./pages/exam-landing";
 import { rootRoute } from "./pages/root";
 import { AuthProvider } from "./contexts/auth";
+import { theme } from "./theme";
 
 import "./index.css";
 import "@freecodecamp/ui/dist/base.css";
@@ -45,9 +46,10 @@ const router = createRouter({ routeTree, context: { queryClient } });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ChakraProvider>
+        <ChakraProvider theme={theme}>
           <RouterProvider router={router} />
         </ChakraProvider>
       </AuthProvider>

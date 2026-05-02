@@ -124,12 +124,12 @@ export function ExamLanding() {
             <Spacer size="m" />
             <Heading as="h1">Instructions</Heading>
             <Spacer size="s" />
-            <Text color={"red"} role="alert">
+            <Text color="fcc.danger" role="alert">
               Please note that any attempt to cheat will result in immediate
               disqualification from the exam and you will need to retake the
               exam to qualify for the certification.
             </Text>
-            <Text color={"red"} role="alert">
+            <Text color="fcc.danger" role="alert">
               The exam is closed book and designed to test both your
               comprehension and your memory. Do not use outside assistance in
               the form of books, notes, AI tools, or other people.
@@ -190,7 +190,7 @@ export function ExamLanding() {
             </Button>
             {updateMutation.data && !downloadAndInstallMutation.isPending && (
               <>
-                <Text color="red.500" marginTop="4">
+                <Text color="fcc.danger" marginTop="4">
                   A new version of the application is available. You must update
                   before starting an exam.
                 </Text>
@@ -207,7 +207,7 @@ export function ExamLanding() {
               <Box maxWidth="100%" role="alert">
                 <Text>Error checking for updates:</Text>
 
-                <Text color={"red"}>
+                <Text color="fcc.danger">
                   {getErrorMessage(updateMutation.error)}
                 </Text>
                 <Button onClick={() => updateMutation.mutate()}>Retry</Button>

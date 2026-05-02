@@ -33,7 +33,7 @@ function SplashParents({ children }: { children: ReactNode }) {
         <Center height="100%">
           <Flex direction="column" maxWidth="50%" minWidth={"450px"}>
             <Spacer size="m" />
-            <Heading color="black">Environment Requirements</Heading>
+            <Heading>Environment Requirements</Heading>
             <Spacer size="s" />
             <OrderedList
               spacing={3}
@@ -146,7 +146,7 @@ export function Splashscreen() {
         </ListItem>
         <ListItem pl={6} maxWidth="100%" overflowX="hidden">
           <Box maxWidth="100%">
-            <Text color={"red"}>{getErrorMessage(updateMutation.error)}</Text>
+            <Text color="fcc.danger">{getErrorMessage(updateMutation.error)}</Text>
             <Button onClick={() => updateMutation.mutate()}>Retry</Button>
           </Box>
         </ListItem>
