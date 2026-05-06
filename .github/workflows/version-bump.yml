@@ -21,13 +21,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: get current version and calculate new version
         id: version
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
         with:
@@ -49,7 +49,7 @@ jobs:
             console.log(`Bumping version from ${version} to ${newVersion}`)
 
       - name: update package.json
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           NEW_VERSION: ${{ steps.version.outputs.new_version }}
         with:
@@ -67,7 +67,7 @@ jobs:
 
       - name: generate changelog since last release
         id: changelog
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { execSync } = require('child_process')
@@ -150,7 +150,7 @@ jobs:
             core.setOutput('last_tag', lastTag || 'none')
 
       - name: create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "release(${{ steps.version.outputs.new_version }}): ${{ inputs.release_type }}"
