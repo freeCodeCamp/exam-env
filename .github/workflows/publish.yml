@@ -249,7 +249,7 @@ jobs:
         run: pip3 install codemagic-cli-tools --break-system-packages
 
       - name: install apple certificates and provisioning profiles (macos)
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-latest' && github.event_name == 'workflow_dispatch'
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           APPLE_DEVELOPER_ID_CERT: ${{ secrets.APPLE_DEVELOPER_ID_CERT }}
@@ -297,12 +297,14 @@ jobs:
             const bundles = '${{ matrix.bundles }}';
             const config = '${{ matrix.config }}';
             const environment = '${{ inputs.environment || 'development' }}';
+            const event = '${{ github.event_name }}';
 
             let args = [];
             if (target) args.push(`--target ${target}`);
             if (bundles) args.push(`--bundles ${bundles}`);
             if (config) args.push(`--config ${config}`);
             if (environment != 'production') args.push('--debug');
+            if (event == 'pull_request') args.push('--no-sign');
 
             core.setOutput('args', args.join(' '));
 
@@ -329,12 +331,12 @@ jobs:
         with:
           releaseId: ${{ github.event_name == 'workflow_dispatch' && needs.create-release.outputs.release_id || '' }}
           args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}
-          uploadUpdaterJson: true
+          uploadUpdaterJson: ${{ github.event_name == 'workflow_dispatch' }}
           # tagName is required to prevent all update URLs from pointing to `/latest/`:
           # https://github.com/freeCodeCamp/exam-env/issues/54
           tagName: ${{ github.event_name == 'workflow_dispatch' && format('{0}/{1}', inputs.environment, steps.version.outputs.version) || '' }}
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
-          releaseDraft: true
+          releaseDraft: ${{ github.event_name == 'workflow_dispatch' }}
 
   publish-release:
     permissions:
