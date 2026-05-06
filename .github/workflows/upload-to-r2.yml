@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: get release meta
         id: meta
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const res = await github.rest.repos.getRelease({
@@ -64,7 +64,7 @@ jobs:
 
       - name: publish release
         id: publish-release
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           release_id: ${{ inputs.release_id }}
         with:
