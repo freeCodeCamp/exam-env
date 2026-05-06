@@ -22,6 +22,9 @@ on:
           - minor
           - major
         default: patch
+  pull_request:
+    paths:
+      - ".github/workflows/publish.yml"
 
 jobs:
   create-release:
@@ -33,12 +36,12 @@ jobs:
       new_version: ${{ steps.handle-rc.outputs.new_version || steps.version.outputs.new_version }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: handle release candidate new version
         id: handle-rc
-        uses: actions/github-script@v8
-        if: ${{ inputs.environment != 'production' }}
+        uses: actions/github-script@v9
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.environment != 'production' }}
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
           ENVIRONMENT: ${{ inputs.environment }}
@@ -84,7 +87,7 @@ jobs:
 
       - name: get version
         id: version
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { version } = require('./package.json')
@@ -92,7 +95,8 @@ jobs:
 
       - name: create release
         id: create-release
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
+        if: github.event_name == 'workflow_dispatch'
         env:
           ENVIRONMENT: ${{inputs.environment}}
           NEW_VERSION: ${{ steps.handle-rc.outputs.new_version || steps.version.outputs.version }}
@@ -144,11 +148,11 @@ jobs:
     env:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: handle release candidate new version
-        uses: actions/github-script@v8
-        if: ${{ inputs.environment != 'production' }}
+        uses: actions/github-script@v9
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.environment != 'production' }}
         env:
           NEW_VERSION: ${{ needs.create-release.outputs.new_version }}
         with:
@@ -172,11 +176,11 @@ jobs:
 
       - name: Set FREECODECAMP_API based on environment
         run: |
-          if [ "${{ inputs.environment }}" = "development" ]; then
+          if [ "${{ inputs.environment || 'development' }}" = "development" ]; then
             echo "FREECODECAMP_API=http://localhost:3000" >> $GITHUB_ENV
-          elif [ "${{ inputs.environment }}" = "staging" ]; then
+          elif [ "${{ inputs.environment || 'development' }}" = "staging" ]; then
             echo "FREECODECAMP_API=https://api.freecodecamp.dev" >> $GITHUB_ENV
-          elif [ "${{ inputs.environment }}" = "production" ]; then
+          elif [ "${{ inputs.environment || 'development' }}" = "production" ]; then
             echo "FREECODECAMP_API=https://api.freecodecamp.org" >> $GITHUB_ENV
           fi
         shell: bash
@@ -187,7 +191,7 @@ jobs:
 
       - name: get version
         id: version
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { version } = require('./package.json')
@@ -231,7 +235,7 @@ jobs:
 
       - name: install Go stable (windows)
         if: matrix.platform == 'windows-latest'
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
           go-version: "stable"
 
@@ -276,7 +280,7 @@ jobs:
           security find-identity -v
 
       - name: Set verbose flag if in debug mode
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
         with:
@@ -286,13 +290,13 @@ jobs:
 
       - name: Build args
         id: build-args
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const target = '${{ matrix.target }}';
             const bundles = '${{ matrix.bundles }}';
             const config = '${{ matrix.config }}';
-            const environment = '${{ inputs.environment }}';
+            const environment = '${{ inputs.environment || 'development' }}';
 
             let args = [];
             if (target) args.push(`--target ${target}`);
@@ -319,16 +323,16 @@ jobs:
 
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           FREECODECAMP_API: ${{ env.FREECODECAMP_API }}
-          ENVIRONMENT: ${{inputs.environment}}
+          ENVIRONMENT: ${{ inputs.environment || 'development' }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE: ${{ secrets.SUPABASE_PUBLISHABLE }}
         with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
+          releaseId: ${{ github.event_name == 'workflow_dispatch' && needs.create-release.outputs.release_id || '' }}
           args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}
           uploadUpdaterJson: true
           # tagName is required to prevent all update URLs from pointing to `/latest/`:
           # https://github.com/freeCodeCamp/exam-env/issues/54
-          tagName: ${{ inputs.environment }}/${{ steps.version.outputs.version }}
+          tagName: ${{ github.event_name == 'workflow_dispatch' && format('{0}/{1}', inputs.environment, steps.version.outputs.version) || '' }}
           # As the release is not published yet, this must be set: https://github.com/tauri-apps/tauri-action?tab=readme-ov-file#tips-and-caveats
           releaseDraft: true
 
@@ -337,11 +341,12 @@ jobs:
       contents: write
       actions: write
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
     needs: [create-release, build-tauri]
 
     steps:
       - name: trigger r2 upload
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
           ref: ${{ github.ref }}
