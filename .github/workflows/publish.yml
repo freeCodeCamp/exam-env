@@ -134,10 +134,6 @@ jobs:
           - platform: "ubuntu-22.04"
             target: "i686-unknown-linux-gnu"
             bundles: "appimage,updater"
-          # Disabled, until needed
-          # - platform: "windows-latest"
-          #   config: "backend/tauri.microsoftstore.conf.json"
-          #   bundles: "msi"
           - platform: "windows-latest"
             bundles: "nsis"
           - platform: "windows-latest"
@@ -295,16 +291,17 @@ jobs:
           script: |
             const target = '${{ matrix.target }}';
             const bundles = '${{ matrix.bundles }}';
-            const config = '${{ matrix.config }}';
             const environment = '${{ inputs.environment || 'development' }}';
             const event = '${{ github.event_name }}';
 
             let args = [];
             if (target) args.push(`--target ${target}`);
             if (bundles) args.push(`--bundles ${bundles}`);
-            if (config) args.push(`--config ${config}`);
             if (environment != 'production') args.push('--debug');
-            if (event == 'pull_request') args.push('--no-sign');
+            if (event == 'pull_request') {
+              args.push('--no-sign');
+              args.push(`--config '{ "bundle": { "macOS": { "files": {} } } }`)
+            }
 
             core.setOutput('args', args.join(' '));
 
