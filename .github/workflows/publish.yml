@@ -300,7 +300,7 @@ jobs:
             if (environment != 'production') args.push('--debug');
             if (event == 'pull_request') {
               args.push('--no-sign');
-              args.push(`--config '{ "bundle": { "macOS": { "files": {} } } }`)
+              args.push(`--config '{ "bundle": { "macOS": { "files": {} } } }'`)
             }
 
             core.setOutput('args', args.join(' '));
