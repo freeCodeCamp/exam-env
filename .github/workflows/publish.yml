@@ -23,8 +23,6 @@ on:
           - major
         default: patch
   pull_request:
-    paths:
-      - ".github/workflows/publish.yml"
 
 jobs:
   create-release:
