@@ -45,6 +45,14 @@ export function getErrorMessage(e: unknown): string {
   if (e instanceof Error) {
     return e.message;
   }
+  if (
+    typeof e === "object" &&
+    e !== null &&
+    "message" in e &&
+    typeof (e as Record<string, unknown>).message === "string"
+  ) {
+    return (e as Record<string, unknown>).message as string;
+  }
   return "An unexpected error occurred: " + JSON.stringify(e);
 }
 

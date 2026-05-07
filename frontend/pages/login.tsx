@@ -29,11 +29,10 @@ export function Login() {
   const [accountToken, setAccountToken] = useState(token.data || "");
 
   useEffect(() => {
-    console.log(token);
-    if (token.data) {
+    if (token.data && !token.isError) {
       navigate({ to: LandingRoute.to });
     }
-  }, [token.data]);
+  }, [token.data, token.isError]);
 
   function handleTokenChange(e: ChangeEvent<HTMLInputElement>) {
     setAccountToken(e.target.value);
