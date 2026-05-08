@@ -1,37 +1,31 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { verifyToken } from "../utils/fetch";
 import { setUser } from "@sentry/react";
-
-export const AuthContext = createContext<{
-  token: UseQueryResult<null | string, unknown>;
-  login: UseMutationResult<void, unknown, string, unknown>;
-  logout: UseMutationResult<void, unknown, void, unknown>;
-} | null>(null);
+import { AuthContext } from ".";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // Query to read token from the platform key storage (IPC)
+  // Memoize queryFn to prevent infinite re-fetching
+  const tokenQueryFn = useCallback(async () => {
+    const token = await invoke<null | string>("get_authorization_token");
+    if (token) {
+      try {
+        await verifyToken(token);
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+      setUser({ id: token });
+      return token;
+    }
+    return null;
+  }, []);
+
   const token = useQuery({
     queryKey: ["authorizationToken"],
-    queryFn: async () => {
-      console.debug("Fetching authorization token from storage");
-      const token = await invoke<null | string>("get_authorization_token");
-      console.debug("Fetched authorization token:", token);
-      if (token) {
-        console.debug("verifying token");
-        await verifyToken(token);
-        console.debug("token verified");
-        setUser({ id: token });
-      }
-      return token ?? null;
-    },
+    queryFn: tokenQueryFn,
     // staleTime: Infinity,
     retry: false,
     refetchOnWindowFocus: false,

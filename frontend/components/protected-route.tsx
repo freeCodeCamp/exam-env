@@ -1,7 +1,7 @@
 import { Navigate } from "@tanstack/react-router";
 import { ReactNode, useContext } from "react";
 
-import { AuthContext } from "../contexts/auth";
+import { AuthContext } from "../contexts";
 import { LoginRoute } from "../pages/login";
 import { Center, Flex, Spinner } from "@chakra-ui/react";
 import { Header } from "./header";
@@ -11,7 +11,7 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   // Safety: Context should exist, because provider is mounted at root.
   const { token } = useContext(AuthContext)!;
 
-  if (token.isFetching) {
+  if (token.isPending) {
     return (
       <>
         <Header />

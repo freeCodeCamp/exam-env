@@ -41,7 +41,7 @@ export default defineConfig(async ({ mode }) => {
       strictPort: true,
       watch: {
         // 3. tell vite to ignore watching `backend`
-        ignored: ["**/backend/**"],
+        ignored: ["**/backend/**", "**/target/**"],
       },
     },
     define: {

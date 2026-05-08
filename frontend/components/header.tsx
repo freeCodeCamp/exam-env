@@ -24,7 +24,7 @@ import { useContext, useRef } from "react";
 
 import { SplashscreenRoute } from "../pages/splashscreen";
 import { LandingRoute } from "../pages/landing";
-import { AuthContext } from "../contexts/auth";
+import { AuthContext } from "../contexts";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();

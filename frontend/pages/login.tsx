@@ -15,12 +15,11 @@ import { createRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { AuthContext } from "../contexts/auth";
+import { AuthContext } from "../contexts";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { LEARN_BASE } from "../utils/env";
-import { captureException } from "@sentry/react";
 import { getErrorMessage } from "../utils/errors";
 
 export function Login() {
