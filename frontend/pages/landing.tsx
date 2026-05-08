@@ -60,9 +60,7 @@ export function Landing() {
   if (examsQuery.isError) {
     return (
       <LandingParent>
-        <Text color="fcc.danger">
-          {getErrorMessage(examsQuery.error)}
-        </Text>
+        <Text color="fcc.danger">{getErrorMessage(examsQuery.error)}</Text>
         <Button
           variant={"danger"}
           onClick={() => {

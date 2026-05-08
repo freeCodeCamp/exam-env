@@ -53,7 +53,7 @@ export async function verifyToken(token: string) {
     if (res.response.status !== 404 && res.response.status !== 418) {
       captureError(res);
     }
-    throw res.error;
+    throw new Error(res.error.message);
   }
 
   if (res.response.status >= 400) {
@@ -97,7 +97,7 @@ export async function getGeneratedExam(examId: string) {
     } else {
       captureError(res);
     }
-    throw res.error;
+    throw new Error(res.error.message);
   }
 
   const serverDateHeader = res.response.headers.get("Date");
@@ -118,7 +118,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
       code: "EXAMPLE_ERROR",
       message: "Example error when posting exam",
     };
-    throw error;
+    throw new Error(error.message);
     // return undefined as never;
   }
 
@@ -141,7 +141,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     } else {
       captureError(res);
     }
-    throw res.error;
+    throw new Error(res.error.message);
   }
 
   return res.response;
@@ -183,7 +183,7 @@ export async function getExams() {
 
   if (res.error) {
     captureError(res);
-    throw res.error;
+    throw new Error(res.error.message);
   }
 
   return res.data;
@@ -207,7 +207,7 @@ export async function getAttemptsByExamId(examId: string) {
 
   if (res.error || res.response.status >= 300) {
     captureException(res.error);
-    throw res.error;
+    throw new Error("unable to get attempts for exam");
   }
 
   console.debug(res);
