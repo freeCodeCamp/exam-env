@@ -89,6 +89,8 @@ export function Exam() {
     onError(error) {
       console.log(error);
       if (
+        typeof error === "object" &&
+        error !== null &&
         "code" in error &&
         error.code === "FCC_EINVAL_EXAM_ENVIRONMENT_EXAM_ATTEMPT" &&
         error.message === "Attempt has exceeded submission time."
@@ -400,7 +402,10 @@ export function Exam() {
                 <Text
                   fontWeight={"bold"}
                 >{`Question ${currentQuestionNumber} of ${questions.length}`}</Text>
-                <Timer secondsLeft={effectiveSecondsLeft} clockError={clockError} />
+                <Timer
+                  secondsLeft={effectiveSecondsLeft}
+                  clockError={clockError}
+                />
               </Flex>
             </Center>
             <Box
