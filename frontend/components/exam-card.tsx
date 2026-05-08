@@ -60,7 +60,7 @@ export function ExamCard({ exam }: ExamCardProps) {
         as="article"
         borderWidth={examStatus.status === "InProgress" ? "3px" : "1px"}
         borderColor={
-          examStatus.status === "InProgress" ? "orange.400" : "gray.200"
+          examStatus.status === "InProgress" ? "orange.400" : "fcc.border"
         }
         boxShadow={examStatus.status === "InProgress" ? "lg" : "sm"}
         _hover={{ boxShadow: "md" }}
@@ -75,7 +75,7 @@ export function ExamCard({ exam }: ExamCardProps) {
               </Heading>
               <Flex justifyContent={"space-between"}>
                 <Flex alignItems="center" gap={2}>
-                  <Text color="gray.600" fontSize="sm" marginBottom={0}>
+                  <Text color="fcc.fgMuted" fontSize="sm" marginBottom={0}>
                     Duration:
                   </Text>
                   <Badge
@@ -87,7 +87,7 @@ export function ExamCard({ exam }: ExamCardProps) {
                   </Badge>
                 </Flex>
                 <Flex alignItems="center" gap={2}>
-                  <Text color="gray.600" fontSize="sm" marginBottom={0}>
+                  <Text color="fcc.fgMuted" fontSize="sm" marginBottom={0}>
                     Passing Percent:
                   </Text>
                   <Badge colorScheme="blue" fontSize="sm">
@@ -110,7 +110,7 @@ export function ExamCard({ exam }: ExamCardProps) {
               aria-busy="true"
             >
               <Spinner size="sm" />
-              <Text fontSize="sm" color="gray.500">
+              <Text fontSize="sm" color="fcc.fgMuted">
                 Getting attempt status...
               </Text>
             </Flex>

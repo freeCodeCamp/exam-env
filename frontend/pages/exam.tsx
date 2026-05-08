@@ -307,8 +307,8 @@ export function Exam() {
               alignSelf={"center"}
               thickness="4px"
               speed="0.65s"
-              emptyColor="gray.200"
-              color="var(--dark-blue)"
+              emptyColor="fcc.bgMuted"
+              color="fcc.accentSolid"
               size="xl"
             />
           </Center>
@@ -338,8 +338,8 @@ export function Exam() {
               alignSelf={"center"}
               thickness="4px"
               speed="0.65s"
-              emptyColor="gray.200"
-              color="var(--dark-blue)"
+              emptyColor="fcc.bgMuted"
+              color="fcc.accentSolid"
               size="xl"
             />
           </Center>
@@ -397,7 +397,7 @@ export function Exam() {
       <Box overflowY="hidden" as="main" id="main-content">
         <Box width={"full"} mt="2em">
           <Center height={"100%"} display={"flex"} flexDirection={"column"}>
-            <Center width="full" borderBottom={"2px"} borderColor={"gray.300"}>
+            <Center width="full" borderBottom={"2px"} borderColor="fcc.border">
               <Flex justifyContent={"space-between"} width={"65vw"}>
                 <Text
                   fontWeight={"bold"}
@@ -434,7 +434,7 @@ export function Exam() {
           justifyContent={"center"}
           alignItems={"center"}
           borderTop={"2px"}
-          borderColor={"gray.300"}
+          borderColor="fcc.border"
           paddingTop={"1rem"}
           flexWrap={"wrap"}
           flexDirection={"column"}
@@ -457,8 +457,8 @@ export function Exam() {
                 _hover={
                   allQuestionsAnswered
                     ? {
-                        color: "blue",
-                        background: "gray.300",
+                        color: "fcc.accent",
+                        background: "fcc.bgMuted",
                       }
                     : undefined
                 }
@@ -484,8 +484,8 @@ export function Exam() {
               _hover={
                 !allQuestionsAnswered
                   ? {
-                      color: "blue",
-                      background: "gray.300",
+                      color: "fcc.accent",
+                      background: "fcc.bgMuted",
                     }
                   : undefined
               }
@@ -700,8 +700,8 @@ function NavigationBubbles({
               specificQuestion(questionId);
             }}
             _hover={{
-              backgroundColor: "gray.200",
-              color: "black",
+              backgroundColor: "fcc.bgMuted",
+              color: "fcc.fg",
             }}
             className={`bottom-bubble-nav ${
               currentQuestionNumber === index ? "bubble-active" : ""

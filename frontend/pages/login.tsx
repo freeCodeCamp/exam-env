@@ -58,7 +58,7 @@ export function Login() {
         <Center height="100%">
           <Flex direction="column">
             <Spacer size="m" />
-            <Heading color="black">Log In</Heading>
+            <Heading>Log In</Heading>
             <Spacer size="s" />
             <FormControl isInvalid={login.isError || token.isError}>
               <FormLabel htmlFor="account-token">

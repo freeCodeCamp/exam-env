@@ -49,8 +49,8 @@ export function Landing() {
           alignSelf={"center"}
           thickness="4px"
           speed="0.65s"
-          emptyColor="gray.200"
-          color="var(--dark-blue)"
+          emptyColor="fcc.bgMuted"
+          color="fcc.accentSolid"
           size="xl"
         />
       </LandingParent>
@@ -60,7 +60,7 @@ export function Landing() {
   if (examsQuery.isError) {
     return (
       <LandingParent>
-        <Text style={{ color: "red" }}>
+        <Text color="fcc.danger">
           {getErrorMessage(examsQuery.error)}
         </Text>
         <Button
