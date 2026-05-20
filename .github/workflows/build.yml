@@ -1,0 +1,253 @@
+name: "build"
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      release_id:
+        type: string
+        required: false
+        default: ""
+      new_version:
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  build-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest"
+            target: "aarch64-apple-darwin"
+            bundles: "dmg,app"
+          - platform: "macos-latest"
+            target: "x86_64-apple-darwin"
+            bundles: "dmg,app"
+          - platform: "ubuntu-22.04"
+            bundles: "appimage,updater"
+          - platform: "ubuntu-22.04-arm"
+            target: "aarch64-unknown-linux-gnu"
+            bundles: "appimage,updater"
+          - platform: "ubuntu-22.04"
+            target: "i686-unknown-linux-gnu"
+            bundles: "appimage,updater"
+          - platform: "windows-latest"
+            bundles: "nsis"
+          - platform: "windows-latest"
+            target: "i686-pc-windows-msvc"
+            bundles: "nsis"
+
+    runs-on: ${{ matrix.platform }}
+    env:
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: handle release candidate new version
+        uses: actions/github-script@v9
+        if: ${{ inputs.new_version != '' }}
+        env:
+          NEW_VERSION: ${{ inputs.new_version }}
+        with:
+          script: |
+            const newVersion = process.env.NEW_VERSION
+            const fs = require('fs')
+            const packageJson = require('./package.json')
+            packageJson.version = newVersion
+            fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
+            const cargoToml = fs.readFileSync('./backend/Cargo.toml', 'utf8')
+            const updatedCargoToml = cargoToml.replace(/^version = ".*"/m, `version = "${newVersion}"`)
+            fs.writeFileSync('./backend/Cargo.toml', updatedCargoToml)
+
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+
+      - name: Set FREECODECAMP_API based on environment
+        env:
+          DEPLOY_ENV: ${{ inputs.environment || 'development' }}
+        run: |
+          if [ "$DEPLOY_ENV" = "development" ]; then
+            echo "FREECODECAMP_API=http://localhost:3000" >> $GITHUB_ENV
+          elif [ "$DEPLOY_ENV" = "staging" ]; then
+            echo "FREECODECAMP_API=https://api.freecodecamp.dev" >> $GITHUB_ENV
+          elif [ "$DEPLOY_ENV" = "production" ]; then
+            echo "FREECODECAMP_API=https://api.freecodecamp.org" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: get version
+        id: version
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { version } = require('./package.json')
+            core.setOutput('version', version)
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target || '' }}
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-22.04-arm'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: install arm64 dependencies (ubuntu aarch64 only)
+        if: matrix.platform == 'ubuntu-22.04-arm'
+        run: sudo apt-get install -y libgtk-3-dev libssl-dev xdg-utils
+
+      - name: install 32-bit dependencies (ubuntu i686 only)
+        if: matrix.platform == 'ubuntu-22.04' && matrix.target == 'i686-unknown-linux-gnu'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib g++-multilib
+          sudo apt-get install -y libwebkit2gtk-4.1-dev:i386 librsvg2-dev:i386
+          sudo apt-get install -y libgtk-3-dev:i386 libssl-dev:i386
+          echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+
+      - name: install frontend dependencies
+        run: bun install && bun run prisma generate
+
+      # The rust build requires the `.env` file to exist, even if none of the variables are used
+      - name: prep env (non-windows)
+        if: matrix.platform != 'windows-latest'
+        run: touch .env
+
+      - name: prep env (windows)
+        if: matrix.platform == 'windows-latest'
+        run: New-Item -Name ".env" -ItemType File
+
+      - name: install Go stable (windows)
+        if: matrix.platform == 'windows-latest'
+        uses: actions/setup-go@v6
+        with:
+          go-version: "stable"
+
+      - name: install relic (windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          go install github.com/sassoftware/relic/v8@latest
+
+      - name: install codemagic cli tools (macos)
+        if: matrix.platform == 'macos-latest'
+        run: pip3 install codemagic-cli-tools --break-system-packages
+
+      - name: install apple certificates and provisioning profiles (macos)
+        if: matrix.platform == 'macos-latest' && inputs.release_id != ''
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_DEVELOPER_ID_CERT: ${{ secrets.APPLE_DEVELOPER_ID_CERT }}
+          PROVISIONING_PROFILE: ${{ secrets.MAC_APP_DIRECT_PROVISIONING_PROFILE }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          CERT_BASE_PATH=/Users/runner/Library/MobileDevice/Certificates
+          mkdir -p $CERT_BASE_PATH
+          DEVELOPER_ID_CERT_PATH=$CERT_BASE_PATH/developer_id_certificate.p12
+          PP_PATH=./backend/embedded.provisionprofile
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          APPLE_API_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY_ID.p8
+
+          echo -n "$APPLE_DEVELOPER_ID_CERT" | base64 --decode -o $DEVELOPER_ID_CERT_PATH
+          echo -n "$PROVISIONING_PROFILE" | base64 --decode -o $PP_PATH
+          echo -n "$APPLE_API_KEY" | base64 --decode -o $APPLE_API_KEY_PATH
+
+          keychain initialize --password $KEYCHAIN_PASSWORD --path $KEYCHAIN_PATH --timeout 21600
+          keychain add-certificates
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security find-identity -v
+
+      - name: Set verbose flag if in debug mode
+        uses: actions/github-script@v9
+        env:
+          ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+        with:
+          script: |
+            const isDebug = process.env.ACTIONS_STEP_DEBUG === 'true';
+            core.exportVariable('TAURI_VERBOSE_FLAG', isDebug ? '--verbose' : '');
+
+      - name: Build args
+        id: build-args
+        uses: actions/github-script@v9
+        env:
+          BUILD_TARGET: ${{ matrix.target }}
+          BUILD_BUNDLES: ${{ matrix.bundles }}
+          BUILD_ENVIRONMENT: ${{ inputs.environment || 'development' }}
+        with:
+          script: |
+            const target = process.env.BUILD_TARGET;
+            const bundles = process.env.BUILD_BUNDLES;
+            const environment = process.env.BUILD_ENVIRONMENT;
+            const isPublish = context.eventName === 'workflow_call';
+
+            let args = [];
+            if (target) args.push(`--target ${target}`);
+            if (bundles) args.push(`--bundles ${bundles}`);
+            if (environment !== 'production') args.push('--debug');
+            if (!isPublish) {
+              args.push('--no-sign');
+              args.push(`--config '{ "bundle": { "macOS": { "files": null } } }'`);
+            }
+
+            core.setOutput('args', args.join(' '));
+
+      # Signing secrets are injected only for publish builds. When this step is skipped
+      # (pull_request), GitHub does not evaluate the env: block, so the secrets are never
+      # loaded into the runner environment — protecting them from malicious build code.
+      - name: inject signing secrets
+        if: inputs.release_id != ''
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          AZURE_VAULT_ID: ${{ secrets.AZURE_VAULT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
+        run: |
+          echo "TAURI_SIGNING_PRIVATE_KEY=$TAURI_SIGNING_PRIVATE_KEY" >> $GITHUB_ENV
+          echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" >> $GITHUB_ENV
+          echo "AZURE_VAULT_ID=$AZURE_VAULT_ID" >> $GITHUB_ENV
+          echo "AZURE_TENANT_ID=$AZURE_TENANT_ID" >> $GITHUB_ENV
+          echo "AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET" >> $GITHUB_ENV
+          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_ENV
+          echo "APPLE_API_ISSUER=$APPLE_API_ISSUER" >> $GITHUB_ENV
+          echo "APPLE_API_KEY=$APPLE_API_KEY" >> $GITHUB_ENV
+        shell: bash
+
+      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # MacOS specific
+          APPLE_SIGNING_IDENTITY: "Developer ID Application: Free Code Camp, Inc. (L33K9LWVP9)"
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          FREECODECAMP_API: ${{ env.FREECODECAMP_API }}
+          ENVIRONMENT: ${{ inputs.environment || 'development' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE: ${{ secrets.SUPABASE_PUBLISHABLE }}
+        with:
+          releaseId: ${{ inputs.release_id }}
+          args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}
+          includeUpdaterJson: ${{ inputs.release_id != '' }}
+          tagName: ${{ inputs.release_id != '' && format('{0}/{1}', inputs.environment, steps.version.outputs.version) || '' }}
+          releaseDraft: ${{ inputs.release_id != '' }}
