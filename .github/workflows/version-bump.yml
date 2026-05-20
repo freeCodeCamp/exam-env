@@ -60,8 +60,10 @@ jobs:
             fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2) + '\n')
 
       - name: update Cargo.toml and Cargo.lock
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
         run: |
-          sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new_version }}"/' backend/Cargo.toml
+          sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" backend/Cargo.toml
           cd backend
           cargo update -p exam-env
 
@@ -70,7 +72,7 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
-            const { execSync } = require('child_process')
+            const { execSync, spawnSync } = require('child_process')
 
             // Find the last release tag for production
             let lastTag
@@ -85,18 +87,20 @@ jobs:
             }
 
             // Get commits since last tag (or all commits if no tag exists)
-            let gitLogCmd
-            if (lastTag) {
-              gitLogCmd = `git log ${lastTag}..HEAD --pretty=format:"%h - %s (%an)" --no-merges`
-              console.log(`Generating changelog since ${lastTag}`)
-            } else {
-              gitLogCmd = 'git log --pretty=format:"%h - %s (%an)" --no-merges'
-              console.log('Generating changelog for all commits (no previous release found)')
-            }
-
             let changelog
             try {
-              changelog = execSync(gitLogCmd, { encoding: 'utf8' })
+              if (lastTag) {
+                if (!/^[a-zA-Z0-9._\/-]+$/.test(lastTag)) {
+                  core.setFailed(`Invalid tag format: ${lastTag}`)
+                  return
+                }
+                console.log(`Generating changelog since ${lastTag}`)
+                const result = spawnSync('git', ['log', `${lastTag}..HEAD`, '--pretty=format:%h - %s (%an)', '--no-merges'], { encoding: 'utf8' })
+                changelog = result.stdout || 'No commits found'
+              } else {
+                console.log('Generating changelog for all commits (no previous release found)')
+                changelog = execSync('git log --pretty=format:"%h - %s (%an)" --no-merges', { encoding: 'utf8' })
+              }
             } catch (error) {
               changelog = 'No commits found'
             }

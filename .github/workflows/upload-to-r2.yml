@@ -20,16 +20,24 @@ jobs:
       - name: get release meta
         id: meta
         uses: actions/github-script@v9
+        env:
+          RELEASE_ID: ${{ inputs.release_id }}
         with:
           script: |
+            const releaseId = parseInt(process.env.RELEASE_ID, 10)
+            if (!Number.isInteger(releaseId) || releaseId <= 0) {
+              core.setFailed(`Invalid release_id: ${process.env.RELEASE_ID}`)
+              return
+            }
+
             const res = await github.rest.repos.getRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id: ${{ inputs.release_id }}
+              release_id: releaseId
             });
 
             if (!res || res.status !== 200) {
-              console.error("no release found by id:", ${{inputs.release_id}});
+              console.error("no release found by id:", releaseId);
               return process.exit(1);
             }
 
@@ -39,8 +47,9 @@ jobs:
 
             const environment = release.tag_name.split("/").at(0);
 
-            if (!environment) {
-              console.error("no environment found in tag:", release.tag_name);
+            const validEnvironments = ['production', 'staging', 'development']
+            if (!environment || !validEnvironments.includes(environment)) {
+              console.error("invalid or missing environment in tag:", release.tag_name);
               return process.exit(1);
             }
 
@@ -48,9 +57,15 @@ jobs:
             console.log("setting environment to:", environment);
 
       - name: download sync script
+        env:
+          # SECURITY: Update GH_RELEASE_TO_R2_VERSION to a specific pinned release tag (never use "latest").
+          # After updating the version, run: sha256sum gh-release-to-r2  and put the result in GH_RELEASE_TO_R2_SHA256.
+          GH_RELEASE_TO_R2_VERSION: "v0.4.0"
+          GH_RELEASE_TO_R2_SHA256: "adabcb356b54f6b6e2fd0822a666f432c477e4516bc99e90d81b1218bd9f9531"
         run: |
           mkdir bin
-          curl -sSL https://github.com/ShaunSHamilton/gh-release-to-r2/releases/latest/download/gh-release-to-r2 -o bin/gh-release-to-r2
+          curl -sSfL "https://github.com/ShaunSHamilton/gh-release-to-r2/releases/download/${GH_RELEASE_TO_R2_VERSION}/gh-release-to-r2" -o bin/gh-release-to-r2
+          echo "${GH_RELEASE_TO_R2_SHA256}  bin/gh-release-to-r2" | sha256sum --check
           chmod +x bin/gh-release-to-r2
           echo "$PWD/bin" >> $GITHUB_PATH
       - name: run sync bin
@@ -60,7 +75,8 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT }}
           RELEASE_ID: ${{ inputs.release_id }}
-        run: gh-release-to-r2 --dest ${{ steps.meta.outputs.environment }} --pattern "latest\.json$"
+          DEPLOY_ENV: ${{ steps.meta.outputs.environment }}
+        run: gh-release-to-r2 --dest "$DEPLOY_ENV" --pattern "latest\.json$"
 
       - name: publish release
         id: publish-release

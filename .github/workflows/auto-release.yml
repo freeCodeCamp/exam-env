@@ -49,7 +49,9 @@ jobs:
             })
 
             const releaseTypeLabel = pr.labels.find(label => label.name.startsWith('release_type:'))
-            const releaseType = releaseTypeLabel ? releaseTypeLabel.name.split(':')[1].trim() : 'patch'
+            const rawReleaseType = releaseTypeLabel ? releaseTypeLabel.name.split(':')[1].trim() : 'patch'
+            const validReleaseTypes = ['patch', 'minor', 'major']
+            const releaseType = validReleaseTypes.includes(rawReleaseType) ? rawReleaseType : 'patch'
 
             core.setOutput('release_type', releaseType)
             console.log(`Triggering ${releaseType} release in production environment`)
@@ -61,11 +63,17 @@ jobs:
           REF: ${{ github.event.pull_request.head.ref }}
         with:
           script: |
+            const ref = process.env.REF
+            if (!/^release\/v\d+\.\d+\.\d+$/.test(ref)) {
+              core.setFailed(`Invalid ref format: ${ref}`)
+              return
+            }
+
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'publish.yml',
-              ref: process.env.REF,
+              ref: ref,
               inputs: {
                 environment: 'production',
                 release_type: process.env.RELEASE_TYPE
