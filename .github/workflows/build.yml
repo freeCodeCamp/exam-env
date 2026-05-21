@@ -192,12 +192,13 @@ jobs:
           BUILD_TARGET: ${{ matrix.target }}
           BUILD_BUNDLES: ${{ matrix.bundles }}
           BUILD_ENVIRONMENT: ${{ inputs.environment || 'development' }}
+          BUILD_RELEASE_ID: ${{ inputs.release_id }}
         with:
           script: |
             const target = process.env.BUILD_TARGET;
             const bundles = process.env.BUILD_BUNDLES;
             const environment = process.env.BUILD_ENVIRONMENT;
-            const isPublish = context.eventName === 'workflow_call';
+            const isPublish = process.env.BUILD_RELEASE_ID !== '';
 
             let args = [];
             if (target) args.push(`--target ${target}`);
