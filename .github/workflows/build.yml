@@ -236,7 +236,7 @@ jobs:
           echo "APPLE_API_KEY=$APPLE_API_KEY" >> $GITHUB_ENV
         shell: bash
 
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5
+      - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # MacOS specific
@@ -249,6 +249,6 @@ jobs:
         with:
           releaseId: ${{ inputs.release_id }}
           args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}
-          includeUpdaterJson: ${{ inputs.release_id != '' }}
+          uploadUpdaterJson: ${{ inputs.release_id != '' }}
           tagName: ${{ inputs.release_id != '' && format('{0}/{1}', inputs.environment, steps.version.outputs.version) || '' }}
           releaseDraft: ${{ inputs.release_id != '' }}
