@@ -13,7 +13,7 @@ import {
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { CloseRequestedEvent } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -37,6 +37,7 @@ import { captureEvent, createEvent, EventKind } from "../utils/superbase";
 
 export function Exam() {
   const { examId } = ExamRoute.useParams();
+  const queryClient = useQueryClient();
   const examQuery = useQuery({
     queryKey: ["exam", examId],
     // TODO: If page is "reloaded" once an exam has ended, this could error with "User has completed exam too recently to retake."
@@ -100,6 +101,11 @@ export function Exam() {
     },
     onSuccess(updatedAttempt) {
       setExamAttempt(updatedAttempt);
+      queryClient.setQueryData(
+        ["exam", examId],
+        (old: typeof examQuery.data | undefined) =>
+          old ? { ...old, examAttempt: updatedAttempt } : old,
+      );
       setNewSelectedAnswers([]);
 
       if (currentQuestionNumber < questions.length) {
