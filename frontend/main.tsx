@@ -35,11 +35,16 @@ Sentry.init({
   tracesSampleRate: 1.0,
   enableLogs: true,
   beforeSend(event) {
-    const messages = [
+    const haystack = [
       event.message,
       ...(event.exception?.values?.map((v) => v.value) ?? []),
+      // Raw objects captured via captureException (e.g. fetch.ts's
+      // `captureException(res.error)`) are titled "Object captured as
+      // exception…" with the real payload under extra.__serialized__, so the
+      // revoked-token text only lives here.
+      event.extra ? JSON.stringify(event.extra) : undefined,
     ];
-    if (messages.some((m) => m?.includes(REVOKED_TOKEN_MESSAGE))) {
+    if (haystack.some((m) => m?.includes(REVOKED_TOKEN_MESSAGE))) {
       return null;
     }
     return event;
