@@ -41,6 +41,31 @@ fn is_update_check_noise(event: &sentry::protocol::Event) -> bool {
     }
 }
 
+/// Substring identifying the WebView2 "failed to create webview" startup
+/// failure, emitted by `tauri_runtime_wry` when the main window's webview cannot
+/// be created. This is a broken/missing WebView2 runtime or OS-level condition
+/// on the user's machine (e.g. missing runtime, insufficient quota, access
+/// denied), not an app bug.
+const WEBVIEW_CREATE_FAILURE_SIGNATURE: &str = "failed to create webview";
+
+/// Stable fingerprint that collapses every locale/HRESULT permutation of the
+/// WebView2 creation failure into a single Sentry issue. The OS reports this
+/// error in the user's system language with varying HRESULT codes, so the
+/// default message-based grouping otherwise fragments one root cause across
+/// multiple issues.
+const WEBVIEW_CREATE_FAILURE_FINGERPRINT: &[std::borrow::Cow<'static, str>] =
+    &[std::borrow::Cow::Borrowed("failed-to-create-webview")];
+
+/// Returns `true` if the event is the WebView2 creation failure (see
+/// [`WEBVIEW_CREATE_FAILURE_SIGNATURE`]). Serialized to JSON for the same
+/// robustness reason as [`is_update_check_noise`].
+fn is_webview_creation_failure(event: &sentry::protocol::Event) -> bool {
+    match serde_json::to_string(event) {
+        Ok(serialized) => serialized.contains(WEBVIEW_CREATE_FAILURE_SIGNATURE),
+        Err(_) => false,
+    }
+}
+
 fn main() {
     let sentry_dsn = dotenvy_macro::dotenv!("SENTRY_DSN");
     let guard = if valid_sentry_dsn(sentry_dsn) {
@@ -52,12 +77,15 @@ fn main() {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
                 enable_logs: true,
-                before_send: Some(std::sync::Arc::new(|event| {
+                before_send: Some(std::sync::Arc::new(|mut event| {
                     if is_update_check_noise(&event) {
-                        None
-                    } else {
-                        Some(event)
+                        return None;
                     }
+                    if is_webview_creation_failure(&event) {
+                        event.fingerprint =
+                            std::borrow::Cow::Borrowed(WEBVIEW_CREATE_FAILURE_FINGERPRINT);
+                    }
+                    Some(event)
                 })),
                 ..Default::default()
             },
