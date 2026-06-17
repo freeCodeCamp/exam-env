@@ -17,6 +17,30 @@ pub struct SentryState {
     pub client: Option<sentry::ClientInitGuard>,
 }
 
+/// Substrings identifying non-actionable, update-check failures. These are
+/// network/environment conditions (offline user, timeout, DNS, transient 5xx,
+/// GitHub rate-limit non-200) rather than bugs: `get_update` tries R2 first and
+/// falls back to GitHub, so a failed check is a recoverable, expected path that
+/// just means "no update right now".
+const UPDATE_CHECK_NOISE_SIGNATURES: &[&str] = &[
+    "failed to request releases",
+    "failed to deserialize releases as json",
+    "failed to check for updates",
+];
+
+/// Returns `true` if the event is a non-actionable, update-check failure.
+///
+/// The event is serialized to JSON so the match is robust regardless of which
+/// field (message, log entry, or exception value) carries the error text.
+fn is_update_check_noise(event: &sentry::protocol::Event) -> bool {
+    match serde_json::to_string(event) {
+        Ok(serialized) => UPDATE_CHECK_NOISE_SIGNATURES
+            .iter()
+            .any(|sig| serialized.contains(sig)),
+        Err(_) => false,
+    }
+}
+
 fn main() {
     let sentry_dsn = dotenvy_macro::dotenv!("SENTRY_DSN");
     let guard = if valid_sentry_dsn(sentry_dsn) {
@@ -28,6 +52,13 @@ fn main() {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
                 enable_logs: true,
+                before_send: Some(std::sync::Arc::new(|event| {
+                    if is_update_check_noise(&event) {
+                        None
+                    } else {
+                        Some(event)
+                    }
+                })),
                 ..Default::default()
             },
         )))
