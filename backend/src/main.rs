@@ -11,59 +11,11 @@ use utils::valid_sentry_dsn;
 mod commands;
 mod error;
 mod secret;
+mod sentry_filter;
 mod utils;
 
 pub struct SentryState {
     pub client: Option<sentry::ClientInitGuard>,
-}
-
-/// Substrings identifying non-actionable, update-check failures. These are
-/// network/environment conditions (offline user, timeout, DNS, transient 5xx,
-/// GitHub rate-limit non-200) rather than bugs: `get_update` tries R2 first and
-/// falls back to GitHub, so a failed check is a recoverable, expected path that
-/// just means "no update right now".
-const UPDATE_CHECK_NOISE_SIGNATURES: &[&str] = &[
-    "failed to request releases",
-    "failed to deserialize releases as json",
-    "failed to check for updates",
-];
-
-/// Returns `true` if the event is a non-actionable, update-check failure.
-///
-/// The event is serialized to JSON so the match is robust regardless of which
-/// field (message, log entry, or exception value) carries the error text.
-fn is_update_check_noise(event: &sentry::protocol::Event) -> bool {
-    match serde_json::to_string(event) {
-        Ok(serialized) => UPDATE_CHECK_NOISE_SIGNATURES
-            .iter()
-            .any(|sig| serialized.contains(sig)),
-        Err(_) => false,
-    }
-}
-
-/// Substring identifying the WebView2 "failed to create webview" startup
-/// failure, emitted by `tauri_runtime_wry` when the main window's webview cannot
-/// be created. This is a broken/missing WebView2 runtime or OS-level condition
-/// on the user's machine (e.g. missing runtime, insufficient quota, access
-/// denied), not an app bug.
-const WEBVIEW_CREATE_FAILURE_SIGNATURE: &str = "failed to create webview";
-
-/// Stable fingerprint that collapses every locale/HRESULT permutation of the
-/// WebView2 creation failure into a single Sentry issue. The OS reports this
-/// error in the user's system language with varying HRESULT codes, so the
-/// default message-based grouping otherwise fragments one root cause across
-/// multiple issues.
-const WEBVIEW_CREATE_FAILURE_FINGERPRINT: &[std::borrow::Cow<'static, str>] =
-    &[std::borrow::Cow::Borrowed("failed-to-create-webview")];
-
-/// Returns `true` if the event is the WebView2 creation failure (see
-/// [`WEBVIEW_CREATE_FAILURE_SIGNATURE`]). Serialized to JSON for the same
-/// robustness reason as [`is_update_check_noise`].
-fn is_webview_creation_failure(event: &sentry::protocol::Event) -> bool {
-    match serde_json::to_string(event) {
-        Ok(serialized) => serialized.contains(WEBVIEW_CREATE_FAILURE_SIGNATURE),
-        Err(_) => false,
-    }
 }
 
 fn main() {
@@ -77,16 +29,7 @@ fn main() {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
                 enable_logs: true,
-                before_send: Some(std::sync::Arc::new(|mut event| {
-                    if is_update_check_noise(&event) {
-                        return None;
-                    }
-                    if is_webview_creation_failure(&event) {
-                        event.fingerprint =
-                            std::borrow::Cow::Borrowed(WEBVIEW_CREATE_FAILURE_FINGERPRINT);
-                    }
-                    Some(event)
-                })),
+                before_send: Some(std::sync::Arc::new(sentry_filter::before_send)),
                 ..Default::default()
             },
         )))
@@ -172,8 +115,14 @@ fn main() {
         .setup(|app| {
             // Deep Link for app is registered during runtime as well as install,
             // because this is the only way to use deep links during development.
+            // Deep-link registration can fail on minimal Linux environments that
+            // lack desktop-integration tooling (e.g. `update-desktop-database`).
+            // That is non-fatal: the app runs fine without the OS-registered
+            // scheme, so log and continue instead of crashing the setup hook.
             #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
-            app.deep_link().register("exam-environment")?;
+            if let Err(e) = app.deep_link().register("exam-environment") {
+                tracing::warn!(error = ?e, "failed to register deep-link scheme; continuing");
+            }
 
             #[cfg(target_os = "macos")]
             {

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, ResourceId, Runtime, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::{Update, UpdaterExt};
-use tracing::{debug, error, info};
+use tracing::{debug, info, warn};
 
 use crate::{
     error::{Error, ErrorKind, PassToSentry},
@@ -215,7 +215,10 @@ async fn get_update<R: Runtime>(app: AppHandle<R>) -> Result<Option<Update>, Err
     match try_update_url(&app, r2_update_url).await {
         Ok(update) => Ok(update),
         Err(e) => {
-            error!(error = ?e, "error checking update from r2");
+            // R2 failing then falling back to GitHub is an expected, recoverable
+            // path, not an error worth a Sentry issue. Log at warn so it stays
+            // out of the error-event stream.
+            warn!(error = ?e, "error checking update from r2, falling back to GitHub");
             let gh_update_url = if let Some(url) = get_gh_latest_json().await? {
                 url
             } else {
