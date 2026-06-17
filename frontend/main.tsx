@@ -21,12 +21,29 @@ import { theme } from "./theme";
 import "./index.css";
 import "@freecodecamp/ui/dist/base.css";
 
+// Expected, non-actionable client condition: the user's authorization token
+// has been revoked server-side. It is reported from several capture sites and,
+// because the minified bundle name changes every release, Sentry fragments it
+// into a new issue per build. Drop it before sending (see also the "do not
+// capture client errors" guard in utils/fetch.ts).
+const REVOKED_TOKEN_MESSAGE = "Provided token is revoked";
+
 Sentry.init({
   dsn: __SENTRY_DSN__,
   release: __APP_VERSION__,
   environment: __ENVIRONMENT__,
   tracesSampleRate: 1.0,
   enableLogs: true,
+  beforeSend(event) {
+    const messages = [
+      event.message,
+      ...(event.exception?.values?.map((v) => v.value) ?? []),
+    ];
+    if (messages.some((m) => m?.includes(REVOKED_TOKEN_MESSAGE))) {
+      return null;
+    }
+    return event;
+  },
 });
 
 const queryClient = new QueryClient();
