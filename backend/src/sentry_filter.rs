@@ -31,8 +31,10 @@ const NON_ACTIONABLE_NOISE_SIGNATURES: &[&str] = &[
 /// with varying HRESULT codes, so default message-based grouping fragments one
 /// root cause across many issues. Rather than drop them (they explain why the
 /// app won't start), they are kept but consolidated under one fingerprint.
-const WEBVIEW_UNAVAILABLE_SIGNATURES: &[&str] =
-    &["failed to create webview", "Could not find the webview runtime"];
+const WEBVIEW_UNAVAILABLE_SIGNATURES: &[&str] = &[
+    "failed to create webview",
+    "Could not find the webview runtime",
+];
 
 /// Stable fingerprint collapsing every [`WEBVIEW_UNAVAILABLE_SIGNATURES`]
 /// variant into a single Sentry issue.
@@ -40,10 +42,10 @@ const WEBVIEW_UNAVAILABLE_FINGERPRINT: &[std::borrow::Cow<'static, str>] =
     &[std::borrow::Cow::Borrowed("webview-unavailable")];
 
 /// Filters and rewrites an event on its way to Sentry. Returns `None` to drop
-/// the event, or `Some(event)` to send it (possibly with an adjusted
-/// fingerprint). Intended to be used directly as the client's `before_send`.
+/// the event, or `Some(event)` to send it - adjusting the fingerprint as needed.
 pub fn before_send(mut event: Event<'static>) -> Option<Event<'static>> {
     if event_matches(&event, NON_ACTIONABLE_NOISE_SIGNATURES) {
+        tracing::warn!(error = ?event, "dropping non-actionable Sentry event");
         return None;
     }
     if event_matches(&event, WEBVIEW_UNAVAILABLE_SIGNATURES) {
