@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import createClient, { FetchResponse } from "openapi-fetch";
-import { captureException, logger } from "@sentry/react";
+import { captureException, logger, startSpan } from "@sentry/react";
 import {
   DownloadEvent,
   DownloadOptions,
@@ -13,6 +13,7 @@ import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
 import { ErrorResponse } from "./errors";
+import { logUsage } from "./telemetry";
 
 const fetch = (r: URL | Request | string) =>
   tauriFetch(r, { connectTimeout: 5_000 });
@@ -37,13 +38,20 @@ export async function verifyToken(token: string) {
   }
 
   console.debug("in verify");
-  const res = await client.GET("/exam-environment/token-meta", {
-    params: {
-      header: {
-        "exam-environment-authorization-token": token,
-      },
+  const res = await startSpan(
+    { name: "GET /exam-environment/token-meta", op: "http.client" },
+    async (span) => {
+      const r = await client.GET("/exam-environment/token-meta", {
+        params: {
+          header: {
+            "exam-environment-authorization-token": token,
+          },
+        },
+      });
+      span.setAttribute("http.response.status_code", r.response.status);
+      return r;
     },
-  });
+  );
   console.debug("done");
 
   debugResponse(res);
@@ -80,14 +88,21 @@ export async function getGeneratedExam(examId: string) {
 
   const token = await invoke<string>("get_authorization_token");
 
-  const res = await client.POST("/exam-environment/exam/generated-exam", {
-    body: { examId },
-    params: {
-      header: {
-        "exam-environment-authorization-token": token,
-      },
+  const res = await startSpan(
+    { name: "POST /exam-environment/exam/generated-exam", op: "http.client" },
+    async (span) => {
+      const r = await client.POST("/exam-environment/exam/generated-exam", {
+        body: { examId },
+        params: {
+          header: {
+            "exam-environment-authorization-token": token,
+          },
+        },
+      });
+      span.setAttribute("http.response.status_code", r.response.status);
+      return r;
     },
-  });
+  );
 
   debugResponse(res);
 
@@ -124,14 +139,21 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
 
   const token = await invoke<string>("get_authorization_token");
 
-  const res = await client.POST("/exam-environment/exam/attempt", {
-    body: { attempt: examAttempt },
-    params: {
-      header: {
-        "exam-environment-authorization-token": token,
-      },
+  const res = await startSpan(
+    { name: "POST /exam-environment/exam/attempt", op: "http.client" },
+    async (span) => {
+      const r = await client.POST("/exam-environment/exam/attempt", {
+        body: { attempt: examAttempt },
+        params: {
+          header: {
+            "exam-environment-authorization-token": token,
+          },
+        },
+      });
+      span.setAttribute("http.response.status_code", r.response.status);
+      return r;
     },
-  });
+  );
 
   debugResponse(res);
 
@@ -171,13 +193,20 @@ export async function getExams() {
 
   const token = await invoke<string>("get_authorization_token");
 
-  const res = await client.GET("/exam-environment/exams", {
-    params: {
-      header: {
-        "exam-environment-authorization-token": token,
-      },
+  const res = await startSpan(
+    { name: "GET /exam-environment/exams", op: "http.client" },
+    async (span) => {
+      const r = await client.GET("/exam-environment/exams", {
+        params: {
+          header: {
+            "exam-environment-authorization-token": token,
+          },
+        },
+      });
+      span.setAttribute("http.response.status_code", r.response.status);
+      return r;
     },
-  });
+  );
 
   debugResponse(res);
 
@@ -196,14 +225,21 @@ export async function getAttemptsByExamId(examId: string) {
 
   const token = await invoke<string>("get_authorization_token");
 
-  const res = await client.GET(`/exam-environment/exams/{examId}/attempts`, {
-    params: {
-      path: { examId },
-      header: {
-        "exam-environment-authorization-token": token,
-      },
+  const res = await startSpan(
+    { name: "GET /exam-environment/exams/{examId}/attempts", op: "http.client" },
+    async (span) => {
+      const r = await client.GET(`/exam-environment/exams/{examId}/attempts`, {
+        params: {
+          path: { examId },
+          header: {
+            "exam-environment-authorization-token": token,
+          },
+        },
+      });
+      span.setAttribute("http.response.status_code", r.response.status);
+      return r;
     },
-  });
+  );
 
   if (res.error || res.response.status >= 300) {
     captureException(res.error);
@@ -283,12 +319,25 @@ export async function checkForUpdate() {
     // });
   }
 
-  const metadata = await invoke<UpdateMetadata>("check");
+  const metadata = await startSpan(
+    { name: "check_for_update", op: "app.update.check" },
+    (span) => {
+      const m = invoke<UpdateMetadata>("check");
+      return m.then((value) => {
+        span.setAttribute("update.available", !!value);
+        return value;
+      });
+    },
+  );
   if (metadata) {
     const update = new Update(metadata);
     console.debug(
       `Found update ${update.version} from ${update.date} with notes ${update.body}`,
     );
+    logUsage("update.available", {
+      version: update.version,
+      current_version: update.currentVersion,
+    });
     return update;
   }
   return null;

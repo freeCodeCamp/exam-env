@@ -11,28 +11,35 @@ use crate::{
     SentryState,
 };
 
+#[tracing::instrument]
 #[tauri::command]
 pub fn get_authorization_token() -> Option<String> {
     secret::get_authorization_token()
 }
 
 /// Sets the Exam Environment Authorization Token, after ensuring it is valid
+// `new_authorization_token` is the secret itself - never record it as a span field.
+// Keyring errors are already captured to Sentry in `secret`, so no `err` here.
+#[tracing::instrument(skip(new_authorization_token))]
 #[tauri::command]
 pub fn set_authorization_token(new_authorization_token: String) -> Result<(), Error> {
     secret::set_authorization_token(&new_authorization_token)
 }
 
+#[tracing::instrument]
 #[tauri::command]
 pub fn remove_authorization_token() -> Result<(), Error> {
     secret::remove_authorization_token()
 }
 
+#[tracing::instrument(skip(app))]
 #[tauri::command]
 pub fn restart_app(app: AppHandle) {
     app.restart()
 }
 
 /// Passes the error string to Sentry as a `Client` error, and flushes the Sentry client.
+#[tracing::instrument(skip(sentry_state, app))]
 #[tauri::command]
 pub fn emit_to_sentry(error_str: String, sentry_state: State<SentryState>, app: AppHandle) {
     let error = Error::new(ErrorKind::Client, error_str, "Client error");
@@ -80,7 +87,10 @@ pub struct Metadata {
 /// Dynamically uses the api location to determine what environment the app release comes from.
 ///
 /// Then, fetches the latest release for that environment from GitHub, and constructs update metadata from it.
-#[tracing::instrument(skip(app, webview), err)]
+// A failed update check is an expected, recoverable "no update right now" path
+// (offline, timeout, 5xx, fallback exhausted), not a bug. Log the returned error
+// at WARN so it lands in Sentry Logs for visibility but never becomes an issue.
+#[tracing::instrument(skip(app, webview), err(level = "warn"))]
 #[tauri::command]
 pub async fn check<R: Runtime>(
     app: AppHandle<R>,
@@ -131,8 +141,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
                 format!("failed to request releases: {:#?}", e),
                 "Unable to fetch releases to check for updates",
             )
-        })
-        .capture()?
+        })?
         .error_for_status()
         .map_err(|e| {
             Error::new(
@@ -151,8 +160,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
                 format!("failed to deserialize releases as json: {:#?}", e),
                 "Unable to fetch releases to check for updates",
             )
-        })
-        .capture()?;
+        })?;
 
     let release = match releases
         .iter()
@@ -176,8 +184,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
             ErrorKind::Request,
             "failed to find latest.json asset in release".to_string(),
             "Unable to fetch releases to check for updates",
-        ))
-        .capture()?;
+        ))?;
 
     let update_url = Url::parse(&asset.browser_download_url)
         .map_err(|e| {
@@ -186,8 +193,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
                 format!("failed to parse latest.json url: {:#?}", e),
                 "Unable to fetch release to check for updates",
             )
-        })
-        .capture()?;
+        })?;
 
     Ok(Some(update_url))
 }
@@ -202,8 +208,7 @@ fn get_r2_latest_json() -> Result<Url, Error> {
             format!("failed to parse latest.json url: {:#?}", e),
             "Unable to fetch release to check for updates",
         )
-    })
-    .capture()?;
+    })?;
 
     Ok(update_url)
 }
@@ -251,8 +256,7 @@ async fn try_update_url<R: Runtime>(
                 format!("failed to create updater builder: {:#?}", e),
                 "Unable to download latest update",
             )
-        })
-        .capture()?
+        })?
         .build()
         .map_err(|e| {
             Error::new(
@@ -260,8 +264,7 @@ async fn try_update_url<R: Runtime>(
                 format!("failed to build updater : {:#?}", e),
                 "Unable to download latest update",
             )
-        })
-        .capture()?
+        })?
         .check()
         .await
         .map_err(|e| {
@@ -271,5 +274,4 @@ async fn try_update_url<R: Runtime>(
                 "Unable to download latest update",
             )
         })
-        .capture()
 }

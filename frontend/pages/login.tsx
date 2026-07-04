@@ -21,6 +21,7 @@ import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { LEARN_BASE } from "../utils/env";
 import { getErrorMessage } from "../utils/errors";
+import { trackAction } from "../utils/telemetry";
 
 export function Login() {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export function Login() {
   }
 
   async function connectAuthToken(token: string) {
+    trackAction("auth.connect_clicked");
     try {
       await login.mutateAsync(token);
       navigate({ to: LandingRoute.to });

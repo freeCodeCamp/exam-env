@@ -17,6 +17,7 @@ import { ExamLandingRoute } from "./pages/exam-landing";
 import { rootRoute } from "./pages/root";
 import { AuthProvider } from "./contexts/auth";
 import { theme } from "./theme";
+import { logUsage } from "./utils/telemetry";
 
 import "./index.css";
 import "@freecodecamp/ui/dist/base.css";
@@ -39,8 +40,20 @@ Sentry.init({
   dsn: __SENTRY_DSN__,
   release: __APP_VERSION__,
   environment: __ENVIRONMENT__,
+  // Performance tracing. browserTracingIntegration is on by default and
+  // captures pageload/navigation; our custom spans (utils/fetch.ts) cover the
+  // API/update calls. tracePropagationTargets links those spans to the
+  // freeCodeCamp backend so a request can be followed FE -> BE.
   tracesSampleRate: 1.0,
+  tracePropagationTargets: [__FREECODECAMP_API__],
+  // Structured usage logs (utils/telemetry.ts) + Sentry's own log capture.
   enableLogs: true,
+  // Session Replay, errors-only: no proactive session sampling, but capture a
+  // replay whenever an error is reported. maskAllText + blockAllMedia keep exam
+  // questions/answers and any token text out of the recording (integrity/PII).
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 1.0,
+  integrations: [Sentry.replayIntegration()],
   beforeSend(event) {
     const haystack = [
       event.message,
@@ -60,6 +73,11 @@ Sentry.init({
     }
     return event;
   },
+});
+
+logUsage("app.launched", {
+  version: __APP_VERSION__,
+  environment: __ENVIRONMENT__,
 });
 
 const queryClient = new QueryClient();
@@ -87,5 +105,5 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         </ChakraProvider>
       </AuthProvider>
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

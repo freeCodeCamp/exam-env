@@ -25,6 +25,7 @@ import { useContext, useRef } from "react";
 import { SplashscreenRoute } from "../pages/splashscreen";
 import { LandingRoute } from "../pages/landing";
 import { AuthContext } from "../contexts";
+import { trackAction } from "../utils/telemetry";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -118,7 +119,10 @@ export function Header() {
             )}
             {!!token.data && (
               <Button
-                onClick={() => logout.mutate()}
+                onClick={() => {
+                  trackAction("auth.logout_clicked");
+                  logout.mutate();
+                }}
                 variant="ghost"
                 w={"100%"}
                 rightIcon={<ArrowForwardIcon />}

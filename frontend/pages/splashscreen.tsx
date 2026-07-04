@@ -24,6 +24,7 @@ import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { checkForUpdate, delayForTesting } from "../utils/fetch";
 import { getErrorMessage } from "../utils/errors";
+import { logUsage, trackAction } from "../utils/telemetry";
 
 function SplashParents({ children }: { children: ReactNode }) {
   return (
@@ -82,6 +83,7 @@ export function Splashscreen() {
       let downloaded = 0;
       let contentLength: number | undefined = 0;
 
+      logUsage("update.download_started", { version: update!.version });
       await update!.downloadAndInstall((event) => {
         switch (event.event) {
           case "Started":
@@ -102,9 +104,11 @@ export function Splashscreen() {
       });
 
       console.debug("Update installed");
+      logUsage("update.installed", { version: update!.version });
       await restartApp();
     },
     onError: (error) => {
+      logUsage("update.failed", { version: update?.version });
       captureException(error);
     },
   });
@@ -173,7 +177,13 @@ export function Splashscreen() {
           <ListIcon as={InfoIcon} color="blue.500" marginTop="2px" />
           Download update (version {update.version})?
         </ListItem>
-        <Button block={true} onClick={() => downloadAndInstallQuery.mutate()}>
+        <Button
+          block={true}
+          onClick={() => {
+            trackAction("update.download_clicked", { version: update.version });
+            downloadAndInstallQuery.mutate();
+          }}
+        >
           Download Now
         </Button>
         <ListItem display="flex" alignItems="center">
@@ -330,9 +340,14 @@ async function checkDeviceCompatibility() {
   }
   const compatError = await updateDeviceList();
   if (compatError) {
+    logUsage("splash.device_check", {
+      result: "fail",
+      reason: compatError.message,
+    });
     captureException(compatError);
     throw compatError;
   }
+  logUsage("splash.device_check", { result: "pass" });
   return null;
 }
 

@@ -24,6 +24,7 @@ import { captureException } from "@sentry/react";
 import { captureAndNavigate, getErrorMessage } from "../utils/errors";
 import { PrismFormatted } from "../components/prism-formatted";
 import { parseMarkdown } from "../utils/markdown";
+import { logUsage, trackAction } from "../utils/telemetry";
 
 export function ExamLanding() {
   const [hasAgreed, setHasAgreed] = useState(false);
@@ -60,6 +61,9 @@ export function ExamLanding() {
       let downloaded = 0;
       let contentLength: number | undefined = 0;
 
+      logUsage("update.download_started", {
+        version: updateMutation.data!.version,
+      });
       await updateMutation.data!.downloadAndInstall((event) => {
         switch (event.event) {
           case "Started":
@@ -80,9 +84,11 @@ export function ExamLanding() {
       });
 
       console.debug("Update installed");
+      logUsage("update.installed", { version: updateMutation.data!.version });
       await restartApp();
     },
     onError: (error) => {
+      logUsage("update.failed", { version: updateMutation.data?.version });
       captureException(error);
     },
   });
@@ -178,7 +184,10 @@ export function ExamLanding() {
                 downloadAndInstallMutation.isError
               }
               block={true}
-              onClick={() => startExamMutation.mutate()}
+              onClick={() => {
+                trackAction("exam.start_clicked", { examId });
+                startExamMutation.mutate();
+              }}
             >
               {updateMutation.isPending || startExamMutation.isPending
                 ? "Checking for updates..."
@@ -196,7 +205,12 @@ export function ExamLanding() {
                 </Text>
                 <Button
                   block={true}
-                  onClick={() => downloadAndInstallMutation.mutate()}
+                  onClick={() => {
+                    trackAction("update.download_clicked", {
+                      version: updateMutation.data?.version,
+                    });
+                    downloadAndInstallMutation.mutate();
+                  }}
                 >
                   Download Now
                 </Button>

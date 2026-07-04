@@ -29,6 +29,11 @@ fn main() {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
                 enable_logs: true,
+                // Performance monitoring: emit transactions/spans for the
+                // `#[tracing::instrument]`-ed commands so command latency and
+                // the update-check path are observable. Volume is low (one
+                // window per user), so full sampling is affordable.
+                traces_sample_rate: 1.0,
                 before_send: Some(std::sync::Arc::new(sentry_filter::before_send)),
                 ..Default::default()
             },
