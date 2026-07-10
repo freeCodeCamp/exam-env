@@ -35,7 +35,7 @@ export function Login() {
   }, [token.data, token.isError]);
 
   function handleTokenChange(e: ChangeEvent<HTMLInputElement>) {
-    setAccountToken(e.target.value);
+    setAccountToken(e.target.value.trim());
   }
 
   async function connectAuthToken(token: string) {

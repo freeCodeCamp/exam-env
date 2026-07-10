@@ -29,6 +29,12 @@ fn main() {
                 release: sentry::release_name!(),
                 environment: Some(utils::ENVIRONMENT.into()),
                 enable_logs: true,
+                // Captured errors (Credential/FS/Request/...) carry no
+                // stacktrace of their own; attach the capture-site stack so
+                // they are locatable once debug files are uploaded in CI.
+                attach_stacktrace: true,
+                // Release health: crash-free sessions/users per release.
+                auto_session_tracking: true,
                 // Performance monitoring: emit transactions/spans for the
                 // `#[tracing::instrument]`-ed commands so command latency and
                 // the update-check path are observable. Volume is low (one

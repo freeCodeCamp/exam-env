@@ -142,10 +142,12 @@ impl PassToSentry<Error> for Error {
 }
 
 fn configure_scope() {
-    if let Some(authorization_token) = get_authorization_token() {
+    if let Some(user_id) =
+        get_authorization_token().and_then(|token| crate::utils::token_user_id(&token))
+    {
         sentry::configure_scope(|scope| {
             let user = sentry::User {
-                id: Some(authorization_token),
+                id: Some(user_id),
                 ..Default::default()
             };
             scope.set_user(Some(user));

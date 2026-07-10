@@ -28,6 +28,10 @@ export default defineConfig(async ({ mode }) => {
         authToken: process.env.SENTRY_AUTH_TOKEN,
         org: "freecodecamp",
         project: "exam-env",
+        disable: env.ENVIRONMENT === "development",
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./dist/**/*.map"],
+        },
       }),
     ],
 

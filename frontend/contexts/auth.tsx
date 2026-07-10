@@ -7,6 +7,20 @@ import { setUser } from "@sentry/react";
 import { AuthContext } from ".";
 import { logUsage } from "../utils/telemetry";
 
+function tokenUserId(token: string): string | undefined {
+  try {
+    const payload = token.split(".")[1];
+    const json = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
+    );
+    return typeof json.examEnvironmentAuthorizationToken === "string"
+      ? json.examEnvironmentAuthorizationToken
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Memoize queryFn to prevent infinite re-fetching
   const tokenQueryFn = useCallback(async () => {
@@ -19,7 +33,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logUsage("auth.token_verify", { result: "invalid" });
         return null;
       }
-      setUser({ id: token });
+      const userId = tokenUserId(token);
+      if (userId) {
+        setUser({ id: userId });
+      }
       logUsage("auth.token_verify", { result: "valid" });
       return token;
     }

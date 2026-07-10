@@ -30,10 +30,17 @@ import "@freecodecamp/ui/dist/base.css";
 // - update-download failures: the updater plugin failing to fetch/download an
 //   update asset is a transient network/server condition (offline, 403/redirect
 //   on the asset, timeout), not a bug. The UI already surfaces a retry button.
+// - "failed to check for updates": FE-side capture of the same update-check
+//   noise the backend filter already drops (backend/src/sentry_filter.rs).
+// - devtools toggle rejection: users pressing the devtools shortcut in
+//   production; the capability is deliberately denied (exam integrity), so the
+//   rejection is expected.
 const DROP_MESSAGE_SIGNATURES = [
   "Provided token is revoked",
   "error sending request for url",
   "Download request failed with status",
+  "failed to check for updates",
+  "internal_toggle_devtools not allowed",
 ];
 
 Sentry.init({

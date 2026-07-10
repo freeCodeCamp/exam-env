@@ -1,3 +1,15 @@
 [workspace]
 members = ["backend"]
 resolver = "3"
+
+# Release builds carry file/line debug info so Sentry can symbolicate native
+# panics (uploaded via `sentry-cli debug-files upload` in CI). No debug builds
+# are ever released, so this is the only source of readable stack traces.
+[profile.release]
+# Line tables are enough for file/line frames and add little size compared to
+# full debug info.
+debug = "line-tables-only"
+# Keep debug info out of the shipped binary: .pdb on Windows (MSVC default),
+# .dSYM on macOS, .dwp on Linux. If Linux .dwp files turn out not to
+# symbolicate on Sentry, fall back to unset (debug info embedded in the ELF).
+split-debuginfo = "packed"

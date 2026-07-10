@@ -34,6 +34,9 @@ const NON_ACTIONABLE_NOISE_SIGNATURES: &[&str] = &[
 const WEBVIEW_UNAVAILABLE_SIGNATURES: &[&str] = &[
     "failed to create webview",
     "Could not find the webview runtime",
+    // Same root cause reported without the "failed to create webview" prefix
+    // (e.g. HRESULT 0x8007139F "not in the correct state").
+    "WebView2 error: WindowsError",
 ];
 
 /// Stable fingerprint collapsing every [`WEBVIEW_UNAVAILABLE_SIGNATURES`]
@@ -61,5 +64,50 @@ fn event_matches(event: &Event, signatures: &[&str]) -> bool {
     match serde_json::to_string(event) {
         Ok(serialized) => signatures.iter().any(|sig| serialized.contains(sig)),
         Err(_) => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn event_with_message(message: &str) -> Event<'static> {
+        Event {
+            message: Some(message.to_string()),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn drops_non_actionable_noise() {
+        let event = event_with_message(
+            "failed to check for updates: error sending request for url (https://example.com)",
+        );
+        assert!(before_send(event).is_none());
+    }
+
+    #[test]
+    fn consolidates_webview_creation_failure() {
+        let event = event_with_message(
+            "failed to create webview: WebView2 error: WindowsError(Error { code: HRESULT(0x80070057), message: \"The parameter is incorrect.\" })",
+        );
+        let sent = before_send(event).expect("event should be kept");
+        assert_eq!(*sent.fingerprint, *WEBVIEW_UNAVAILABLE_FINGERPRINT);
+    }
+
+    #[test]
+    fn consolidates_bare_webview2_error() {
+        let event = event_with_message(
+            "WebView2 error: WindowsError(Error { code: HRESULT(0x8007139F), message: \"The group or resource is not in the correct state to perform the requested operation.\" })",
+        );
+        let sent = before_send(event).expect("event should be kept");
+        assert_eq!(*sent.fingerprint, *WEBVIEW_UNAVAILABLE_FINGERPRINT);
+    }
+
+    #[test]
+    fn keeps_unrelated_events_untouched() {
+        let event = event_with_message("Credential: something else went wrong");
+        let sent = before_send(event).expect("event should be kept");
+        assert_ne!(*sent.fingerprint, *WEBVIEW_UNAVAILABLE_FINGERPRINT);
     }
 }

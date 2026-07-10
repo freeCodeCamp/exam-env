@@ -1389,6 +1389,7 @@ dependencies = [
 name = "exam-env"
 version = "2.0.2"
 dependencies = [
+ "base64 0.22.1",
  "dotenvy_macro",
  "keyring",
  "sentry",

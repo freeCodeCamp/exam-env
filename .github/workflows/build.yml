@@ -253,3 +253,14 @@ jobs:
           uploadUpdaterJson: ${{ inputs.release_id != '' }}
           tagName: ${{ inputs.release_id != '' && format('{0}/{1}', inputs.environment, steps.version.outputs.version) || '' }}
           releaseDraft: ${{ inputs.release_id != '' }}
+
+      # Released binaries are release builds with line-tables-only debug info
+      # split into .pdb/.dSYM/.dwp files (see [profile.release] in Cargo.toml).
+      # Uploading those files lets Sentry symbolicate native panics without
+      # shipping debug info to users.
+      - name: upload native debug symbols to Sentry
+        if: inputs.release_id != ''
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        shell: bash
+        run: bunx @sentry/cli debug-files upload --org freecodecamp --project exam-env ./target

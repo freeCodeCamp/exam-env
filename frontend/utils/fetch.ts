@@ -57,11 +57,15 @@ export async function verifyToken(token: string) {
   debugResponse(res);
 
   if (res.error) {
-    // Do not capture client errors (e.g. bad tokens)
-    if (res.response.status !== 404 && res.response.status !== 418) {
+    // Do not capture client errors (e.g. bad, missing, or malformed tokens)
+    if (
+      res.response.status !== 400 &&
+      res.response.status !== 404 &&
+      res.response.status !== 418
+    ) {
       captureError(res);
     }
-    throw new Error(res.error.message);
+    throw new Error(errorMessage(res));
   }
 
   if (res.response.status >= 400) {
@@ -112,7 +116,7 @@ export async function getGeneratedExam(examId: string) {
     } else {
       captureError(res);
     }
-    throw new Error(res.error.message);
+    throw new Error(errorMessage(res));
   }
 
   const serverDateHeader = res.response.headers.get("Date");
@@ -163,7 +167,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     } else {
       captureError(res);
     }
-    throw new Error(res.error.message);
+    throw new Error(errorMessage(res));
   }
 
   return res.response;
@@ -212,7 +216,7 @@ export async function getExams() {
 
   if (res.error) {
     captureError(res);
-    throw new Error(res.error.message);
+    throw new Error(errorMessage(res));
   }
 
   return res.data;
@@ -242,7 +246,7 @@ export async function getAttemptsByExamId(examId: string) {
   );
 
   if (res.error || res.response.status >= 300) {
-    captureException(res.error);
+    captureError(res);
     throw new Error("unable to get attempts for exam");
   }
 
@@ -362,9 +366,10 @@ interface StandardError {
   message: string;
 }
 
-// function captureError(res: ErrorResponse<StandardError>) {
-function captureError(res: ErrorResponse<StandardError>) {
-  if (res.error.code && res.error.message) {
+// `error` is optional so non-2xx responses without a parsed error body (e.g.
+// getAttemptsByExamId's `status >= 300` guard) can also be captured.
+function captureError(res: { error?: StandardError; response: Response }) {
+  if (res.error?.code && res.error?.message) {
     const se = new Error(
       `${res.error.code}: ${res.error.message}; ${res.response.statusText}`,
     );
@@ -373,4 +378,15 @@ function captureError(res: ErrorResponse<StandardError>) {
     const se = new Error(`Unknown error: ${JSON.stringify(res)}`);
     captureException(se);
   }
+}
+
+// Message for thrown `Error`s. An `Error` without a message is titled
+// "No error message" by Sentry, which groups unrelated failures together.
+function errorMessage(res: { error?: StandardError; response: Response }) {
+  return (
+    res.error?.message ||
+    res.error?.code ||
+    res.response.statusText ||
+    `request failed with status ${res.response.status}`
+  );
 }
