@@ -92,7 +92,7 @@ fn main() {
         "Start: {sentry_release_name}"
     );
 
-    tauri::Builder::default()
+    let run_result = tauri::Builder::default()
         .plugin(tauri_plugin_deep_link::init())
         // Ensure only one window of the app may be open at a time.
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
@@ -138,6 +138,28 @@ fn main() {
             #[cfg(target_os = "macos")]
             {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
+                // Running from the mounted DMG (or app-translocation) makes
+                // the install location read-only: updates and other writes
+                // fail with "Read-only file system (os error 30)". Warn the
+                // user up front instead of surfacing raw errors later.
+                let readonly_location = std::env::current_exe()
+                    .map(|exe| {
+                        let path = exe.to_string_lossy().into_owned();
+                        path.starts_with("/Volumes/") || path.contains("/AppTranslocation/")
+                    })
+                    .unwrap_or(false);
+                if readonly_location {
+                    use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                    tracing::warn!("app is running from a read-only location");
+                    app.dialog()
+                        .message(
+                            "The app is running from a read-only location (for example, straight from the downloaded disk image), so it cannot update itself or save data.\n\nQuit the app, drag it into the Applications folder, and reopen it from there.",
+                        )
+                        .title("Move to Applications")
+                        .kind(MessageDialogKind::Warning)
+                        .show(|_| {});
+                }
             }
 
             // In debug builds, allow window content to be visible
@@ -149,6 +171,41 @@ fn main() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .run(tauri::generate_context!());
+
+    if let Err(e) = run_result {
+        // A missing/broken WebView2 runtime means no window can ever appear,
+        // so remediation guidance has to be a native dialog.
+        #[cfg(windows)]
+        {
+            let message = e.to_string();
+            if message.contains("failed to create webview")
+                || message.contains("webview runtime")
+            {
+                show_webview_unavailable_dialog(&message);
+            }
+        }
+
+        // Panic (matching the previous `.expect`) so the Sentry panic
+        // integration captures the failure and the client guard flushes
+        // during unwind.
+        panic!("error while running tauri application: {e:?}");
+    }
+}
+
+/// Shown when the webview cannot be created (missing/broken WebView2
+/// runtime, unwritable data folder, ...). Uses a plain Win32 dialog because
+/// no webview UI is available at this point.
+#[cfg(windows)]
+fn show_webview_unavailable_dialog(detail: &str) {
+    rfd::MessageDialog::new()
+        .set_level(rfd::MessageLevel::Error)
+        .set_title("freeCodeCamp Exam Environment")
+        .set_description(format!(
+            "The app could not start its browser window (Microsoft Edge WebView2).\n\n\
+             Repairing or reinstalling the WebView2 Runtime usually fixes this:\n\
+             https://developer.microsoft.com/microsoft-edge/webview2/\n\n\
+             Details: {detail}"
+        ))
+        .show();
 }

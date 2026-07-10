@@ -35,12 +35,17 @@ import "@freecodecamp/ui/dist/base.css";
 // - devtools toggle rejection: users pressing the devtools shortcut in
 //   production; the capability is deliberately denied (exam integrity), so the
 //   rejection is expected.
+// - "listeners[eventId].handlerId": upstream tauri bug - the Rust-injected
+//   unlisten script does not guard against listener ids that are already gone
+//   (stale after navigation, see tauri-apps/tauri#15583). Unlistening a dead
+//   listener is a no-op; the thrown TypeError is harmless.
 const DROP_MESSAGE_SIGNATURES = [
   "Provided token is revoked",
   "error sending request for url",
   "Download request failed with status",
   "failed to check for updates",
   "internal_toggle_devtools not allowed",
+  "listeners[eventId].handlerId",
 ];
 
 Sentry.init({
