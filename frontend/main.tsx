@@ -61,11 +61,16 @@ Sentry.init({
   // Structured usage logs (utils/telemetry.ts) + Sentry's own log capture.
   enableLogs: true,
   // Session Replay, errors-only: no proactive session sampling, but capture a
-  // replay whenever an error is reported. maskAllText + blockAllMedia keep exam
-  // questions/answers and any token text out of the recording (integrity/PII).
+  // replay whenever an error is reported.
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1.0,
-  integrations: [Sentry.replayIntegration()],
+  integrations: [
+    Sentry.replayIntegration({
+      maskAllText: false,
+      blockAllMedia: false,
+      maxReplayDuration: 10_000,
+    }),
+  ],
   beforeSend(event) {
     const haystack = [
       event.message,
