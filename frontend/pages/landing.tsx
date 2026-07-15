@@ -40,6 +40,8 @@ export function Landing() {
     queryFn: getExams,
     retry: false,
     refetchOnWindowFocus: false,
+    staleTime: 500,
+    gcTime: 10_000,
   });
 
   if (examsQuery.isPending) {
