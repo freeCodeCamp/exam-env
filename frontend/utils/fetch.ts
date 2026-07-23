@@ -23,6 +23,25 @@ const client = createClient<paths>({
   fetch,
 });
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function isTransientApiError(error: unknown): boolean {
+  return error instanceof ApiError && error.status >= 500;
+}
+
+export function retryTransientApiError(failureCount: number, error: Error) {
+  return failureCount < 2 && isTransientApiError(error);
+}
+
 export async function verifyToken(token: string) {
   if (VITE_MOCK_DATA) {
     if (token) {
@@ -65,11 +84,11 @@ export async function verifyToken(token: string) {
     ) {
       captureError(res);
     }
-    throw new Error(errorMessage(res));
+    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
   }
 
   if (res.response.status >= 400) {
-    throw new Error(res.response.statusText);
+    throw new ApiError(errorMessage(res), res.response.status);
   }
 
   return res.data;
@@ -116,7 +135,7 @@ export async function getGeneratedExam(examId: string) {
     } else {
       captureError(res);
     }
-    throw new Error(errorMessage(res));
+    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
   }
 
   const serverDateHeader = res.response.headers.get("Date");
@@ -137,7 +156,8 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
       code: "EXAMPLE_ERROR",
       message: "Example error when posting exam",
     };
-    throw new Error(error.message);
+    throw new ApiError(error.message, 500, error.code);
+    // throw new Error(error.message);
     // return undefined as never;
   }
 
@@ -167,7 +187,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     } else {
       captureError(res);
     }
-    throw new Error(errorMessage(res));
+    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
   }
 
   return res.response;
@@ -216,7 +236,7 @@ export async function getExams() {
 
   if (res.error) {
     captureError(res);
-    throw new Error(errorMessage(res));
+    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
   }
 
   return res.data;
@@ -230,7 +250,10 @@ export async function getAttemptsByExamId(examId: string) {
   const token = await invoke<string>("get_authorization_token");
 
   const res = await startSpan(
-    { name: "GET /exam-environment/exams/{examId}/attempts", op: "http.client" },
+    {
+      name: "GET /exam-environment/exams/{examId}/attempts",
+      op: "http.client",
+    },
     async (span) => {
       const r = await client.GET(`/exam-environment/exams/{examId}/attempts`, {
         params: {
@@ -247,7 +270,7 @@ export async function getAttemptsByExamId(examId: string) {
 
   if (res.error || res.response.status >= 300) {
     captureError(res);
-    throw new Error("unable to get attempts for exam");
+    throw new ApiError("unable to get attempts for exam", res.response.status);
   }
 
   console.debug(res);

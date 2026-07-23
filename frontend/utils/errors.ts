@@ -93,9 +93,11 @@ export function err<T extends ErrorResponse<any>>(res: T) {
 
 export function captureAndNavigate(
   errorStr: string,
-  navigate: ReturnType<typeof useNavigate>
+  navigate: ReturnType<typeof useNavigate>,
 ) {
-  const error = new Error(errorStr);
+  const error = new Error(
+    errorStr || "Empty error message (source discarded the cause)",
+  );
   const eventId = captureException(error);
   navigate({
     to: LandingRoute.to,

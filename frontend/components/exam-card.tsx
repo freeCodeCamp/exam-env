@@ -1,5 +1,9 @@
 import { Button } from "@freecodecamp/ui";
-import { getAttemptsByExamId, getExams } from "../utils/fetch";
+import {
+  getAttemptsByExamId,
+  getExams,
+  retryTransientApiError,
+} from "../utils/fetch";
 import { useNavigate } from "@tanstack/react-router";
 import { ExamLandingRoute } from "../pages/exam-landing";
 import { useQuery } from "@tanstack/react-query";
@@ -45,7 +49,7 @@ export function ExamCard({ exam }: ExamCardProps) {
   const attemptsQuery = useQuery({
     queryKey: ["exam-attempts", exam.id],
     queryFn: async () => getAttemptsByExamId(exam.id),
-    retry: false,
+    retry: retryTransientApiError,
     refetchOnWindowFocus: false,
   });
 

@@ -2,7 +2,11 @@ import { useCallback, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { verifyToken } from "../utils/fetch";
+import {
+  isTransientApiError,
+  retryTransientApiError,
+  verifyToken,
+} from "../utils/fetch";
 import { setUser } from "@sentry/react";
 import { AuthContext } from ".";
 import { logUsage } from "../utils/telemetry";
@@ -29,6 +33,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         await verifyToken(token);
       } catch (e) {
+        // A transient API failure says nothing about token validity
+        // TanStack Query retries instead of treating the user as logged out.
+        if (isTransientApiError(e)) throw e;
         console.error(e);
         logUsage("auth.token_verify", { result: "invalid" });
         return null;
@@ -48,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     queryKey: ["authorizationToken"],
     queryFn: tokenQueryFn,
     // staleTime: Infinity,
-    retry: false,
+    retry: retryTransientApiError,
     refetchOnWindowFocus: false,
   });
 
@@ -70,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logUsage("auth.login_failure");
       token.refetch();
     },
-    retry: false,
+    retry: retryTransientApiError,
   });
 
   // Mutation to remove token from platform storage

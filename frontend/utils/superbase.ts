@@ -1,15 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { fetch } from "@tauri-apps/plugin-http";
 
-export const supabase = createClient(
-  __SUPABASE_URL__,
-  __SUPABASE_PUBLISHABLE__,
-  {
-    global: {
-      fetch: fetch.bind(globalThis),
-    },
-  },
-);
+const supabase =
+  __SUPABASE_URL__ && __SUPABASE_PUBLISHABLE__
+    ? createClient(__SUPABASE_URL__, __SUPABASE_PUBLISHABLE__, {
+        global: {
+          fetch: fetch.bind(globalThis),
+        },
+      })
+    : ({
+        from() {
+          return { insert() {} };
+        },
+      } as unknown as ReturnType<typeof createClient>);
 
 export const EventKind = {
   CAPTIONS_OPENED: "CAPTIONS_OPENED",

@@ -18,7 +18,11 @@ import { ProtectedRoute } from "../components/protected-route";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { ExamRoute } from "./exam";
-import { checkForUpdate, getExams } from "../utils/fetch";
+import {
+  checkForUpdate,
+  getExams,
+  retryTransientApiError,
+} from "../utils/fetch";
 import { restartApp } from "../utils/commands";
 import { captureException } from "@sentry/react";
 import { captureAndNavigate, getErrorMessage } from "../utils/errors";
@@ -36,7 +40,7 @@ export function ExamLanding() {
   const noteQuery = useQuery({
     queryKey: ["exams"],
     queryFn: getExams,
-    retry: false,
+    retry: retryTransientApiError,
     refetchOnWindowFocus: false,
     select: (data) => {
       const exam = data.find((e) => e.id === examId);
@@ -68,9 +72,7 @@ export function ExamLanding() {
         switch (event.event) {
           case "Started":
             contentLength = event.data.contentLength;
-            console.debug(
-              `Started downloading ${event.data.contentLength} bytes`
-            );
+            console.debug(`Started downloading ${contentLength} bytes`);
             break;
           case "Progress":
             downloaded += event.data.chunkLength;
@@ -118,7 +120,7 @@ export function ExamLanding() {
   }, []);
 
   if (noteQuery.isError) {
-    captureAndNavigate(noteQuery.error.message, navigate);
+    captureAndNavigate(getErrorMessage(noteQuery.error), navigate);
   }
 
   return (
@@ -255,7 +257,7 @@ export function ExamLanding() {
                   {JSON.stringify(
                     downloadAndInstallMutation.error.message,
                     null,
-                    2
+                    2,
                   ).slice(0, 1000)}
                 </Code>
                 <Button onClick={() => downloadAndInstallMutation.mutate()}>

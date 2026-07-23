@@ -22,7 +22,13 @@ import {
 } from "@chakra-ui/icons";
 
 import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
-import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
+import {
+  ApiError,
+  getGeneratedExam,
+  isTransientApiError,
+  postExamAttempt,
+  retryTransientApiError,
+} from "../utils/fetch";
 import { QuestionSetForm } from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
 import { LandingRoute } from "./landing";
@@ -42,9 +48,11 @@ export function Exam() {
     queryKey: ["exam", examId],
     // TODO: If page is "reloaded" once an exam has ended, this could error with "User has completed exam too recently to retake."
     queryFn: () => getGeneratedExam(examId),
-    retry: false,
+    retry: retryTransientApiError,
     refetchOnWindowFocus: false,
   });
+
+  const submissionHadTransientFailure = useRef(false);
 
   const {
     isOpen: questionSubmissionErrorModalIsOpen,
@@ -86,6 +94,16 @@ export function Exam() {
       await postExamAttempt(updatedAttempt);
 
       return updatedAttempt;
+    },
+    onMutate() {
+      submissionHadTransientFailure.current = false;
+    },
+    retry(failureCount, error) {
+      if (failureCount < 3 && isTransientApiError(error)) {
+        submissionHadTransientFailure.current = true;
+        return true;
+      }
+      return false;
     },
     onError(error) {
       if (
@@ -380,6 +398,8 @@ export function Exam() {
     (scrollableElementRef.current?.clientWidth ?? 0);
 
   const allQuestionsAnswered = answeredAll();
+  const submissionRetrying =
+    submitQuestionMutation.isPending && submitQuestionMutation.failureCount > 0;
 
   return (
     <>
@@ -494,11 +514,25 @@ export function Exam() {
               }
               marginLeft="0.4em"
               isLoading={submitQuestionMutation.isPending}
-              loadingText="Submitting"
+              loadingText={
+                submissionRetrying ? "Still submitting..." : "Submitting"
+              }
             >
               Submit Question
             </Button>
           </Flex>
+          {submissionRetrying && (
+            <Text
+              role="status"
+              aria-live="polite"
+              color="orange.500"
+              fontSize="sm"
+              marginTop="0.5em"
+            >
+              Your submission is taking longer than expected. Retrying
+              automatically - do not close the exam.
+            </Text>
+          )}
           <NavigationBubbles
             questions={questions}
             currentQuestionNumber={currentQuestionNumber}
