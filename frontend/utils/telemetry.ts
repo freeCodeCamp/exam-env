@@ -1,13 +1,15 @@
-import { addBreadcrumb, logger } from "@sentry/react";
+import { addBreadcrumb, metrics } from "@sentry/react";
 
 /**
  * Telemetry helpers built on Sentry. Two primitives:
  *
- * - {@link logUsage}: a discrete, queryable usage event emitted as a Sentry
- *   structured log (requires `enableLogs` in `Sentry.init`). Aggregate these in
- *   Sentry Logs/Explore to answer "how is the app used" - logins, device-check
- *   outcomes, update adoption, etc. We deliberately do NOT log exam-funnel
- *   progress (question-by-question), only coarse lifecycle/auth/update signals.
+ * - {@link logUsage}: a discrete usage event emitted as a Sentry counter metric
+ *   (`enableMetrics` is on by default in the SDK). Each call increments a
+ *   counter named after the event, with `attributes` as metric tags so you can
+ *   group/filter in Sentry Metrics to answer "how is the app used" - logins,
+ *   device-check outcomes, update adoption, etc. We deliberately do NOT track
+ *   exam-funnel progress (question-by-question), only coarse
+ *   lifecycle/auth/update signals.
  * - {@link trackAction}: a user-intent breadcrumb attached to the current scope.
  *   It is not searchable on its own; it rides along with the next captured error
  *   to show the path that led there.
@@ -16,12 +18,12 @@ import { addBreadcrumb, logger } from "@sentry/react";
  * either - usage signals must stay free of PII and exam material.
  */
 
-/** Discrete usage event -> Sentry Logs (searchable, aggregatable). */
+/** Discrete usage event -> Sentry counter metric (aggregatable by attribute). */
 export function logUsage(
   event: string,
   attributes: Record<string, unknown> = {},
 ) {
-  logger.info(event, attributes);
+  metrics.count(event, 1, { attributes });
 }
 
 /** User-intent breadcrumb for error context. */

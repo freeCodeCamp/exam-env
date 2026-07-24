@@ -58,7 +58,6 @@ Sentry.init({
   // freeCodeCamp backend so a request can be followed FE -> BE.
   tracesSampleRate: 1.0,
   tracePropagationTargets: [__FREECODECAMP_API__],
-  // Structured usage logs (utils/telemetry.ts) + Sentry's own log capture.
   enableLogs: true,
   // Session Replay, errors-only: no proactive session sampling, but capture a
   // replay whenever an error is reported.
