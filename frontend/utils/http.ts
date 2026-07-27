@@ -2,7 +2,7 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 // Requests run in the Rust process via reqwest, so the WebView document origin
 // is not attached. Force a stable Origin the freeCodeCamp API can validate.
-export const EXAM_ENV_ORIGIN = "https://exam-env.freecodecamp.org";
+export const EXAM_ENV_ORIGIN = "https://exam.freecodecamp.org";
 
 type Init = Parameters<typeof tauriFetch>[1];
 

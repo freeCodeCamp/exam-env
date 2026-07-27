@@ -5,10 +5,10 @@ use tauri_plugin_updater::{Update, UpdaterExt};
 use tracing::{debug, info, warn};
 
 use crate::{
+    SentryState,
     error::{Error, ErrorKind, PassToSentry},
     secret,
-    utils::ENVIRONMENT,
-    SentryState,
+    utils::{ENVIRONMENT, ORIGIN},
 };
 
 #[tracing::instrument]
@@ -133,7 +133,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
     let response = client
         .get("https://api.github.com/repos/freeCodeCamp/exam-env/releases")
         .header("User-Agent", "Exam-Environment")
-        .header("Origin", "https://exam-env.freecodecamp.org")
+        .header("Origin", ORIGIN)
         .send()
         .await
         .map_err(|e| {
@@ -152,16 +152,13 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
             )
         })?;
 
-    let releases: Vec<GitHubRelease> = response
-        .json()
-        .await
-        .map_err(|e| {
-            Error::new(
-                ErrorKind::Serialization,
-                format!("failed to deserialize releases as json: {:#?}", e),
-                "Unable to fetch releases to check for updates",
-            )
-        })?;
+    let releases: Vec<GitHubRelease> = response.json().await.map_err(|e| {
+        Error::new(
+            ErrorKind::Serialization,
+            format!("failed to deserialize releases as json: {:#?}", e),
+            "Unable to fetch releases to check for updates",
+        )
+    })?;
 
     let release = match releases
         .iter()
@@ -187,14 +184,13 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
             "Unable to fetch releases to check for updates",
         ))?;
 
-    let update_url = Url::parse(&asset.browser_download_url)
-        .map_err(|e| {
-            Error::new(
-                ErrorKind::Serialization,
-                format!("failed to parse latest.json url: {:#?}", e),
-                "Unable to fetch release to check for updates",
-            )
-        })?;
+    let update_url = Url::parse(&asset.browser_download_url).map_err(|e| {
+        Error::new(
+            ErrorKind::Serialization,
+            format!("failed to parse latest.json url: {:#?}", e),
+            "Unable to fetch release to check for updates",
+        )
+    })?;
 
     Ok(Some(update_url))
 }
@@ -258,11 +254,19 @@ async fn try_update_url<R: Runtime>(
                 "Unable to download latest update",
             )
         })?
+        .header("Origin", ORIGIN)
+        .map_err(|e| {
+            Error::new(
+                ErrorKind::Request,
+                format!("failed to add origin header to updater builder: {:#?}", e),
+                "Unable to download latest update",
+            )
+        })?
         .build()
         .map_err(|e| {
             Error::new(
                 ErrorKind::Request,
-                format!("failed to build updater : {:#?}", e),
+                format!("failed to build updater: {:#?}", e),
                 "Unable to download latest update",
             )
         })?
