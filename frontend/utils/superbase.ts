@@ -1,14 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
-import { fetch } from "@tauri-apps/plugin-http";
 import { logger } from "@sentry/react";
 
 import { logUsage } from "./telemetry";
+import { httpFetch } from "./http";
 
 const supabase =
   __SUPABASE_URL__ && __SUPABASE_PUBLISHABLE__
     ? createClient(__SUPABASE_URL__, __SUPABASE_PUBLISHABLE__, {
         global: {
-          fetch: fetch.bind(globalThis),
+          fetch: httpFetch,
         },
       })
     : ({

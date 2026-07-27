@@ -133,6 +133,7 @@ async fn get_gh_latest_json() -> Result<Option<Url>, Error> {
     let response = client
         .get("https://api.github.com/repos/freeCodeCamp/exam-env/releases")
         .header("User-Agent", "Exam-Environment")
+        .header("Origin", "https://exam-env.freecodecamp.org")
         .send()
         .await
         .map_err(|e| {

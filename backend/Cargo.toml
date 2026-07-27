@@ -24,7 +24,11 @@ keyring = { version = "3.6.3", features = [
   "apple-native",
   "linux-native",
 ] }
-tauri-plugin-http = { version = "2.5.7", features = ["multipart", "json"] }
+tauri-plugin-http = { version = "2.5.9", features = [
+  "multipart",
+  "json",
+  "unsafe-headers",
+] }
 tauri-plugin-opener = "2"
 time = "0.3.47"
 tauri-plugin-log = "2"

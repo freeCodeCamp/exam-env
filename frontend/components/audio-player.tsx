@@ -11,9 +11,9 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { fetch } from "@tauri-apps/plugin-http";
 import { logger } from "@sentry/react";
 import { FullQuestion } from "../utils/types";
+import { httpFetch } from "../utils/http";
 
 interface AudioPlayerProps {
   fullQuestion: FullQuestion;
@@ -49,7 +49,7 @@ export function AudioPlayer({ fullQuestion }: AudioPlayerProps) {
 
         const fragment = parseMediaFragment(audioUrl);
 
-        const response = await fetch(audioUrl);
+        const response = await httpFetch(audioUrl);
         const arrayBuffer = await response.arrayBuffer();
 
         const audioBuffer =

@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import createClient, { FetchResponse } from "openapi-fetch";
 import { captureException, logger, startSpan } from "@sentry/react";
 import {
@@ -14,9 +13,10 @@ import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
 import { ErrorResponse } from "./errors";
 import { logUsage } from "./telemetry";
+import { httpFetch } from "./http";
 
 const fetch = (r: URL | Request | string) =>
-  tauriFetch(r, { connectTimeout: 5_000 });
+  httpFetch(r, { connectTimeout: 5_000 });
 
 const client = createClient<paths>({
   baseUrl: __FREECODECAMP_API__,
