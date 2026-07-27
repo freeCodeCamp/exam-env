@@ -1,5 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { fetch } from "@tauri-apps/plugin-http";
+import { logger } from "@sentry/react";
+
+import { logUsage } from "./telemetry";
 
 const supabase =
   __SUPABASE_URL__ && __SUPABASE_PUBLISHABLE__
@@ -33,18 +36,39 @@ interface Event {
 }
 
 export async function captureEvent(event: Event) {
+  // Event capture is best-effort analytics, not application-critical
   try {
     const res = await supabase.from("events").insert(event);
-    console.debug(
-      event,
-      res.count,
-      res.data,
-      res.error,
-      res.status,
-      res.statusText,
-    );
+    // Unconfigured builds use a no-op client that returns undefined; skip.
+    if (!res) return;
+    if (res.error) {
+      logUsage("supabase.event_insert", {
+        result: "error",
+        kind: event.kind,
+        status: res.status,
+      });
+      logger.warn("supabase event insert failed", {
+        kind: event.kind,
+        status: res.status,
+        code: res.error.code,
+        message: res.error.message,
+      });
+      return;
+    }
+    logUsage("supabase.event_insert", {
+      result: "ok",
+      status: res.status,
+      kind: event.kind,
+    });
   } catch (e) {
-    console.log(e);
+    logUsage("supabase.event_insert", {
+      result: "exception",
+      kind: event.kind,
+    });
+    logger.warn("supabase event insert threw", {
+      kind: event.kind,
+      message: e instanceof Error ? e.message : String(e),
+    });
   }
 }
 
