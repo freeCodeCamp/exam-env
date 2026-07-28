@@ -6,7 +6,7 @@
 html,
 body {
   overflow-x: hidden;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: chain;
 }
 
 :root {

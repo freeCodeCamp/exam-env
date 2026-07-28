@@ -74,6 +74,7 @@ export function Landing() {
           color="fcc.accentSolid"
           size="xl"
         />
+        <Spacer size="l" />
       </LandingParent>
     );
   }
