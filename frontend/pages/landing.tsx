@@ -1,6 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
 import { Center, Flex, Text, Heading, Spinner } from "@chakra-ui/react";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import { Button, Spacer } from "@freecodecamp/ui";
 
 import { ProtectedRoute } from "../components/protected-route";
@@ -8,11 +8,18 @@ import { Header } from "../components/header";
 import { Flash } from "../components/flash";
 import { getExams } from "../utils/fetch";
 import { rootRoute } from "./root";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { ExamCard } from "../components/exam-card";
 import { getErrorMessage } from "../utils/errors";
+import { RepeatIcon } from "@chakra-ui/icons";
 
-function LandingParent({ children }: { children: ReactNode }) {
+function LandingParent({
+  examsQuery,
+  children,
+}: {
+  examsQuery: UseQueryResult;
+  children: ReactNode;
+}) {
   const { flashKind, flashMessage } = LandingRoute.useSearch();
 
   return (
@@ -22,7 +29,19 @@ function LandingParent({ children }: { children: ReactNode }) {
       <Center as="main" id="main-content">
         <Flex flexDirection={"column"}>
           <Spacer size="m" />
-          <Heading as="h1">Exam Selection</Heading>
+          <Flex justifyContent={"space-between"}>
+            <Heading as="h1" marginBottom={0}>
+              Exam Selection
+            </Heading>
+            <Button
+              size="medium"
+              onClick={() => {
+                examsQuery.refetch();
+              }}
+            >
+              <RepeatIcon />
+            </Button>
+          </Flex>
           <Spacer size="m" />
           <Text>
             Please select the exam you would like to take from the list below.
@@ -44,9 +63,9 @@ export function Landing() {
     gcTime: 10_000,
   });
 
-  if (examsQuery.isPending) {
+  if (examsQuery.isPending || examsQuery.isFetching) {
     return (
-      <LandingParent>
+      <LandingParent examsQuery={examsQuery}>
         <Spinner
           alignSelf={"center"}
           thickness="4px"
@@ -61,7 +80,7 @@ export function Landing() {
 
   if (examsQuery.isError) {
     return (
-      <LandingParent>
+      <LandingParent examsQuery={examsQuery}>
         <Text color="fcc.danger">{getErrorMessage(examsQuery.error)}</Text>
         <Button
           variant={"danger"}
@@ -84,7 +103,7 @@ export function Landing() {
   });
 
   return (
-    <LandingParent>
+    <LandingParent examsQuery={examsQuery}>
       <ul
         style={{ listStyleType: "none", padding: 0 }}
         aria-label="Available exams"

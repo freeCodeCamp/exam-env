@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { WarningIcon } from "@chakra-ui/icons";
 import { getErrorMessage } from "../utils/errors";
+import type { ReactNode } from "react";
 
 type Exams = Awaited<ReturnType<typeof getExams>>;
 type Attempts = NonNullable<Awaited<ReturnType<typeof getAttemptsByExamId>>>;
@@ -78,26 +79,15 @@ export function ExamCard({ exam }: ExamCardProps) {
                 {exam.config.name}
               </Heading>
               <Flex justifyContent={"space-between"}>
-                <Flex alignItems="center" gap={2}>
-                  <Text color="fcc.fgMuted" fontSize="sm" marginBottom={0}>
-                    Duration:
-                  </Text>
-                  <Badge
-                    colorScheme="blue"
-                    fontSize="sm"
-                    aria-label={examTimeVerbose(exam.config.totalTimeInS)}
-                  >
-                    {examTimeInHumanReadableFormat(exam.config.totalTimeInS)}
-                  </Badge>
-                </Flex>
-                <Flex alignItems="center" gap={2}>
-                  <Text color="fcc.fgMuted" fontSize="sm" marginBottom={0}>
-                    Passing Percent:
-                  </Text>
-                  <Badge colorScheme="blue" fontSize="sm">
-                    {exam.config.passingPercent}%
-                  </Badge>
-                </Flex>
+                <LabeledBadge
+                  label="Duration:"
+                  ariaLabel={examTimeVerbose(exam.config.totalTimeInS)}
+                >
+                  {examTimeInHumanReadableFormat(exam.config.totalTimeInS)}
+                </LabeledBadge>
+                <LabeledBadge label="Passing Percent:">
+                  {exam.config.passingPercent}%
+                </LabeledBadge>
               </Flex>
             </Box>
             {examStatus.status === "InProgress" && (
@@ -172,6 +162,27 @@ export function ExamCard({ exam }: ExamCardProps) {
   );
 }
 
+function LabeledBadge({
+  label,
+  ariaLabel,
+  children,
+}: {
+  label: string;
+  ariaLabel?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Flex alignItems="center" gap={2}>
+      <Text color="fcc.fgMuted" fontSize="sm" marginBottom={0}>
+        {label}
+      </Text>
+      <Badge colorScheme="blue" fontSize="sm" aria-label={ariaLabel}>
+        {children}
+      </Badge>
+    </Flex>
+  );
+}
+
 // Converts seconds to Xh Ym format
 function examTimeInHumanReadableFormat(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -198,18 +209,9 @@ function getExamStatus(
   attempts: Attempts,
 ): ExamStatus {
   const latestAttempt = getLatestAttempt(attempts);
-  const examStatus: ExamStatus = { status: "Available" };
 
   if (!latestAttempt) {
-    if (!exam.canTake && exam.prerequisites.length > 0) {
-      return {
-        status: "UnmetPrerequisites",
-        message:
-          "You must complete the prerequisite courses to take this exam.",
-        alertStatus: "info",
-      };
-    }
-    return examStatus;
+    return getAvailabilityStatus(exam);
   }
 
   const startTime = new Date(latestAttempt.startTime);
@@ -236,15 +238,7 @@ function getExamStatus(
     case "Denied":
     case "Approved":
       if (now >= retakeAvailableAt) {
-        if (!exam.canTake && exam.prerequisites.length > 0) {
-          return {
-            status: "UnmetPrerequisites",
-            message:
-              "You must complete the prerequisite courses to take this exam.",
-            alertStatus: "info",
-          };
-        }
-        return examStatus;
+        return getAvailabilityStatus(exam);
       }
 
       return {
@@ -254,16 +248,29 @@ function getExamStatus(
       };
 
     default:
-      if (!exam.canTake && exam.prerequisites.length > 0) {
-        return {
-          status: "UnmetPrerequisites",
-          message:
-            "You must complete the prerequisite courses to take this exam.",
-          alertStatus: "info",
-        };
-      }
-      return examStatus;
+      return getAvailabilityStatus(exam);
   }
+}
+
+// Availability gated on prerequisites + academic honesty policy acceptance.
+function getAvailabilityStatus(exam: ExamCardProps["exam"]): ExamStatus {
+  if (!exam.canTake && exam.prerequisites.length > 0) {
+    return {
+      status: "UnmetPrerequisites",
+      message: "You must complete the prerequisite courses to take this exam.",
+      alertStatus: "info",
+    };
+  }
+
+  if (!exam.canTake) {
+    return {
+      status: "UnmetPrerequisites",
+      message: "You must accept the academic honesty policy to take this exam.",
+      alertStatus: "info",
+    };
+  }
+
+  return { status: "Available" };
 }
 
 function getLatestAttempt(attempts: Attempts) {
