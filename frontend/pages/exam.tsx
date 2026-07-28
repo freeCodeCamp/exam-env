@@ -23,13 +23,15 @@ import {
 
 import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
 import {
-  ApiError,
   getGeneratedExam,
   isTransientApiError,
   postExamAttempt,
   retryTransientApiError,
 } from "../utils/fetch";
-import { QuestionSetForm } from "../components/question-set-form";
+import {
+  QuestionSetForm,
+  QuestionSetFormHandle,
+} from "../components/question-set-form";
 import { ProtectedRoute } from "../components/protected-route";
 import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
@@ -124,9 +126,12 @@ export function Exam() {
         (old: typeof examQuery.data | undefined) =>
           old ? { ...old, examAttempt: updatedAttempt } : old,
       );
-      setNewSelectedAnswers([]);
 
+      // Only clear on advance - `fullQuestion` keeps its identity when there is
+      // no next question, so QuestionSetForm's effect would not re-run to
+      // restore the selection from the attempt.
       if (currentQuestionNumber < questions.length) {
+        setNewSelectedAnswers([]);
         const nextId = questions[currentQuestionNumber].id;
         setActiveQuestionId(nextId);
       }
@@ -135,6 +140,15 @@ export function Exam() {
         questionSubmissionErrorModalOnClose();
       }
       // nextQuestion();
+
+      // Defer to let the (possibly new) question render, then send focus back
+      // to the question instead of leaving it on the submit button. An effect
+      // on `activeQuestionId` would not fire for the last question.
+      clearTimeout(focusTimeoutRef.current);
+      focusTimeoutRef.current = setTimeout(
+        () => questionSetFormRef.current?.focusQuestion(),
+        0,
+      );
     },
   });
 
@@ -149,6 +163,12 @@ export function Exam() {
   const [hasFinishedExam, setHasFinishedExam] = useState(false);
 
   const scrollableElementRef = useRef<HTMLDivElement | null>(null);
+  const questionSetFormRef = useRef<QuestionSetFormHandle | null>(null);
+  const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+
+  useEffect(() => () => clearTimeout(focusTimeoutRef.current), []);
 
   useEffect(() => {
     if (!examQuery.data || activeQuestionId) {
@@ -443,6 +463,7 @@ export function Exam() {
               paddingTop={"1rem"}
             >
               <QuestionSetForm
+                ref={questionSetFormRef}
                 fullQuestion={fullQuestion}
                 examAttempt={examAttempt}
                 setNewSelectedAnswers={setNewSelectedAnswers}

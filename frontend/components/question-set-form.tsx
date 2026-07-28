@@ -1,6 +1,12 @@
 import { Box, Divider, Text } from "@chakra-ui/react";
 import { QuizQuestion } from "@freecodecamp/ui";
-import { SyntheticEvent, useEffect, useRef } from "react";
+import {
+  Ref,
+  SyntheticEvent,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { AudioPlayer } from "./audio-player";
@@ -13,6 +19,11 @@ type QuestionTypeFormProps = {
   newSelectedAnswers: Answers[number]["id"][];
   setNewSelectedAnswers: (newSelectedAnswers: Answers[number]["id"][]) => void;
   examAttempt: UserExamAttempt;
+  ref?: Ref<QuestionSetFormHandle>;
+};
+
+export type QuestionSetFormHandle = {
+  focusQuestion: () => void;
 };
 
 export function QuestionSetForm({
@@ -20,8 +31,22 @@ export function QuestionSetForm({
   newSelectedAnswers,
   setNewSelectedAnswers,
   examAttempt,
+  ref,
 }: QuestionTypeFormProps) {
   const lastTrackedId = useRef<string | null>(null);
+  const questionRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      // Focus the whole question region, not an individual answer, so that
+      // context and audio are announced instead of being skipped over.
+      focusQuestion() {
+        questionRef.current?.focus();
+      },
+    }),
+    [],
+  );
 
   function captionsToggled(e: SyntheticEvent<HTMLDetailsElement, Event>) {
     if (e.currentTarget.open) {
@@ -55,7 +80,13 @@ export function QuestionSetForm({
   }, [fullQuestion]);
 
   return (
-    <Box width="65vw" paddingBottom={"1rem"}>
+    <Box
+      width="65vw"
+      paddingBottom={"1rem"}
+      ref={questionRef}
+      tabIndex={-1}
+      _focusVisible={{ outline: "none" }}
+    >
       {fullQuestion.questionSet.context && (
         <>
           <Text fontWeight={"bold"}>Context</Text>

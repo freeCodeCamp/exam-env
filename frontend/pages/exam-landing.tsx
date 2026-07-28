@@ -167,6 +167,7 @@ export function ExamLanding() {
             )}
             <Checkbox
               id="terms-agreement"
+              isChecked={hasAgreed}
               onChange={(e) => setHasAgreed(e.target.checked)}
             >
               I understand and am ready to proceed

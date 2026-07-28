@@ -35,11 +35,14 @@ function LandingParent({
             </Heading>
             <Button
               size="medium"
+              aria-label="Refresh exam list"
+              aria-busy={examsQuery.isFetching}
+              disabled={examsQuery.isFetching}
               onClick={() => {
                 examsQuery.refetch();
               }}
             >
-              <RepeatIcon />
+              <RepeatIcon aria-hidden="true" />
             </Button>
           </Flex>
           <Spacer size="m" />
@@ -67,6 +70,8 @@ export function Landing() {
     return (
       <LandingParent examsQuery={examsQuery}>
         <Spinner
+          role="status"
+          label="Loading exams"
           alignSelf={"center"}
           thickness="4px"
           speed="0.65s"
@@ -95,8 +100,9 @@ export function Landing() {
     );
   }
 
-  // Exams sorted by `canTake` first, then by name alphabetically
-  examsQuery.data.sort((a, b) => {
+  // Exams sorted by `canTake` first, then by name alphabetically.
+  // Copied first - `examsQuery.data` is the react-query cache array.
+  const exams = [...examsQuery.data].sort((a, b) => {
     if (a.canTake === b.canTake) {
       return a.config.name.localeCompare(b.config.name);
     }
@@ -109,7 +115,7 @@ export function Landing() {
         style={{ listStyleType: "none", padding: 0 }}
         aria-label="Available exams"
       >
-        {examsQuery.data.map((exam) => {
+        {exams.map((exam) => {
           return <ExamCard key={exam.id} exam={exam} />;
         })}
       </ul>
