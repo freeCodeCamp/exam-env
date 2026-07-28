@@ -26,6 +26,7 @@ import { SplashscreenRoute } from "../pages/splashscreen";
 import { LandingRoute } from "../pages/landing";
 import { AuthContext } from "../contexts";
 import { trackAction } from "../utils/telemetry";
+import { LoginRoute } from "../pages/login";
 
 export function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -100,12 +101,14 @@ export function Header() {
           <DrawerHeader>Navigate</DrawerHeader>
           <DrawerBody>
             <Button
-              onClick={() => navigate({ to: LandingRoute.to })}
+              onClick={() =>
+                navigate({ to: !!token ? LandingRoute.to : LoginRoute.to })
+              }
               variant="ghost"
               w={"100%"}
               rightIcon={<ArrowForwardIcon />}
             >
-              Home
+              {!!token ? "Home" : "Login"}
             </Button>
             {import.meta.env.DEV && (
               <Button
