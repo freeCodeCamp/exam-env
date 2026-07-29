@@ -4,7 +4,7 @@
 //! before events are sent. Wired up via [`crate::sentry_filter::before_send`] in
 //! the client's `ClientOptions`.
 
-use sentry::protocol::Event;
+use sentry::protocol::{Context, Event};
 
 /// Substrings identifying non-actionable failures that are dropped before being
 /// sent to Sentry. They are recoverable network/update-server conditions or
@@ -54,7 +54,36 @@ pub fn before_send(mut event: Event<'static>) -> Option<Event<'static>> {
     if event_matches(&event, WEBVIEW_UNAVAILABLE_SIGNATURES) {
         event.fingerprint = std::borrow::Cow::Borrowed(WEBVIEW_UNAVAILABLE_FINGERPRINT);
     }
+    enrich(&mut event);
     Some(event)
+}
+
+/// Attaches the user and the frontend's session replay to an event.
+///
+/// Done here rather than on a scope because Sentry's Rust scopes are per-thread
+/// while commands run on arbitrary runtime worker threads. This way every event
+/// carries the context regardless of how it was captured - explicitly via
+/// `PassToSentry::capture`, or by the tracing layer from a `tracing::error!`.
+fn enrich(event: &mut Event<'static>) {
+    if event.user.is_none()
+        && let Some(id) = crate::error::sentry_user_id()
+    {
+        event.user = Some(sentry::User {
+            id: Some(id),
+            ..Default::default()
+        });
+    }
+
+    if let Some(replay_id) = crate::error::replay_id() {
+        // `contexts.replay.replay_id` is how Sentry links an event to a replay,
+        // so the recording of the session that hit a backend error is reachable
+        // from the issue it produced.
+        let mut context = std::collections::BTreeMap::new();
+        context.insert("replay_id".to_string(), replay_id.into());
+        event
+            .contexts
+            .insert("replay".to_string(), Context::Other(context));
+    }
 }
 
 /// Returns `true` if any of `signatures` appears anywhere in the event. The

@@ -1,4 +1,4 @@
-import { restartApp } from "../utils/commands";
+import { downloadAndInstallUpdate, restartApp } from "../utils/commands";
 import { ReactNode, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -23,7 +23,11 @@ import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { checkForUpdate, delayForTesting } from "../utils/fetch";
-import { getErrorMessage } from "../utils/errors";
+import {
+  backendEventId,
+  getErrorMessage,
+  recordBackendError,
+} from "../utils/errors";
 import { logUsage, trackAction } from "../utils/telemetry";
 
 function SplashParents({ children }: { children: ReactNode }) {
@@ -84,13 +88,11 @@ export function Splashscreen() {
       let contentLength: number | undefined = 0;
 
       logUsage("update.download_started", { version: update!.version });
-      await update!.downloadAndInstall((event) => {
+      await downloadAndInstallUpdate(update!.rid, (event) => {
         switch (event.event) {
           case "Started":
             contentLength = event.data.contentLength;
-            console.debug(
-              `Started downloading ${event.data.contentLength} bytes`
-            );
+            console.debug(`Started downloading ${contentLength} bytes`);
             break;
           case "Progress":
             downloaded += event.data.chunkLength;
@@ -109,7 +111,8 @@ export function Splashscreen() {
     },
     onError: (error) => {
       logUsage("update.failed", { version: update?.version });
-      captureException(error);
+      // Already captured in the backend; this records the session only.
+      recordBackendError(error);
     },
   });
 
@@ -236,12 +239,14 @@ export function Splashscreen() {
               wordBreak="break-word"
               whiteSpace="pre-wrap"
             >
-              {JSON.stringify(
-                downloadAndInstallQuery.error.message,
-                null,
-                2
-              ).slice(0, 1000)}
+              {getErrorMessage(downloadAndInstallQuery.error).slice(0, 1000)}
             </Code>
+            {backendEventId(downloadAndInstallQuery.error) && (
+              <Text fontSize="sm" opacity={0.8}>
+                freeCodeCamp have been notified. Error ID:{" "}
+                {backendEventId(downloadAndInstallQuery.error)}
+              </Text>
+            )}
             <Button onClick={() => downloadAndInstallQuery.mutate()}>
               Retry
             </Button>

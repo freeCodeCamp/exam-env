@@ -1,6 +1,7 @@
-import { captureException } from "@sentry/react";
+import { captureException, getReplay } from "@sentry/react";
 import { useNavigate } from "@tanstack/react-router";
 import { LandingRoute } from "../pages/landing";
+import { reportReplayId } from "./commands";
 
 export type Result<T> =
   | { error: null; data: T }
@@ -10,6 +11,8 @@ export type FCCError = {
   debug: string;
   kind: "Credential" | "FS" | "Serialization" | "Request" | "Client";
   user: string;
+  /** Set when the backend reported the error to Sentry. */
+  eventId?: string | null;
 };
 
 export function isFCCError(e: unknown): e is FCCError {
@@ -89,6 +92,40 @@ export type QueryFnError<F extends (...args: any) => any> = NonNullable<
 
 export function err<T extends ErrorResponse<any>>(res: T) {
   return { ...res.error, _status: res.response.status };
+}
+
+/**
+ * Handles an error the backend returned.
+ *
+ * The backend captures its own errors, with the surrounding tracing span and the
+ * context only it has (endpoint, status, version), so the frontend must not
+ * report them again - a second `captureException` would mean two issues for one
+ * failure, the frontend's being the less useful of the two.
+ *
+ * What the frontend does add is what the user was doing. Replay runs in buffer
+ * mode (`replaysOnErrorSampleRate`), which only persists a recording when the
+ * frontend itself captures an error, so flushing the buffer explicitly records
+ * the session without producing an event of its own.
+ */
+export function recordBackendError(e: unknown) {
+  console.error(e);
+
+  void getReplay()
+    ?.flush()
+    // Re-reporting the replay id keeps subsequent backend errors linked: a flush
+    // in buffer mode continues as a session replay under a possibly new id.
+    .then(reportReplayId)
+    .catch(() => {
+      // Recording the session is best-effort; never mask the original error.
+    });
+
+  return { message: getErrorMessage(e), eventId: backendEventId(e) };
+}
+
+/** Id of the Sentry event the backend reported this error as, for the user to
+ * quote to support. */
+export function backendEventId(e: unknown): string | undefined {
+  return isFCCError(e) ? (e.eventId ?? undefined) : undefined;
 }
 
 export function captureAndNavigate(

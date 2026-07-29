@@ -18,6 +18,7 @@ import { rootRoute } from "./pages/root";
 import { AuthProvider } from "./contexts/auth";
 import { theme } from "./theme";
 import { logUsage } from "./utils/telemetry";
+import { reportReplayId } from "./utils/commands";
 
 import "./index.css";
 import "@freecodecamp/ui/dist/base.css";
@@ -27,9 +28,6 @@ import "@freecodecamp/ui/dist/base.css";
 //   server-side. Reported from several capture sites and, because the minified
 //   bundle name changes every release, Sentry fragments it into a new issue per
 //   build (see also the "do not capture client errors" guard in utils/fetch.ts).
-// - update-download failures: the updater plugin failing to fetch/download an
-//   update asset is a transient network/server condition (offline, 403/redirect
-//   on the asset, timeout), not a bug. The UI already surfaces a retry button.
 // - "failed to check for updates": FE-side capture of the same update-check
 //   noise the backend filter already drops (backend/src/sentry_filter.rs).
 // - devtools toggle rejection: users pressing the devtools shortcut in
@@ -42,7 +40,6 @@ import "@freecodecamp/ui/dist/base.css";
 const DROP_MESSAGE_SIGNATURES = [
   "Provided token is revoked",
   "error sending request for url",
-  "Download request failed with status",
   "failed to check for updates",
   "internal_toggle_devtools not allowed",
   "listeners[eventId].handlerId",
@@ -95,6 +92,12 @@ logUsage("app.launched", {
   version: __APP_VERSION__,
   environment: __ENVIRONMENT__,
 });
+
+// Errors raised in the backend are captured there, so the backend needs this
+// session's replay id to link its issues to the recording. Reported again after
+// each flush in `recordBackendError`, which is also what covers the case of the
+// replay not having started yet at this point.
+void reportReplayId();
 
 const queryClient = new QueryClient();
 

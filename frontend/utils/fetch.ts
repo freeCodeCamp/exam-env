@@ -1,11 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import createClient, { FetchResponse } from "openapi-fetch";
 import { captureException, logger, startSpan } from "@sentry/react";
-import {
-  DownloadEvent,
-  DownloadOptions,
-  Update,
-} from "@tauri-apps/plugin-updater";
 
 import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
@@ -278,7 +273,10 @@ export async function getAttemptsByExamId(examId: string) {
   return res.data;
 }
 
-interface UpdateMetadata {
+/**
+ * A pending update, as returned by the `check` command. `rid` identifies the update the backend is holding.
+ */
+export interface UpdateMetadata {
   rid: number;
   currentVersion: string;
   version: string;
@@ -287,69 +285,26 @@ interface UpdateMetadata {
   rawJson: Record<string, unknown>;
 }
 
-export async function checkForUpdate() {
+export async function checkForUpdate(): Promise<UpdateMetadata | null> {
   if (VITE_MOCK_DATA) {
     await delayForTesting(1000);
-
-    class MockUpdate extends Update {
-      constructor(metadata: UpdateMetadata) {
-        super(metadata);
-      }
-      download(
-        _onEvent?: (progress: DownloadEvent) => void,
-        _options?: DownloadOptions,
-      ): Promise<void> {
-        return new Promise((res) => res());
-      }
-      install(): Promise<void> {
-        return new Promise((res) => res());
-      }
-      async downloadAndInstall(
-        onEvent?: (progress: DownloadEvent) => void,
-        _options?: DownloadOptions,
-      ): Promise<void> {
-        if (onEvent) {
-          onEvent({
-            data: {
-              contentLength: 100,
-            },
-            event: "Started",
-          });
-          for (let i = 0; i < 100; i++) {
-            await delayForTesting(50);
-            onEvent({
-              data: {
-                chunkLength: i,
-              },
-              event: "Progress",
-            });
-          }
-          onEvent({
-            event: "Finished",
-          });
-        }
-      }
-      close(): Promise<void> {
-        return new Promise((res) => res());
-      }
-    }
     // Comment out to test update functionality
     // throw new Error("Test: No update available");
     return null;
-    // return new MockUpdate({
+    // return {
     //   rid: 0,
     //   currentVersion: "0.0.1",
     //   version: "0.0.2",
     //   date: new Date().toUTCString(),
     //   body: "New update",
     //   rawJson: {},
-    // });
+    // };
   }
 
   const metadata = await startSpan(
     { name: "check_for_update", op: "app.update.check" },
     (span) => {
-      const m = invoke<UpdateMetadata>("check");
+      const m = invoke<UpdateMetadata | null>("check");
       return m.then((value) => {
         span.setAttribute("update.available", !!value);
         return value;
@@ -357,15 +312,14 @@ export async function checkForUpdate() {
     },
   );
   if (metadata) {
-    const update = new Update(metadata);
     console.debug(
-      `Found update ${update.version} from ${update.date} with notes ${update.body}`,
+      `Found update ${metadata.version} from ${metadata.date} with notes ${metadata.body}`,
     );
     logUsage("update.available", {
-      version: update.version,
-      current_version: update.currentVersion,
+      version: metadata.version,
+      current_version: metadata.currentVersion,
     });
-    return update;
+    return metadata;
   }
   return null;
 }

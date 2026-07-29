@@ -1,4 +1,5 @@
 use std::error::Error as _;
+use std::sync::RwLock;
 
 use sentry::capture_error;
 use serde::{Deserialize, Serialize};
@@ -16,6 +17,7 @@ pub enum ErrorKind {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Error {
     /// Error for logs, debugging, and reporting
     pub debug: String,
@@ -23,6 +25,8 @@ pub struct Error {
     pub kind: ErrorKind,
     /// Error message shown to user
     pub user: String,
+    /// Id of the Sentry event this error was reported as, when it was reported.
+    pub event_id: Option<String>,
 }
 
 impl Error {
@@ -31,10 +35,16 @@ impl Error {
             kind,
             debug,
             user: user.to_string(),
+            event_id: None,
         }
     }
-    fn add_context(&mut self, context: &str) {
-        self.debug.push_str(context);
+
+    /// Adopts the id of the most recently captured Sentry event - i.e. the one a preceding `tracing::error!` produced through the Sentry tracing layer.
+    ///
+    /// Use this instead of [`PassToSentry::capture`] when the path already logs at ERROR: capturing as well would report the same failure twice.
+    pub fn adopt_last_event_id(mut self) -> Self {
+        self.event_id = sentry::last_event_id().map(|id| id.to_string());
+        self
     }
 }
 
@@ -73,38 +83,14 @@ pub trait PassToSentry<T> {
 impl<T> PassToSentry<Result<T, Error>> for Result<T, Error> {
     fn capture(self) -> Result<T, Error> {
         match self {
-            Err(mut e) => {
-                configure_scope();
-
-                let sentry_uuid = capture_error(&e);
-                e.add_context(&format!(" + UUID: {sentry_uuid}"));
-
-                Err(e)
-            }
+            Err(e) => Err(e.capture()),
             Ok(t) => Ok(t),
         }
     }
 
     fn emit(self, app: &AppHandle) -> Result<T, Error> {
         match self {
-            Err(e) => {
-                let source = if let Some(s) = e.source() {
-                    s.to_string()
-                } else {
-                    "unknown".to_string()
-                };
-
-                app.emit(
-                    "unrecoverable-error",
-                    UnrecoverableError {
-                        source,
-                        message: e.to_string(),
-                    },
-                )
-                .unwrap();
-
-                Err(e)
-            }
+            Err(e) => Err(e.emit(app)),
             Ok(t) => Ok(t),
         }
     }
@@ -112,11 +98,9 @@ impl<T> PassToSentry<Result<T, Error>> for Result<T, Error> {
 
 impl PassToSentry<Error> for Error {
     fn capture(mut self) -> Self {
-        configure_scope();
-
         let sentry_uuid = capture_error(&self);
 
-        self.add_context(&format!(" + UUID: {sentry_uuid}"));
+        self.event_id = Some(sentry_uuid.to_string());
 
         self
     }
@@ -141,16 +125,26 @@ impl PassToSentry<Error> for Error {
     }
 }
 
-fn configure_scope() {
-    if let Some(user_id) =
-        get_authorization_token().and_then(|token| crate::utils::token_user_id(&token))
-    {
-        sentry::configure_scope(|scope| {
-            let user = sentry::User {
-                id: Some(user_id),
-                ..Default::default()
-            };
-            scope.set_user(Some(user));
-        });
+/// Id of the frontend's session replay, as reported by `commands::set_replay_id`.
+///
+/// Backend errors are captured in the backend, so without this the replay of the
+/// session that hit the error would not be linked to the resulting issue.
+/// Read by [`crate::sentry_filter::before_send`], which enriches every outgoing
+/// event - Sentry's Rust scopes are per-thread, and commands run on whichever
+/// worker thread the runtime picks, so scope-based enrichment is unreliable here.
+static REPLAY_ID: RwLock<Option<String>> = RwLock::new(None);
+
+pub fn set_replay_id(replay_id: Option<String>) {
+    if let Ok(mut guard) = REPLAY_ID.write() {
+        *guard = replay_id;
     }
+}
+
+pub fn replay_id() -> Option<String> {
+    REPLAY_ID.read().ok().and_then(|guard| guard.clone())
+}
+
+/// Id identifying the user across events: the inner token id, never the raw JWT.
+pub fn sentry_user_id() -> Option<String> {
+    get_authorization_token().and_then(|token| crate::utils::token_user_id(&token))
 }

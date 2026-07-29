@@ -120,7 +120,9 @@ fn main() {
             // commands::take_screenshot,
             commands::restart_app,
             commands::emit_to_sentry,
+            commands::set_replay_id,
             commands::check,
+            commands::download_and_install,
         ])
         .manage(sentry_state)
         .setup(|app| {

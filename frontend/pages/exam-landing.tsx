@@ -23,9 +23,13 @@ import {
   getExams,
   retryTransientApiError,
 } from "../utils/fetch";
-import { restartApp } from "../utils/commands";
-import { captureException } from "@sentry/react";
-import { captureAndNavigate, getErrorMessage } from "../utils/errors";
+import { downloadAndInstallUpdate, restartApp } from "../utils/commands";
+import {
+  backendEventId,
+  captureAndNavigate,
+  getErrorMessage,
+  recordBackendError,
+} from "../utils/errors";
 import { PrismFormatted } from "../components/prism-formatted";
 import { parseMarkdown } from "../utils/markdown";
 import { logUsage, trackAction } from "../utils/telemetry";
@@ -68,7 +72,7 @@ export function ExamLanding() {
       logUsage("update.download_started", {
         version: updateMutation.data!.version,
       });
-      await updateMutation.data!.downloadAndInstall((event) => {
+      await downloadAndInstallUpdate(updateMutation.data!.rid, (event) => {
         switch (event.event) {
           case "Started":
             contentLength = event.data.contentLength;
@@ -91,7 +95,8 @@ export function ExamLanding() {
     },
     onError: (error) => {
       logUsage("update.failed", { version: updateMutation.data?.version });
-      captureException(error);
+      // Already captured in the backend; this records the session only.
+      recordBackendError(error);
     },
   });
 
@@ -255,12 +260,17 @@ export function ExamLanding() {
                   wordBreak="break-word"
                   whiteSpace="pre-wrap"
                 >
-                  {JSON.stringify(
-                    downloadAndInstallMutation.error.message,
-                    null,
-                    2,
-                  ).slice(0, 1000)}
+                  {getErrorMessage(downloadAndInstallMutation.error).slice(
+                    0,
+                    1000,
+                  )}
                 </Code>
+                {backendEventId(downloadAndInstallMutation.error) && (
+                  <Text fontSize="sm" opacity={0.8}>
+                    freeCodeCamp have been notified. Error ID:{" "}
+                    {backendEventId(downloadAndInstallMutation.error)}
+                  </Text>
+                )}
                 <Button onClick={() => downloadAndInstallMutation.mutate()}>
                   Retry
                 </Button>
