@@ -32,18 +32,15 @@ pub fn set_authorization_token(new_token: &str) -> Result<(), Error> {
 
 pub fn remove_authorization_token() -> Result<(), Error> {
     let entry = get_entry();
-    entry
-        .delete_credential()
-        .map_err(|e| {
-            Error::new(
-                ErrorKind::Credential,
-                e.to_string(),
-                "Failed to remove authorization token",
-            )
-        })
-        .capture()?;
-
-    Ok(())
+    match entry.delete_credential() {
+        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        Err(e) => Err(Error::new(
+            ErrorKind::Credential,
+            e.to_string(),
+            "Failed to remove authorization token",
+        ))
+        .capture(),
+    }
 }
 
 /// NOTE: This function can error if the `service` or `user` arguments passed to `Entry::new` are too long
