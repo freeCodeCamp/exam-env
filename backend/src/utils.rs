@@ -3,7 +3,7 @@ use sentry::types::Dsn;
 
 // pub static FREECODECAMP_API: &'static str = dotenvy_macro::dotenv!("FREECODECAMP_API");
 pub static ENVIRONMENT: &'static str = dotenvy_macro::dotenv!("ENVIRONMENT");
-pub static ORIGIN: &'static str = "httpps://exam.freecodecamp.org";
+pub static ORIGIN: &'static str = "https://exam.freecodecamp.org";
 
 pub fn valid_sentry_dsn(url: &str) -> bool {
     url.parse::<Dsn>().is_ok()
