@@ -2,12 +2,12 @@ import { useCallback, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
+import { verifyToken } from "../utils/fetch";
 import {
   isTransientApiError,
   retryTransientApiError,
-  verifyToken,
-} from "../utils/fetch";
-import { setUser } from "@sentry/react";
+} from "../utils/api-error";
+import { identifyUser } from "../utils/sentry";
 import { AuthContext } from ".";
 import { logUsage } from "../utils/telemetry";
 
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       const userId = tokenUserId(token);
       if (userId) {
-        setUser({ id: userId });
+        identifyUser(userId);
       }
       logUsage("auth.token_verify", { result: "valid" });
       return token;
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
     onSuccess() {
       logUsage("auth.logout");
-      setUser(null);
+      identifyUser(null);
       // Invalidate and refetch the token query to update context
       token.refetch();
     },

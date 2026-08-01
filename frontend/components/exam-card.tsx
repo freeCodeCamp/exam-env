@@ -1,9 +1,6 @@
 import { Button } from "@freecodecamp/ui";
-import {
-  getAttemptsByExamId,
-  getExams,
-  retryTransientApiError,
-} from "../utils/fetch";
+import { getAttemptsByExamId, getExams } from "../utils/fetch";
+import { retryTransientApiError } from "../utils/api-error";
 import { useNavigate } from "@tanstack/react-router";
 import { ExamLandingRoute } from "../pages/exam-landing";
 import { useQuery } from "@tanstack/react-query";

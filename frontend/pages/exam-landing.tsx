@@ -18,18 +18,15 @@ import { ProtectedRoute } from "../components/protected-route";
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { ExamRoute } from "./exam";
-import {
-  checkForUpdate,
-  getExams,
-  retryTransientApiError,
-} from "../utils/fetch";
+import { checkForUpdate, getExams } from "../utils/fetch";
+import { retryTransientApiError } from "../utils/api-error";
 import { downloadAndInstallUpdate, restartApp } from "../utils/commands";
+import { backendEventId, getErrorMessage } from "../utils/errors";
 import {
-  backendEventId,
   captureAndNavigate,
-  getErrorMessage,
   recordBackendError,
-} from "../utils/errors";
+  reportedEventId,
+} from "../utils/sentry";
 import { PrismFormatted } from "../components/prism-formatted";
 import { parseMarkdown } from "../utils/markdown";
 import { logUsage, trackAction } from "../utils/telemetry";
@@ -125,7 +122,11 @@ export function ExamLanding() {
   }, []);
 
   if (noteQuery.isError) {
-    captureAndNavigate(getErrorMessage(noteQuery.error), navigate);
+    captureAndNavigate(
+      getErrorMessage(noteQuery.error),
+      navigate,
+      reportedEventId(noteQuery.error),
+    );
   }
 
   return (

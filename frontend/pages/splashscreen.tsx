@@ -17,17 +17,13 @@ import {
 import { CheckIcon, CloseIcon, InfoIcon } from "@chakra-ui/icons";
 import { Button, Spacer } from "@freecodecamp/ui";
 import { createRoute, useNavigate } from "@tanstack/react-router";
-import { captureException } from "@sentry/react";
 
 import { Header } from "../components/header";
 import { rootRoute } from "./root";
 import { LandingRoute } from "./landing";
 import { checkForUpdate, delayForTesting } from "../utils/fetch";
-import {
-  backendEventId,
-  getErrorMessage,
-  recordBackendError,
-} from "../utils/errors";
+import { backendEventId, getErrorMessage } from "../utils/errors";
+import { captureClientError, recordBackendError } from "../utils/sentry";
 import { logUsage, trackAction } from "../utils/telemetry";
 
 function SplashParents({ children }: { children: ReactNode }) {
@@ -349,7 +345,7 @@ async function checkDeviceCompatibility() {
       result: "fail",
       reason: compatError.message,
     });
-    captureException(compatError);
+    captureClientError(compatError, "device-compatibility");
     throw compatError;
   }
   logUsage("splash.device_check", { result: "pass" });

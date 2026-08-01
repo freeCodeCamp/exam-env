@@ -29,7 +29,7 @@ export function Flash({ flashKind = "info", flashMessage }: FlashProps) {
         <Alert status={flashKind} justifyContent={"space-between"}>
           <AlertIcon />
           <Box>
-            <AlertTitle>{flashKind}</AlertTitle>
+            <AlertTitle>{FLASH_TITLES[flashKind]}</AlertTitle>
             <AlertDescription>{flashMessage}</AlertDescription>
           </Box>
           <CloseButton
@@ -45,6 +45,15 @@ export function Flash({ flashKind = "info", flashMessage }: FlashProps) {
 }
 
 const handledFlashKinds = ["error", "info", "warning"] as const;
+
+// The kind names the alert's styling, not what happened - "warning" on its own
+// tells the user nothing.
+const FLASH_TITLES: Record<(typeof handledFlashKinds)[number], string> = {
+  error: "Something went wrong",
+  info: "Notice",
+  warning: "Warning",
+};
+
 function flashKindToStatus(
   flashKind: string | null
 ): asserts flashKind is (typeof handledFlashKinds)[number] {

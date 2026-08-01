@@ -1,12 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import createClient, { FetchResponse } from "openapi-fetch";
-import { captureException, logger, startSpan } from "@sentry/react";
+import { logger, startSpan } from "@sentry/react";
 
 import type { paths } from "../../prisma/api-schema";
 import { UserExam, UserExamAttempt } from "./types";
 import { VITE_MOCK_DATA } from "./env";
 import { deserializeDates } from "./serde";
-import { ErrorResponse } from "./errors";
+import { isInformative } from "./errors";
+import { ApiError, ENDPOINTS } from "./api-error";
+import { captureApiResponseError } from "./sentry";
 import { logUsage } from "./telemetry";
 import { httpFetch } from "./http";
 
@@ -17,25 +19,6 @@ const client = createClient<paths>({
   baseUrl: __FREECODECAMP_API__,
   fetch,
 });
-
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-    public readonly code?: string,
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
-}
-
-export function isTransientApiError(error: unknown): boolean {
-  return error instanceof ApiError && error.status >= 500;
-}
-
-export function retryTransientApiError(failureCount: number, error: Error) {
-  return failureCount < 2 && isTransientApiError(error);
-}
 
 export async function verifyToken(token: string) {
   if (VITE_MOCK_DATA) {
@@ -53,7 +36,7 @@ export async function verifyToken(token: string) {
 
   console.debug("in verify");
   const res = await startSpan(
-    { name: "GET /exam-environment/token-meta", op: "http.client" },
+    { name: ENDPOINTS.tokenMeta, op: "http.client" },
     async (span) => {
       const r = await client.GET("/exam-environment/token-meta", {
         params: {
@@ -77,13 +60,22 @@ export async function verifyToken(token: string) {
       res.response.status !== 404 &&
       res.response.status !== 418
     ) {
-      captureError(res);
+      captureApiResponseError(res);
     }
-    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
+    throw new ApiError(
+      errorMessage(res),
+      res.response.status,
+      ENDPOINTS.tokenMeta,
+      res.error.code,
+    );
   }
 
   if (res.response.status >= 400) {
-    throw new ApiError(errorMessage(res), res.response.status);
+    throw new ApiError(
+      errorMessage(res),
+      res.response.status,
+      ENDPOINTS.tokenMeta,
+    );
   }
 
   return res.data;
@@ -107,7 +99,7 @@ export async function getGeneratedExam(examId: string) {
   const token = await invoke<string>("get_authorization_token");
 
   const res = await startSpan(
-    { name: "POST /exam-environment/exam/generated-exam", op: "http.client" },
+    { name: ENDPOINTS.generatedExam, op: "http.client" },
     async (span) => {
       const r = await client.POST("/exam-environment/exam/generated-exam", {
         body: { examId },
@@ -128,9 +120,14 @@ export async function getGeneratedExam(examId: string) {
     if (res.error.code === "FCC_EINVAL_EXAM_ENVIRONMENT_PREREQUISITES") {
       logger.warn(res.error.message, res.error);
     } else {
-      captureError(res);
+      captureApiResponseError(res);
     }
-    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
+    throw new ApiError(
+      errorMessage(res),
+      res.response.status,
+      ENDPOINTS.generatedExam,
+      res.error.code,
+    );
   }
 
   const serverDateHeader = res.response.headers.get("Date");
@@ -151,7 +148,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
       code: "EXAMPLE_ERROR",
       message: "Example error when posting exam",
     };
-    throw new ApiError(error.message, 500, error.code);
+    throw new ApiError(error.message, 500, ENDPOINTS.examAttempt, error.code);
     // throw new Error(error.message);
     // return undefined as never;
   }
@@ -159,7 +156,7 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
   const token = await invoke<string>("get_authorization_token");
 
   const res = await startSpan(
-    { name: "POST /exam-environment/exam/attempt", op: "http.client" },
+    { name: ENDPOINTS.examAttempt, op: "http.client" },
     async (span) => {
       const r = await client.POST("/exam-environment/exam/attempt", {
         body: { attempt: examAttempt },
@@ -180,9 +177,14 @@ export async function postExamAttempt(examAttempt: UserExamAttempt) {
     if (res.error.code === "FCC_EINVAL_EXAM_ENVIRONMENT_EXAM_ATTEMPT") {
       logger.warn(res.error.message, res.error);
     } else {
-      captureError(res);
+      captureApiResponseError(res);
     }
-    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
+    throw new ApiError(
+      errorMessage(res),
+      res.response.status,
+      ENDPOINTS.examAttempt,
+      res.error.code,
+    );
   }
 
   return res.response;
@@ -213,7 +215,7 @@ export async function getExams() {
   const token = await invoke<string>("get_authorization_token");
 
   const res = await startSpan(
-    { name: "GET /exam-environment/exams", op: "http.client" },
+    { name: ENDPOINTS.exams, op: "http.client" },
     async (span) => {
       const r = await client.GET("/exam-environment/exams", {
         params: {
@@ -230,8 +232,13 @@ export async function getExams() {
   debugResponse(res);
 
   if (res.error) {
-    captureError(res);
-    throw new ApiError(errorMessage(res), res.response.status, res.error.code);
+    captureApiResponseError(res);
+    throw new ApiError(
+      errorMessage(res),
+      res.response.status,
+      ENDPOINTS.exams,
+      res.error.code,
+    );
   }
 
   return res.data;
@@ -245,10 +252,7 @@ export async function getAttemptsByExamId(examId: string) {
   const token = await invoke<string>("get_authorization_token");
 
   const res = await startSpan(
-    {
-      name: "GET /exam-environment/exams/{examId}/attempts",
-      op: "http.client",
-    },
+    { name: ENDPOINTS.examAttempts, op: "http.client" },
     async (span) => {
       const r = await client.GET(`/exam-environment/exams/{examId}/attempts`, {
         params: {
@@ -264,8 +268,12 @@ export async function getAttemptsByExamId(examId: string) {
   );
 
   if (res.error || res.response.status >= 300) {
-    captureError(res);
-    throw new ApiError("unable to get attempts for exam", res.response.status);
+    captureApiResponseError(res);
+    throw new ApiError(
+      "unable to get attempts for exam",
+      res.response.status,
+      ENDPOINTS.examAttempts,
+    );
   }
 
   console.debug(res);
@@ -343,27 +351,24 @@ interface StandardError {
   message: string;
 }
 
-// `error` is optional so non-2xx responses without a parsed error body (e.g.
-// getAttemptsByExamId's `status >= 300` guard) can also be captured.
-function captureError(res: { error?: StandardError; response: Response }) {
-  if (res.error?.code && res.error?.message) {
-    const se = new Error(
-      `${res.error.code}: ${res.error.message}; ${res.response.statusText}`,
-    );
-    captureException(se);
-  } else {
-    const se = new Error(`Unknown error: ${JSON.stringify(res)}`);
-    captureException(se);
-  }
-}
-
 // Message for thrown `Error`s. An `Error` without a message is titled
-// "No error message" by Sentry, which groups unrelated failures together.
+// "No error message" by Sentry, which groups unrelated failures together, and
+// one carrying an uninformative body says no more to the user than it does to
+// Sentry - so fall through both to whatever the response itself states.
 function errorMessage(res: { error?: StandardError; response: Response }) {
-  return (
-    res.error?.message ||
-    res.error?.code ||
-    res.response.statusText ||
-    `request failed with status ${res.response.status}`
+  const { status, statusText } = res.response;
+  const detail = [res.error?.message, res.error?.code, statusText].find(
+    isInformative,
   );
+
+  // The detail of a 5xx describes the server's internals, if anything: name the
+  // failure as the user's - the request did not go through, and retrying is the
+  // only thing they can do about it.
+  if (status >= 500) {
+    return `The freeCodeCamp server could not complete the request (${status}${
+      detail ? `: ${detail}` : ""
+    }). Please try again in a few moments.`;
+  }
+
+  return detail ?? `request failed with status ${status}`;
 }

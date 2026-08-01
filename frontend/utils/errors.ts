@@ -1,7 +1,7 @@
-import { captureException, getReplay } from "@sentry/react";
-import { useNavigate } from "@tanstack/react-router";
-import { LandingRoute } from "../pages/landing";
-import { reportReplayId } from "./commands";
+/**
+ * Error shapes and the plain functions that read them. Deliberately free of
+ * Sentry: reporting lives in `sentry.ts`, which depends on this module.
+ */
 
 export type Result<T> =
   | { error: null; data: T }
@@ -40,13 +40,28 @@ export function isFCCError(e: unknown): e is FCCError {
   return true;
 }
 
+/** Bodies that carry no information. An error the API does not recognise is
+ * serialised with `JSON.stringify`, and a thrown `Error` stringifies to "{}" -
+ * which reached the user as a flash message reading "{}". */
+const EMPTY_MESSAGES = ["{}", "[]", "null", "undefined", "[object Object]"];
+
+/** Whether a message says anything at all - i.e. is worth showing to a user or
+ * grouping a Sentry issue on. */
+export function isInformative(message?: string | null): message is string {
+  const trimmed = message?.trim();
+  return !!trimmed && !EMPTY_MESSAGES.includes(trimmed);
+}
+
+const UNKNOWN_ERROR =
+  "An unexpected error occurred. Please try again in a few moments.";
+
 export function getErrorMessage(e: unknown): string {
   console.error(e);
   if (isFCCError(e)) {
-    return e.user;
+    return isInformative(e.user) ? e.user : UNKNOWN_ERROR;
   }
   if (e instanceof Error) {
-    return e.message;
+    return isInformative(e.message) ? e.message : UNKNOWN_ERROR;
   }
   if (
     typeof e === "object" &&
@@ -54,9 +69,15 @@ export function getErrorMessage(e: unknown): string {
     "message" in e &&
     typeof (e as Record<string, unknown>).message === "string"
   ) {
-    return (e as Record<string, unknown>).message as string;
+    const { message } = e as { message: string };
+    return isInformative(message) ? message : UNKNOWN_ERROR;
   }
-  return "An unexpected error occurred: " + JSON.stringify(e);
+  // The serialised value is the only description there is, but it is only worth
+  // showing when it describes something.
+  const serialized = JSON.stringify(e);
+  return isInformative(serialized)
+    ? "An unexpected error occurred: " + serialized
+    : UNKNOWN_ERROR;
 }
 
 /**
@@ -94,54 +115,8 @@ export function err<T extends ErrorResponse<any>>(res: T) {
   return { ...res.error, _status: res.response.status };
 }
 
-/**
- * Handles an error the backend returned.
- *
- * The backend captures its own errors, with the surrounding tracing span and the
- * context only it has (endpoint, status, version), so the frontend must not
- * report them again - a second `captureException` would mean two issues for one
- * failure, the frontend's being the less useful of the two.
- *
- * What the frontend does add is what the user was doing. Replay runs in buffer
- * mode (`replaysOnErrorSampleRate`), which only persists a recording when the
- * frontend itself captures an error, so flushing the buffer explicitly records
- * the session without producing an event of its own.
- */
-export function recordBackendError(e: unknown) {
-  console.error(e);
-
-  void getReplay()
-    ?.flush()
-    // Re-reporting the replay id keeps subsequent backend errors linked: a flush
-    // in buffer mode continues as a session replay under a possibly new id.
-    .then(reportReplayId)
-    .catch(() => {
-      // Recording the session is best-effort; never mask the original error.
-    });
-
-  return { message: getErrorMessage(e), eventId: backendEventId(e) };
-}
-
 /** Id of the Sentry event the backend reported this error as, for the user to
  * quote to support. */
 export function backendEventId(e: unknown): string | undefined {
   return isFCCError(e) ? (e.eventId ?? undefined) : undefined;
-}
-
-export function captureAndNavigate(
-  errorStr: string,
-  navigate: ReturnType<typeof useNavigate>,
-) {
-  const error = new Error(
-    errorStr || "Empty error message (source discarded the cause)",
-  );
-  const eventId = captureException(error);
-  navigate({
-    to: LandingRoute.to,
-    search: {
-      flashKind: "error",
-      flashMessage: `An error has occured. freeCodeCamp have been notified. Error ID: ${eventId}`,
-    },
-  });
-  return error;
 }

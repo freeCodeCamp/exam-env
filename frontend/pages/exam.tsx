@@ -22,12 +22,11 @@ import {
 } from "@chakra-ui/icons";
 
 import { usePreventImmediateExit } from "../components/use-prevent-immediate-exit";
+import { getGeneratedExam, postExamAttempt } from "../utils/fetch";
 import {
-  getGeneratedExam,
   isTransientApiError,
-  postExamAttempt,
   retryTransientApiError,
-} from "../utils/fetch";
+} from "../utils/api-error";
 import {
   QuestionSetForm,
   QuestionSetFormHandle,
@@ -37,6 +36,7 @@ import { LandingRoute } from "./landing";
 import { rootRoute } from "./root";
 import { Answers, FullQuestion, UserExamAttempt } from "../utils/types";
 import { getErrorMessage } from "../utils/errors";
+import { reportedEventId } from "../utils/sentry";
 import { ExamSubmissionModal } from "../components/exam-submission-modal";
 import { QuestionSubmissionErrorModal } from "../components/question-submission-error-modal";
 import { produce } from "immer";
@@ -359,12 +359,18 @@ export function Exam() {
   }
 
   if (examQuery.isError) {
+    // An exhausted 5xx has already been reported by the query cache; quote that
+    // id rather than capturing the same failure again.
+    const eventId = reportedEventId(examQuery.error);
+    const message = getErrorMessage(examQuery.error);
     return (
       <Navigate
         to={LandingRoute.to}
         search={{
-          flashKind: "warning",
-          flashMessage: getErrorMessage(examQuery.error),
+          flashKind: "error",
+          flashMessage: eventId
+            ? `${message} freeCodeCamp have been notified. Error ID: ${eventId}`
+            : message,
         }}
       />
     );
