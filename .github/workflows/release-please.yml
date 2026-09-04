@@ -1,0 +1,102 @@
+name: "release-please"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-please:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.releases_created }}
+      version: ${{ steps.release.outputs.version }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      release_id: ${{ steps.release.outputs.id }}
+
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # The root package is at path `.`, so release-please-action emits its
+      # outputs unprefixed. If that ever changes, the build below would receive
+      # an empty release_id and silently upload artifacts nowhere.
+      - name: verify release outputs
+        if: steps.release.outputs.releases_created == 'true'
+        env:
+          RELEASE_ID: ${{ steps.release.outputs.id }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+        run: |
+          if [ -z "$RELEASE_ID" ] || [ -z "$TAG_NAME" ]; then
+            echo "::error::release was created but id/tag_name outputs are empty"
+            exit 1
+          fi
+          if [ "$TAG_NAME" != "production/${{ steps.release.outputs.version }}" ]; then
+            echo "::error::expected tag production/<version>, got $TAG_NAME"
+            exit 1
+          fi
+          echo "Releasing $TAG_NAME (release id $RELEASE_ID)"
+
+      # release-please names the release `production: v2.3.0`. The freeCodeCamp
+      # client picks a release with `name.endsWith('/production')`, so the
+      # legacy `v<version>/<environment>` name has to be restored.
+      # See client/src/templates/Challenges/exam-download/show.tsx (getLatest).
+      - name: restore release name
+        if: steps.release.outputs.releases_created == 'true'
+        uses: actions/github-script@v9
+        env:
+          RELEASE_ID: ${{ steps.release.outputs.id }}
+          VERSION: ${{ steps.release.outputs.version }}
+        with:
+          script: |
+            const name = `v${process.env.VERSION}/production`
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: parseInt(process.env.RELEASE_ID, 10),
+              name
+            })
+            console.log(`Renamed release to ${name}`)
+
+  build-tauri:
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    uses: ./.github/workflows/build.yml
+    with:
+      environment: production
+      release_id: ${{ needs.release-please.outputs.release_id }}
+      tag_name: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
+
+  publish-release:
+    permissions:
+      actions: write
+    runs-on: ubuntu-latest
+    needs: [release-please, build-tauri]
+
+    steps:
+      - name: trigger r2 upload
+        uses: actions/github-script@v9
+        env:
+          release_id: ${{ needs.release-please.outputs.release_id }}
+          ref: ${{ github.ref }}
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'upload-to-r2.yml',
+              ref: process.env.ref,
+              inputs: {
+                release_id: process.env.release_id,
+              }
+            })
+
+            console.log(`Successfully triggered r2 upload for production release`)

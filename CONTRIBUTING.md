@@ -34,9 +34,17 @@ Ensure your commit messages and PR titles follow the following convention:
 
 Where:
 
-- **type**: The type of change - `feat`, `fix`, `chore`, `breaking`, `dev`
+- **type**: The type of change - `feat`, `fix`, `perf`, `refactor`, `revert`, `chore`, `dev`, `build`, `ci`, `docs`, `test`, `style`
 - **scope**: Optional scope of the change (e.g. `client`, `backend`, `prisma`, `.github`)
 - **description**: A brief description of the change
+
+Breaking changes are marked with a `!` before the colon, or a `BREAKING CHANGE:` footer:
+
+```
+feat(backend)!: drop support for legacy exam tokens
+```
+
+`pr-title.yml` validates PR titles against this convention, because the title becomes the squashed commit subject that release-please reads. See [Deployment Workflow](#deployment-workflow) for how the type maps to a version bump.
 
 ## Build
 
@@ -74,49 +82,73 @@ The `tauri.conf.dev.json` config does not sign the bundle, and does not create u
 
 ## Deployment Workflow
 
-The project uses an automated deployment workflow consisting of three GitHub Actions:
+Versioning and changelogs are handled by [release-please](https://github.com/googleapis/release-please). The version is derived from the conventional commit subjects on `main`.
 
-### 1. Version Bump (`version-bump.yml`)
+Configuration lives in `release-please-config.json`, and the current released version in `.release-please-manifest.json`. A release bumps `package.json`, `backend/Cargo.toml` and `Cargo.lock` together, and appends to `CHANGELOG.md`.
 
-Manually triggered workflow to create a version bump PR:
+### 1. Release Please (`release-please.yml`)
 
-1. Go to Actions → version-bump → Run workflow
+Runs on every push to `main`:
+
+1. Maintains an open release PR titled `chore(main): release X.Y.Z`, rewritten on each push. It is a live preview of the next version and its changelog.
+2. When that PR is merged, it tags `production/X.Y.Z`, creates a draft GitHub release, and continues in the same workflow run:
+   - renames the release to `vX.Y.Z/production`
+   - calls `build.yml` with `environment: production`
+   - dispatches `upload-to-r2.yml`, which syncs artifacts and undrafts the release
+
+> [!IMPORTANT]
+> The `<environment>/<version>` tag and `v<version>/<environment>` release name are a cross-repo contract. The freeCodeCamp client selects a release with `name.endsWith('/production')` when deciding which build to offer for download, and `upload-to-r2.yml` derives the R2 destination prefix from the tag. See `client/src/templates/Challenges/exam-download/show.tsx`.
+>
+> release-please emits the tag natively via `component`/`tag-separator`, but names the release `production: vX.Y.Z`, so `release-please.yml` restores the expected name.
+
+Merging the release PR **is** the production release. There is no separate trigger.
+
+> [!NOTE]
+> The chain runs inside one workflow because releases created with `GITHUB_TOKEN` do not fire `on: release` events.
+
+### 2. Publish (`publish.yml`)
+
+Manually triggered, for release candidates only:
+
+1. Go to Actions → publish → Run workflow
 2. Select:
-   - **Release Type**: `patch`, `minor`, or `major`
+   - **Environment**: `staging` or `development`
+   - **Base version**: optional override; defaults to the version release-please would ship next
 3. The workflow will:
-   - Calculate the new version based on the release type
-   - Update `package.json`, `backend/Cargo.toml`, and `backend/tauri.conf.json`
-   - Create a PR with title: `release(X.X.X): <RELEASE_TYPE>`
-   - Add label: `release_type: <RELEASE_TYPE>`
+   - Read the pending release PR's manifest, so the RC matches the version `main` would actually ship
+   - Tag `<environment>/X.Y.Z-rc.N`, incrementing `N` past any existing RC for that version
+   - Build a debug, unsigned bundle and upload it to the `<environment>` R2 prefix
 
-### 2. Auto Release (`auto-release.yml`)
+RC versions are patched into `package.json` and `backend/Cargo.toml` in-flight by `build.yml`; they are never committed.
 
-Automatically triggered when a version bump PR is merged:
+### 3. Build (`build.yml`)
 
-1. Verifies the PR was created by the github-actions bot
-2. Extracts the release type from the PR label (e.g., `release_type: patch`)
-3. Triggers the publish workflow with the following inputs:
-   - **release_type**: extracted from the PR label
-   - **environment**: production
-
-### 3. Publish (`publish.yml`)
-
-Builds and publishes the application:
-
-1. Triggered automatically by auto-release or manually via Actions
-2. Builds the application for all platforms
-3. Creates a GitHub release with the version from `backend/tauri.conf.json`
-4. Uploads build artifacts and updater files
+Builds the Tauri bundles for every platform. Runs unsigned on `pull_request`, and signed when called with a `release_id`.
 
 ### Quick Release Process
 
-1. Run the `version-bump` workflow with desired release type
-2. Review and merge the generated PR
-3. The `auto-release` workflow automatically triggers `publish`
-4. Monitor the publish workflow for completion
+**Production**
 
-### Release Candidates
+1. Review the open `chore(main): release X.Y.Z` PR
+2. Merge it
+3. Monitor `release-please` for completion
 
-1. Run the `publish` workflow directly with inputs:
-   - **release_type**: `patch`, `minor`, or `major`
-   - **environment**: `staging` or `development`
+**Release candidate**
+
+1. Run the `publish` workflow with `environment: staging`
+
+### Choosing the version
+
+The bump follows from the commits released since the last production tag:
+
+| Commit                                                 | Bump  |
+| ------------------------------------------------------ | ----- |
+| `fix:`, `perf:`, `refactor:`                           | patch |
+| `feat:`                                                | minor |
+| `feat!:`, or any type with a `BREAKING CHANGE:` footer | major |
+| `docs:`, `test:`, `style:`                             | none  |
+
+To force a specific version, add a `Release-As: X.Y.Z` footer to a commit.
+
+> [!IMPORTANT]
+> PRs are squash-merged, so the **PR title** becomes the commit subject that release-please parses. `pr-title.yml` validates it. A title outside the convention produces no version bump and no changelog entry.

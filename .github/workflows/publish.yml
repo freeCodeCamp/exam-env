@@ -1,5 +1,11 @@
 name: "publish"
 
+# Release candidates for the non-production environments.
+#
+# Production releases are handled by release-please.yml: merging the release PR
+# tags, releases, builds and uploads in one chain. Nothing here touches
+# production, and RC versions are never committed to the repository - they are
+# patched into package.json/Cargo.toml in-flight by build.yml.
 on:
   workflow_dispatch:
     inputs:
@@ -8,78 +14,108 @@ on:
         type: choice
         required: true
         options:
-          - development
-          - production
           - staging
-        default: production
-      release_type:
-        description: "Release Type"
-        type: choice
-        # Not generally needed for production releases
+          - development
+        default: staging
+      base_version:
+        description: "Base version for the RC (defaults to the version release-please would ship next)"
+        type: string
         required: false
-        options:
-          - patch
-          - minor
-          - major
-        default: patch
+        default: ""
 
 jobs:
   create-release:
     permissions:
       contents: write
+      pull-requests: read
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create-release.outputs.result }}
-      new_version: ${{ steps.handle-rc.outputs.new_version }}
+      new_version: ${{ steps.rc.outputs.new_version }}
+      tag_name: ${{ steps.rc.outputs.tag_name }}
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: handle release candidate new version
-        id: handle-rc
+      - name: resolve release candidate version
+        id: rc
         uses: actions/github-script@v9
-        if: ${{ inputs.environment != 'production' }}
         env:
-          RELEASE_TYPE: ${{ inputs.release_type }}
+          BASE_VERSION: ${{ inputs.base_version }}
           ENVIRONMENT: ${{ inputs.environment }}
         with:
           script: |
-            // Version of current production release
-            const { version } = require('./package.json')
-            const [major, minor, patch] = version.split('.').map(Number)
+            const owner = context.repo.owner
+            const repo = context.repo.repo
 
-            let newVersion
-            if (process.env.RELEASE_TYPE === 'major') {
-              newVersion = `${major + 1}.0.0`
-            } else if (process.env.RELEASE_TYPE === 'minor') {
-              newVersion = `${major}.${minor + 1}.0`
+            let baseVersion = process.env.BASE_VERSION.trim()
+
+            // Prefer the version release-please has already computed from the
+            // commits on main. Its open release PR carries the bumped manifest,
+            // so an RC is always the version main would actually ship next.
+            if (baseVersion) {
+              console.log(`Using operator-supplied base version ${baseVersion}`)
             } else {
-              newVersion = `${major}.${minor}.${patch + 1}`
+              const { data: prs } = await github.rest.pulls.list({
+                owner, repo, state: 'open', base: 'main', per_page: 100
+              })
+              const releasePr = prs.find(pr =>
+                pr.labels.some(label => label.name === 'autorelease: pending')
+              )
+
+              if (releasePr) {
+                const { data: file } = await github.rest.repos.getContent({
+                  owner, repo,
+                  path: '.release-please-manifest.json',
+                  ref: releasePr.head.sha
+                })
+                const manifest = JSON.parse(
+                  Buffer.from(file.content, 'base64').toString('utf8')
+                )
+                baseVersion = manifest['.']
+                console.log(`Using pending release-please version ${baseVersion} (PR #${releasePr.number})`)
+              }
             }
 
-            // If previous RC for given release type already exists, increment its RC number
-            const releases = await github.rest.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            // No pending release PR means nothing releasable has landed since
+            // the last production release. Fall back to a patch bump so the RC
+            // still sorts ahead of what is already shipped.
+            if (!baseVersion) {
+              const { version } = require('./package.json')
+              const [major, minor, patch] = version.split('.').map(Number)
+              baseVersion = `${major}.${minor}.${patch + 1}`
+              console.log(`No pending release PR; falling back to ${baseVersion}`)
+            }
+
+            if (!/^\d+\.\d+\.\d+$/.test(baseVersion)) {
+              core.setFailed(`Invalid base version: ${baseVersion}`)
+              return
+            }
+
+            const environment = process.env.ENVIRONMENT
+
+            // If a previous RC for this version exists, increment its RC number
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner, repo, per_page: 100
             })
 
-            const rcReleases = releases.data.filter(release =>
-              release.tag_name.startsWith(`${process.env.ENVIRONMENT}/${newVersion}-rc.`)
+            const rcReleases = releases.filter(release =>
+              release.tag_name.startsWith(`${environment}/${baseVersion}-rc.`)
             )
 
+            let newVersion = baseVersion
             if (rcReleases.length > 0) {
-              // Get highest RC number
               const rcNumbers = rcReleases.map(release => {
                 const match = release.tag_name.match(/rc\.(\d+)$/)
                 return match ? parseInt(match[1], 10) : 0
               })
-              const highestRc = Math.max(...rcNumbers)
-              newVersion += `-rc.${highestRc + 1}`
+              newVersion += `-rc.${Math.max(...rcNumbers) + 1}`
             } else {
               newVersion += `-rc.0`
             }
 
             core.setOutput('new_version', newVersion)
+            core.setOutput('tag_name', `${environment}/${newVersion}`)
             console.log(`Setting release candidate version to ${newVersion}`)
 
       - name: create release
@@ -87,19 +123,19 @@ jobs:
         uses: actions/github-script@v9
         env:
           ENVIRONMENT: ${{ inputs.environment }}
-          NEW_VERSION: ${{ steps.handle-rc.outputs.new_version }}
+          NEW_VERSION: ${{ steps.rc.outputs.new_version }}
+          TAG_NAME: ${{ steps.rc.outputs.tag_name }}
         with:
           # TODO: see if release already exists (e.g. re-run of failed workflow), then re-use it
           script: |
-            const version = process.env.NEW_VERSION || require('./package.json').version
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `${process.env.ENVIRONMENT}/${version}`,
-              name: `v${version}/${process.env.ENVIRONMENT}`,
+              tag_name: process.env.TAG_NAME,
+              name: `v${process.env.NEW_VERSION}/${process.env.ENVIRONMENT}`,
               body: `This release is for the ${process.env.ENVIRONMENT} environment.`,
               draft: true,
-              prerelease: process.env.ENVIRONMENT != "production"
+              prerelease: true
             })
             console.log("Created release with id:", data.id);
             return data.id
@@ -111,6 +147,7 @@ jobs:
       environment: ${{ inputs.environment }}
       release_id: ${{ needs.create-release.outputs.release_id }}
       new_version: ${{ needs.create-release.outputs.new_version }}
+      tag_name: ${{ needs.create-release.outputs.tag_name }}
     secrets: inherit
 
   publish-release:
@@ -137,4 +174,4 @@ jobs:
               }
             })
 
-            console.log(`Successfully triggered publish workflow for production environment`)
+            console.log(`Successfully triggered r2 upload for release ${process.env.release_id}`)

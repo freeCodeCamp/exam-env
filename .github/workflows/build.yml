@@ -15,6 +15,10 @@ on:
         type: string
         required: false
         default: ""
+      tag_name:
+        type: string
+        required: false
+        default: ""
 
 jobs:
   build-tauri:
@@ -87,14 +91,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: get version
-        id: version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const { version } = require('./package.json')
-            core.setOutput('version', version)
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -251,7 +247,7 @@ jobs:
           releaseId: ${{ inputs.release_id }}
           args: ${{ steps.build-args.outputs.args }} ${{ env.TAURI_VERBOSE_FLAG }}
           uploadUpdaterJson: ${{ inputs.release_id != '' }}
-          tagName: ${{ inputs.release_id != '' && format('{0}/{1}', inputs.environment, steps.version.outputs.version) || '' }}
+          tagName: ${{ inputs.tag_name }}
           releaseDraft: ${{ inputs.release_id != '' }}
 
       # Released binaries are release builds with line-tables-only debug info

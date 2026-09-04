@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "last-release-sha": "31c258f36dd0c9fa780003092c1ab7b7af7725b8",
+  "draft": true,
+  "separate-pull-requests": false,
+  "pull-request-title-pattern": "chore${scope}: release ${version}",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "exam-env",
+      "changelog-path": "CHANGELOG.md",
+      "component": "production",
+      "include-component-in-tag": true,
+      "include-v-in-tag": false,
+      "tag-separator": "/",
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "backend/Cargo.toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.lock",
+          "jsonpath": "$.package[?(@.name.value==\"exam-env\")].version"
+        }
+      ]
+    }
+  },
+  "changelog-sections": [
+    { "type": "feat", "section": "✨ Features" },
+    { "type": "fix", "section": "🐛 Bug Fixes" },
+    { "type": "perf", "section": "⚡ Performance" },
+    { "type": "refactor", "section": "♻️ Refactors" },
+    { "type": "revert", "section": "⏪ Reverts" },
+    { "type": "chore", "section": "🔧 Chores" },
+    { "type": "dev", "section": "🔧 Chores" },
+    { "type": "build", "section": "🔧 Chores" },
+    { "type": "ci", "section": "🔧 Chores" },
+    { "type": "docs", "section": "📝 Docs", "hidden": true },
+    { "type": "test", "section": "🧪 Tests", "hidden": true },
+    { "type": "style", "section": "💄 Style", "hidden": true }
+  ]
+}
